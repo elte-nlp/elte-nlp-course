@@ -45,20 +45,20 @@
 \date{2021}
 \maketitle
 
+\begin{slide}[toc=Whitespace splitting]{Baseline: splitting on whitespace}
+  For many writing systems, splitting the text at \emph{white spaces} is a
+  useful baseline:\bigskip
 
-\begin{slide}{Representation levels}
-  Natural languages are very complex sign systems, and their signs (words,
-  phrases, sentences etc.) have dramatically more internal structure than
-  ordinary symbols. Linguists typically distinguish at least the following four
-  levels of linguistic representation in a linguistic sign:\footnote{The
-    discussion of representation levels and grammars in this section closely
-    follows Marcus Kracht's
-    \href{https://linguistics.ucla.edu/people/Kracht/courses/ling20-fall07/ling-intro.pdf}{Intoduction to Linguistics}, which is highly recommended.}
+  'This isn't an easy sentence to tokenize!' $\Rightarrow$ \\
+  
+  ['This', "isn't", 'an', 'easy', 'sentence', 'to', 'tokenize!']\bigskip
+
+  Problems:
   \begin{itemize}
-  \item {\gold phonological structure}: the level of individual sounds, or, in
-    written language, written symbols, letters;
-  \item {\gold morphological structure}: the level of \emph{morphemes}, i.e.,
-    minimal  meaningful linguistic units, and their organization into \emph{words};
+  \item we typically want to treat punctuation marks as separate tokens (but
+    only if they are really punctuation, think of 'U.K.' or '10,000.00\$' );
+  \item this solution cannot separate token pairs without white space between
+    them, e.g., expressions with clitics.
   \end{itemize}
 \end{slide}
 
