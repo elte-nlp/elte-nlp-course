@@ -1,0 +1,75 @@
+\documentclass[style=upen, size=14pt]{powerdot}
+\definecolor{arany}{RGB}{255,242,0}
+\hypersetup{backref=page}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=cyan,
+    filecolor=magenta,      
+    urlcolor=cyan}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\DeclareMathOperator*{\argmax}{argmax}
+\DeclareMathOperator*{\argmin}{argmin}
+\usepackage{amssymb}
+\usepackage{stmaryrd}
+\usepackage[latin2]{inputenc}
+%\usepackage[magyar]{babel}
+%\usepackage{euler}
+\usepackage{tikz}
+\usepackage{tikz-qtree}
+\usepackage{tikz-dependency}
+\usepackage{linguex}
+\tikzset{every tree node/.style={align=center,anchor=north}}
+%\usepackage{tabularx}
+%\usepackage{threeparttable}
+%\usepackage{color}
+%\selectlanguage{english}
+%\frenchspacing
+\newcommand{\nd}{\noindent}
+\newcommand{\Val}{\mathop{\mathit{Val}}}
+\newcommand{\gold}{\color{arany}}
+%\usepackage{tikz}
+%\usepackage{tikz-qtree}
+\newcommand{\qed}{\hfill\mbox{\raggedright \rule{.1in}{.1in}}}
+\def\es{\mathbin\land}
+\newtheorem{defi}{Definition}
+\newtheorem{axioma}{Axiom}
+\newtheorem{tetel}{Theorem}
+\newtheorem{prop}{Proposition}
+\newtheorem{lemma}{Lemma}
+\begin{document}
+
+\title{Natural Language Processing\\~~\\Lecture 3\\Tokenization}
+% \author{}
+
+\date{2021}
+\maketitle
+
+
+\begin{slide}{Representation levels}
+  Natural languages are very complex sign systems, and their signs (words,
+  phrases, sentences etc.) have dramatically more internal structure than
+  ordinary symbols. Linguists typically distinguish at least the following four
+  levels of linguistic representation in a linguistic sign:\footnote{The
+    discussion of representation levels and grammars in this section closely
+    follows Marcus Kracht's
+    \href{https://linguistics.ucla.edu/people/Kracht/courses/ling20-fall07/ling-intro.pdf}{Intoduction to Linguistics}, which is highly recommended.}
+  \begin{itemize}
+  \item {\gold phonological structure}: the level of individual sounds, or, in
+    written language, written symbols, letters;
+  \item {\gold morphological structure}: the level of \emph{morphemes}, i.e.,
+    minimal  meaningful linguistic units, and their organization into \emph{words};
+  \end{itemize}
+\end{slide}
+
+
+\end{document}
+
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:
+
+% LocalWords:  Tokenization
