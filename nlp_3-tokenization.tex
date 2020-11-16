@@ -209,6 +209,25 @@
 \end{slide}
 
 \begin{slide}[toc=]{Lexer-based solutions cont.}
+  Most lexers are actually lexical analyser generators. Their input is a list of
+  token classes (types), regular expression patterns and\smallskip
+
+  \begin{center}
+    [\textsc{RegexPattern}] $\Rightarrow$ [\textsc{Action}]\smallskip
+  \end{center}
+
+rules (where the most important action is classifying the actual match as a
+token of a given type), and they generate a concrete, optimized lexical analyzer
+implementing the given rules, e.g., by generating the C source code of the
+analyzer.
+\end{slide}
+
+\begin{slide}[toc=spaCy]{Case study: spaCy's rule-based tokenizer}
+  A simple example: tokenizing \emph{``Let's go to N.Y.!''}
+    \begin{center}
+      \includegraphics[width=0.9\textwidth]{figures/spacy_tokenizer.eps}
+    \end{center}
+    \footnotesize{}
 \end{slide}
 
 \end{document}
