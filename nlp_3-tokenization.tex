@@ -133,7 +133,9 @@
 
   For example, most current regex libraries allow a regex similar to\bigskip
 
-  (?P$<$a$>$[ab]*)(?P=a)\bigskip
+  \begin{center}
+    (?P$<$a$>$[ab]*)(?P=a)\bigskip
+  \end{center}
 
   which uses back-reference to define exactly the aforementioned non-regular
   ``twin language''.
@@ -223,12 +225,86 @@ analyzer.
 \end{slide}
 
 \begin{slide}[toc=spaCy]{Case study: spaCy's rule-based tokenizer}
+  % To appreciate how a purpose-built, rule-based NLP tokenizer might look like,
+  % let's look briefly at spaCy's built in tokenizer. The following explanation is
+  % from the spaCy website's tokenization section:
+
+  \begin{enumerate}
+  \item The input text is split on white space.\footnote{The algorithm
+    description is from the
+    \href{https://spacy.io/usage/linguistic-features\#tokenization}{spaCy
+      documentation.}}
+  \item Then, the tokenizer processes the text from left to right. On each
+    substring, it performs two checks:
+    \begin{enumerate}
+    \item Does the substring match a tokenizer exception rule? For example,
+      "don't" does not contain whitespace, but should be split.
+    \item Can a prefix, suffix or infix be split off? For example punctuation
+      like commas, periods.
+    \end{enumerate}
+    If there's a match, the rule is applied and the tokenizer continues
+    its loop, starting with the newly split substrings.
+  \end{enumerate}
+
+\end{slide}
+
+\begin{slide}[toc=]{SpaCy's rule-based tokenizer cont.}
   A simple example: tokenizing \emph{``Let's go to N.Y.!''}
     \begin{center}
-      \includegraphics[width=0.9\textwidth]{figures/spacy_tokenizer.eps}
+      \includegraphics[width=0.9\textwidth]{figures/spacy_tokenizer.eps}\
+      
+      \footnotesize{(Figure from the \href{https://spacy.io/usage/linguistic-features\#tokenization}{spaCy documentation})}
     \end{center}
-    \footnotesize{}
 \end{slide}
+
+\begin{slide}[toc=Edit distance]{Edit distance}
+  In addition to segmenting the input into units, tokenization also involves
+  classifying tokens into types, deciding e.g., which type(s)\smallskip
+  \begin{center}
+    'Apple', 'apple', 'appple'\smallskip
+  \end{center}
+  belong to. In many cases, these decisions require a \emph{similarity metric}
+  between strings.
+
+  One of the most important metric families in this domain is the so-called
+  \emph{\gold edit distance} family, which measure the distance between two
+  strings by the number edit operations required to transform them into each
+  other.
+\end{slide}
+
+\begin{slide}[toc=]{Edit distance cont.}
+  Given
+  \begin{itemize}
+  \item a set of \emph{\gold editing operations} (e.g., removing or inserting a character
+    from/into the string) and
+  \item a \emph{\gold weight function} that assigns a weight to each operation,
+  \end{itemize}
+  the \emph{\gold edit distance} between two strings, a source and a target, is
+  the minimum total weight that is needed for transforming the source into the
+  target.
+\end{slide}
+    
+\begin{slide}[toc=]{Levenshtein distance}
+  One of the most important variants is the so-called Levenshtein distance,
+  where the operations are the
+   \begin{itemize}
+  \item deletion,
+  \item insertion, and
+  \item substitution of a character,
+  \end{itemize}
+  and the weight of all operations is 1.0.
+  \begin{center}
+    \includegraphics[width=0.4\textwidth]{figures/levenshtein.eps}\
+    
+    \footnotesize{(Figure from \href{https://devopedia.org/levenshtein-distance}{Devopedia})}
+  \end{center}
+\end{slide}
+
+
+\begin{slide}[toc=]{Regular expressions: back-references}
+  
+\end{slide}
+
 
 \end{document}
 
