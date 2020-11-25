@@ -301,10 +301,138 @@ analyzer.
 \end{slide}
 
 
-\begin{slide}[toc=]{Regular expressions: back-references}
-  
+\begin{slide}[toc=Subword tokenization]{Tokenization vs subword tokenization}
+  Classical tokenization aims at segmenting the input character stream precisely
+  into linguistically motivated units: words and punctuation. This type of
+  tokenization
+
+  \begin{itemize}
+  \item is rather challenging, because there is a wide variety of writing systems
+    and languages that all require (sometimes radically) different rules/models;
+  \item does not necessarily find the most important boundaries, because in many
+    cases \emph{subwords}, i.e. smaller than word units are more useful for
+    downstream tasks;
+  \item generates huge vocabularies on larger corpora, and still leads to
+    problems with out of vocabulary words.
+  \end{itemize}
 \end{slide}
 
+\begin{slide}[toc=]{Tokenization vs subword tokenization cont.}
+  A recently developed alternative is \emph{subword tokenization}:
+  \begin{itemize}
+  \item requires no or only very minimal pretokenization;
+  \item statistical and data-driven: learns the segmentation model from a corpus;
+  \item segments input into frequently occurring word and subword units;
+  \item vocabulary size can be freely chosen, and every token is guaranteed to
+    be in the vocabulary;
+  \item writing and language-agnostic;
+  \item the subword segments are in general informative, boundaries are
+    frequently close to morphological ones.
+  \end{itemize}
+\end{slide}
+
+\begin{slide}[toc=]{Tokenization vs subword tokenization cont.}
+  A large number of modern deep, end-to-end NLP architectures use
+  subword-tokenization instead of classical tokenization for segmenting the
+  input.\bigskip
+
+  The main advantages are
+  \begin{itemize}
+  \item not requiring manual feature engineering or rule writing,
+  \item freely choosable vocabulary size,
+  \item no out-of-vocabulary words,
+  \item providing access to the inner structure of words in many cases: if a
+    word is rare or doesn't occur in the training corpus then it is decomposed
+    into smaller, informative units.
+  \end{itemize}
+\end{slide}
+
+\begin{slide}[toc=Byte Pair Encoding]{Byte Pair Encoding (BPE)}
+  BPE was originally a simple compression technique for byte sequences, but can
+  be generalized to any sequence consisting of symbols from a finite alphabet.
+  To generate an encoded/compressend version of a sequence over an alphabet,
+  \begin{enumerate}
+  \item initialize the symbol list with the symbols in the alphabet, and
+  \item repeatedly count all symbol pairs and replace each occurrence of the
+    most frequent pair ('A', 'B') with a new 'AB' element, and add 'AB' to the
+    list of symbols.
+  \end{enumerate}
+\end{slide}
+    
+\begin{slide}[toc=]{Byte Pair Encoding (BPE) cont.}
+  How can this technique be used for subword tokenization of texts? The trick is
+  to learn the vocabulary used for segmentation from a training corpus by
+  applying BPE to the text. Modifications to basic BPE:
+  \begin{itemize}
+  \item start with a rough pretokenization into words (frequently highly simple,
+    e.g. split on white space),
+  \item do not allow BPE merges to cross word boundaries.
+  \end{itemize}
+  In practice these modifications are frequently implemented by adding a new
+  '\_' word-end (or word-start) symbol to the alphabet, and stipulating that
+  '\_' can only end (or start) merged items.
+\end{slide}
+
+\begin{slide}[toc=]{Byte Pair Encoding (BPE) cont.}
+  A simple example: BPE encoded versions of a sentence after different numbers
+  of merge operations.
+  \begin{center}
+    \includegraphics[width=1.\textwidth]{figures/bpe.eps}
+    \footnotesize(Table from \href{http://www.lrec-conf.org/proceedings/lrec2018/pdf/1049.pdf}{BPEmb: Tokenization-free Pre-trained Subword Embeddings})
+  \end{center}
+  As the number of merges increases, more and more symbols are full words.
+\end{slide}
+
+\begin{slide}[toc=]{Greedy BPE subword tokenization}
+  Processing a corpus with BPE results in a 'vocabulary' of all characters
+  together with the results of all merges. New pretokenized input is then
+  subword tokenized by greedily matching the words against this
+  vocabulary/dictionary from left to right:
+
+  \includegraphics[width=1.\textwidth]{figures/max_match.eps}
+  
+  \footnotesize(From \href{https://web.stanford.edu/~jurafsky/slp3/2.pdf}{ch. 2 of Jurafsky and Martin's \emph{Speech and Language
+      Processing} (3rd ed.)})
+
+  \end{slide}
+
+\begin{slide}[toc=WordPiece]{WordPiece}
+  WordPiece is another subword tokenization method that is only slightly
+  different from BPE. The differences are:
+  \begin{itemize}
+  \item WordPiece works with word-start symbols instead of word-end symbols which is
+    traditional for BPE;
+  \item merges are peformed depending on which resulting merged symbol could be
+    used for a statistical language model with the lowest perplexity (maximal
+    likelihood) on the training corpus. (These concepts will be explained in
+    detail in a later lecture.)
+  \end{itemize}
+\end{slide}
+
+\begin{slide}[toc=Subword sampling]{Subword sampling}
+  The default subword tokenization strategy of BPE and WordPiece
+  deterministically produces the greedily matching decomposition of words, even
+  if there are informative alternative segmentations in terms of the vocabulary,
+  e.g.,
+  \begin{center}
+    \emph{unrelated} = \emph{un} + \emph{related}
+  \end{center}
+  To solve this problem, solutions were developed to \emph{probabilistically
+    sample} from the possible alternative decompositions: \emph{Subword
+    regularization} for WordPiece and \emph{BPE dropout.}\footnote{See \href{https://arxiv.org/pdf/1804.10959.pdf}{Kudo: Subword Regularization} and \href{https://arxiv.org/pdf/1910.13267.pdf}{Provilkov et al.: BPE-Dropout}.}
+\end{slide}
+
+\begin{slide}[toc=SentencePiece]{SentencePiece}
+  In their original form, BPE and WordPiece require (crude) pretokenization as a
+  preprocessing step. The
+  \href{https://github.com/google/sentencepiece}{SentencePiece} tokenizer, in
+  contrast, treats every character, even spaces in the same way, and applies BPE
+  or WordPiece on raw sentences or even paragraphs eliminating the need for
+  pretokenization.
+
+  As a result, SentencePiece is one of the most popular solutions for generating
+  the input for deeep end-to-end models from raw text.
+\end{slide}
 
 \end{document}
 
