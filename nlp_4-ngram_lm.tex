@@ -221,7 +221,7 @@ log-likelihood one also minimizes the model's perplexitiy on the training data.
   in the sequence.
 \end{slide}
 
-\begin{slide}[toc=\emph{N}-grams]{\emph{N}-gram language models}
+\begin{slide}[toc=N-grams]{N-gram language models}
   Using this approximation, the probability of a $\langle w_1,\dots,w_n \rangle$
   sequence can be calculated as
   \begin{small}
@@ -289,7 +289,7 @@ and the big advantage is that the
   \small(Figure from D. Jurafsky's \href{https://slideplayer.com/slide/4578484/}{HMM slides})
 \end{slide}
 
-\begin{slide}[toc=Increasing \emph{N}]{Increasing \emph{N}}
+\begin{slide}[toc=Increasing N]{Increasing N}
   Since in reality human languages are way too complex to satisfy a low-order
   Markov assumption, $N$-gram models with higher $N$s (with $N=3,4$ or even $5$)
   typically have better intrinsic and extrinsic performance.
@@ -306,7 +306,7 @@ and the big advantage is that the
   \end{itemize}
 \end{slide}
 
-\begin{slide}[toc=]{Increasing \emph{N}}
+\begin{slide}[toc=]{Increasing N cont.}
   The extremely high number of linguistically possible $N$-grams for higher $N$
   values poses two important problems:
   \begin{itemize}
@@ -319,6 +319,51 @@ and the big advantage is that the
 \end{slide}
 
 \section{Smoothing}
+
+\begin{slide}[toc=Additive smoothing]{Additive smoothing}
+  How can we solve the problem of $N$-grams that never or very rarely occur in
+  the corpus? A simple solution is to \emph{overcount} every $N$-gram by a certain
+  number and use
+%  \begin{small}
+    $$
+    P(w_{i} ~\vert~ w_{i-k},\dots,w_{i-1}) \approx \frac{C(\langle
+      w_{i-k},\dots,w_{i}\rangle)+\delta}{C(\langle w_{i-k},\dots,w_{i-1}
+      \rangle) + \delta|V|}.
+    $$
+%  \end{small}
+  The $|V|$ multiplier comes from the fact that for every $N-1$-gram there are
+  exactly $|V|$ $N$-grams that are its continuations.\bigskip
+
+  A widespread choice for $\delta$ is 1.
+\end{slide}
+
+\begin{slide}[toc=]{Additive smoothing cont.}
+  An important problem with this solution:
+
+  If both $C(\langle w_1,w_2\rangle)=0$ and $C(\langle w_1,w_3\rangle)=0$, then under
+  additive smoothing we have 
+  $$ p(w_1,w_2)=p(w_1,w_3).$$
+  Suppose now that $w_2$ is much more common than $w_3$. Then, intuitively, we
+  should have 
+  $$ p(w_1,w_2)>p(w_1,w_3)$$
+  instead of the above equality, so the result from additive smoothing seems
+  wrong -- we should somehow \emph{interpolate} between unigram and bigram
+  counts.
+\end{slide}
+
+\begin{slide}[toc=Interpolation]{Interpolation}
+  In case of bigrams, we add -- with a certain weight -- the probabilities coming
+  from the unigram frequencies:
+$$P(w_2 ~\vert ~w_1) \approx \lambda_1\frac{C(\langle w_1, w_2 \rangle)}{C(w_1)} + (1 - \lambda_1)\frac{C(w_1)}{\sum_{w\in V}C(w)}$$
+Recursive solution for arbitrary $k$:
+\begin{small}
+$$P(w_{k+1} \vert~ w_1,.., w_k) \approx \lambda_k\frac{c(\langle w_1 ,.., w_{k+1} \rangle)}{c(\langle w_1 ,.., w_k\rangle)} + (1-\lambda_k)P(\langle w_2 ,.., w_{k+1}\rangle)$$
+\end{small}
+$\lambda_k$ is empirically set on the basis of the corpus, typically using
+Expectation Maximization.
+
+
+\end{slide}
 
 \end{document}
 
