@@ -354,7 +354,7 @@ and the big advantage is that the
 \begin{slide}[toc=Interpolation]{Interpolation}
   In case of bigrams, we add -- with a certain weight -- the probabilities coming
   from the unigram frequencies:
-$$P(w_2 ~\vert ~w_1) \approx \lambda_1\frac{C(\langle w_1, w_2 \rangle)}{C(w_1)} + (1 - \lambda_1)\frac{C(w_1)}{\sum_{w\in V}C(w)}$$
+$$P(w_2 ~\vert ~w_1) \approx \lambda_1\frac{C(\langle w_1, w_2 \rangle)}{C(w_1)} + (1 - \lambda_1)\frac{C(w_2)}{\sum_{w\in V}C(w)}$$
 Recursive solution for arbitrary $k$:
 \begin{small}
 $$P(w_{k+1} \vert~ w_1,.., w_k) \approx \lambda_k\frac{c(\langle w_1 ,.., w_{k+1} \rangle)}{c(\langle w_1 ,.., w_k\rangle)} + (1-\lambda_k)P(\langle w_2 ,.., w_{k+1}\rangle)$$
