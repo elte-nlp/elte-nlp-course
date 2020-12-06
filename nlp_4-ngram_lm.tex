@@ -191,7 +191,7 @@ log-likelihood one also minimizes the model's perplexitiy on the training data.
 
 \begin{slide}[toc=Estimating probabilities]{Estimating  probabilities}
   How can we estimate the required $P(\mathbf{w})$ probabilities from a corpus
-  of texts? We could try to use occurrence counts:
+  of texts? We could try to use occurrence counts to get the maximum likelihood estimate:
   $$
   P(\mathbf{w}) \approx \frac{C(\mathbf{w})}{C(\mathrm{all~~texts~~in~~corpus})}
   $$
