@@ -1,0 +1,294 @@
+\documentclass[style=upen, size=14pt]{powerdot}
+\definecolor{arany}{RGB}{255,242,0}
+\hypersetup{backref=page}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=cyan,
+    filecolor=magenta,      
+    urlcolor=cyan}
+% \pdsetup{trans=Split}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\DeclareMathOperator*{\argmax}{argmax}
+\DeclareMathOperator*{\argmin}{argmin}
+\DeclareMathOperator{\sign}{sign}
+\usepackage{amssymb}
+\usepackage{stmaryrd}
+\usepackage[latin2]{inputenc}
+%\usepackage[magyar]{babel}
+%\usepackage{euler}
+\usepackage{tikz}
+\usepackage{tikz-qtree}
+\usepackage{tikz-dependency}
+\usepackage{linguex}
+\usepackage{amsthm}
+
+\tikzset{every tree node/.style={align=center,anchor=north}}
+%\usepackage{tabularx}
+%\usepackage{threeparttable}
+%\usepackage{color}
+%\selectlanguage{english}
+%\frenchspacing
+\newcommand{\nd}{\noindent}
+\newcommand{\Val}{\mathop{\mathit{Val}}}
+\newcommand{\gold}{\color{arany}}
+%\usepackage{tikz}
+%\usepackage{tikz-qtree}
+%\newcommand{\qed}{\hfill\mbox{\raggedright \rule{.1in}{.1in}}}
+\def\es{\mathbin\land}
+\theoremstyle{definition}
+\newtheorem*{definition}{Definition}
+\newtheorem{axioma}{Axiom}
+\newtheorem{tetel}{Theorem}
+\newtheorem{prop}{Proposition}
+\newtheorem{lemma}{Lemma}
+\begin{document}
+
+\title{Natural Language Processing\\~~\\Lecture 5\\Text classification and sequence tagging with linear methods}
+% \author{}
+
+\date{2021}
+\maketitle
+
+\section{Text classification}
+
+\begin{slide}[toc=Tasks]{Text classification tasks}
+  A text classification task is to assign the appropriate label from a given
+  $C=\{c_1,\dots,c_n\}$ set of class/category labels to a $d$
+  text/document.\bigskip
+
+  Representative examples include
+  \begin{itemize}
+  \item \textbf{\gold Sentiment analysis}: classify according to the sentiment
+    expressed by the document. Label set examples:
+    \begin{itemize}
+    \item  $\{$positive, negative$\}$,
+    \item  $\{$positive, negative, ambigous$\}$, 
+    \item $\{$admiration, amusement, annoyance, approval, \dots, sadness,
+      surprise$\}$.\footnote{The example is based on the 27 emotions of the
+        \href{https://arxiv.org/abs/2005.00547}{GoEmotions dataset}.}
+    \end{itemize}
+  \end{itemize}
+\end{slide}
+
+\begin{slide}[toc=]{Text classification tasks cont.}
+  \begin{itemize}
+  \item \textbf{\gold SPAM detection}: binary classification to decide whether
+    a message is unsolicited.
+  \item \textbf{\gold Authorship detection}: who wrote a text from a specified set of authors.
+  \item \textbf{\gold Author characteristics detection}: was the author male or
+    female, what was their age etc.
+  \item \textbf{\gold Subject/topic detection}: to which subject/topic a
+    document belongs to in a predefined list, e.g., in the Library of Congress Classification system
+    $\{$medicine, agriculture, science, fine arts, \dots $\}$
+  \item \textbf{\gold Genre detection}: determine the genre of a text, e.g.,
+    assign a label from the set $\{$scifi, adventure, love story, mystery,
+    historical, western$\}$.
+    % \footnote{Labels from the paper
+    %   \href{https://www.aclweb.org/anthology/C18-1167.pdf}{Genre Identification
+    %     and the Compositional Effect of Genre in Literature}}
+  \end{itemize}
+ \end{slide}
+
+ \begin{slide}[toc=Methods]{Methods}
+   \begin{itemize}
+   \item \textbf{\gold Manually designed rule-based systems}: e.g., using
+     carefully designed lists of words positively or negatively correlated with
+     the classes.
+     
+     These systems can reach good performance, but require a lot of manual work
+     and are difficult to maintain and adapt.
+   \item \textbf{\gold Machine learning methods}: Models learnt on a supervised
+     data set containing labeled documents:
+     $\{\langle d_i, c_i \rangle\}_{i\in \{1, \dots, N\}}$.
+
+     Methods range from linear machine learning methods such as logistic
+     regression to deep neural networks.
+   \end{itemize}
+ \end{slide}
+
+ \begin{slide}[toc=Bag of words]{Bag of words (BOW) representation}
+   Many machine learning-based classification methods require their input to be
+   represented as fixed-length numerical  vectors. For texts with varying
+   lengths, a common approach is use a bag of words representation:
+   \begin{itemize}
+   \item Tokenize the input texts using a $V=\{w_1,\dots,w_N\}$ vocabulary of
+     word types, and
+   \item represent them as $|V|=N$-dimensional vectors of word counts, i.e., for
+     a $d$ document $BOW_V(d)=\langle c_{1,d}, \dots, c_{N,d}\rangle$, where each $c_{i,d}$
+     is the count of $w_i$ in $d$.
+   \end{itemize}
+ \end{slide}
+
+ 
+ \begin{slide}[toc=]{Bag of words representation cont.}
+   A simple example:\smallskip
+   
+   \includegraphics[width=1.0\textwidth]{figures/bow.eps}
+
+   \begin{center}
+     \footnotesize{(Figure from \href{https://towardsdatascience.com/from-word-embeddings-to-pretrained-language-models-a-new-age-in-nlp-part-1-7ed0c7f3dfc5}{From Word Embeddings to Pretrained Language Models}.)}     
+   \end{center}
+ \end{slide}
+
+ \begin{slide}[toc=]{Bag of words refinements}
+   The basic BOW representation can be refined in several ways, perhaps the
+   three most important are
+   \begin{itemize}
+   \item omitting \emph{\gold stopword} (non-informative word) counts from the
+     BOW vectors. What counts as stopword is task and domain dependent, but it
+     is common to consider (some) function words, e.g. determiners to be
+     stopwords;
+   \item adding some word sequence counts to the BOW representations, e.g.,
+     \emph{\gold bigram or trigram counts};
+   \item weight words according to their informativity: the most widespread
+     method is weighting according to \emph{\gold term frequency} and
+     \emph{\gold inverse document frequency (TF-IDF)}.
+   \end{itemize}
+ \end{slide}
+
+
+ \begin{slide}[toc=TF-IDF]{TF-IDF schemes}
+   The basic assumption of TF-IDF weighting schemes is that words that occur in
+   a large fraction of the training documents are not so informative as words
+   occurring only in a few. TF-IDF vectors, accordingly discount word counts
+   (``term frequencies'') by document frequencies. A simple but widespread
+   variant:
+   $$TF{\text -}IDF(d)=\langle tf_{1,d}\cdot idf_1, \dots, tf_{N,d}\cdot idf_N\rangle$$
+   where $tf_{i,d}$ is simply the count of $w_i$ in $d$, while
+   $$
+   idf_i = \log\frac{\mathrm{\# of~~all~~documents}}{\mathrm{\# of~~documents~~containing}~~w_i  }
+   $$
+ \end{slide}
+
+ \begin{slide}[toc=]{Binary bag of words}
+   An interesting simplification of the BOW representation is to indicate only
+   the presence or absence of words:
+
+   $$BOW_{bin}(d)=\sign(BOW(d))$$
+
+   where the application of the $\sign$ function is elementwise, i.e.,
+
+   $$BOW_{bin}(d)=\langle \sign(c_{1,d}), \dots, \sign(c_{N,d})\rangle.$$
+   
+   It turned out that these simpler and less memory consuming representations
+   can be used instead of normal BOW vectors in many settings without noticeable
+   performance difference.
+ \end{slide}
+
+ \begin{slide}[toc=Naive Bayes]{Naive Bayes classifier with BOW}
+   In its simplest form, the Naive Bayes (NB) classifier is a generative model
+   modeling the joint distribution of $\mathbf{x}$ observation feature vectors
+   and their $c$ class labels as
+   $$
+   P(\mathbf{x}, c) = P(c)\prod_{i=1}^D P(x_i~\vert~c).
+   $$
+   The model is ``naive'', because it is based on the \emph{conditional
+     independence assumption} that given the class label, all observed features
+   are independent of each other.
+ \end{slide}
+
+ \begin{slide}[toc=]{Naive Bayes classifier with BOW cont.}
+   NB models can be precisely described by specifying
+   \begin{itemize}
+   \item the class label categorical distribution $P(c)$, and the
+   \item the $P(x_i~\vert~ c_j)$ distributions for each $x_i$ observation
+     feature and $c_j$ label.
+   \end{itemize}
+   $P(c)$ is always a categorical (Bernoulli or ``multinoulli'') distribution,
+   while the choice of $P(x_i~\vert~ c_j)$ distributions depends on the type of
+   $x_i$; for continuous $x_i$-s it can be any continuous distribution,
+   Gaussian being a common choice.
+ \end{slide}
+
+ \begin{slide}[toc=]{Naive Bayes classifier with BOW cont.}
+   The NB model can be adapted to text classification by applying the NB
+   assumption to individual tokens: each token is assumed to be chosen
+   independently from others according to a categorical conditional distribution
+   $P(w ~|~ c)$. If $\mathbf{x}$ is a BOW vector and $c$ is a class label this
+   means
+   $$
+   P(\mathbf{x}, c) = P(c) \prod_{i=1}^{|V|}P(w_i~\vert~c)^{x_i}.
+   $$
+   Taking the logarithm of both sides for numerical stability reasons:
+   $$
+   \log P(\mathbf{x}, c) = \log P(c) + \sum_{i=1}^{|V|}x_i \log P(w_i~\vert~c).
+   $$
+ \end{slide}
+
+ \begin{slide}[toc=]{Naive Bayes classifier with BOW cont.}
+   This means that given an $\mathbf{x}$ BOW vector and a vector
+   $$\theta_c=\langle \log P(w_1~\vert~c),\dots,\log P(w_{|V|}~\vert~c) \rangle$$
+   of conditional log probabilities of words for a $c$ class,
+   $$\log P(\mathbf{x}, c) = \log P(c) +  \theta_c \cdot \mathbf{x},$$
+   i.e., the log probability of $(\mathbf{x}, c)$ is a simple linear function
+   for each $c_i$. Prediction of the most likely class for a $d$ document is also
+   very simple:
+   $$
+   \hat c = \argmax_{c\in C}(\log P(c) + \theta_{c}  \cdot BOW(d) )
+   $$
+ \end{slide}
+
+ \begin{slide}[toc=]{Naive Bayes classifier with BOW cont.}
+   The MLE of the model parameters can be based on simple counts:
+   $$
+   P(c) \approx \frac{\# \mathrm{of}~~c~~\mathrm{documents}}{ \# \mathrm{of~~all~~documents}},
+   $$
+   $$
+   P(w~|~c) \approx \frac{\# w~~\mathrm{occurrences~~in}~~c~~\mathrm{documents}}{\# of~~\mathrm{words~~in}~~c~~\mathrm{documents}}.
+   $$\smallskip
+   
+   As we are basically working with per-class (unigram) language models, data
+   sparsity presents problems again.
+ \end{slide}
+
+ \begin{slide}[toc=]{Naive Bayes classifier with BOW cont.}
+   Most radically, if a word $w\in V$ does not occur in any $c$-class documents
+   then the corpus-based MLE for $P(w~|~c)=0$ and, therefore, for any document
+   with $\mathbf{x}$ BOW vector containing a non-zero count for  $w$
+   $$
+   P(\mathbf{x}, c) = P(c) \prod_{i=1}^{|V|}P(w_i~\vert~c)^{x_i}=0,
+   $$
+   regardless of any other word they contain.
+
+   The solution is, again, using appropriate smoothing methods, e.g., add-one
+   smoothing.
+ \end{slide}
+
+ \begin{slide}[toc=]{Naive Bayes limitations}
+   Although BOW-based NB models are fairly simple to estimate and use for
+   prediction, and can perform acceptably, there are some negatives:
+   \begin{itemize}
+   \item The NB conditional independence assumption is rather unrealistic and
+     leads to misleading probability predictions with basic BOW;
+   \item the NB assumption is absurd for and makes it impossible to use refined
+     BOW variants such as $N$-gram based ones;
+   \item using a full generative model for a discriminative task typically has
+     some performance penalties.
+   \end{itemize}
+ \end{slide}
+
+ \begin{slide}[toc=Discriminative]{Discriminative linear methods}
+   The alternative within the domain of linear models is obviously to use one of
+   the well known \emph{discriminative learning algorithms}:
+   \begin{itemize}
+   \item a perceptron variant,
+   \item logistic regression, or  
+   \item SVM.
+   \end{itemize}
+   These models do not assume conditional independence and therefore have no
+   problem with using refined BOW representations as input.
+ \end{slide}
+
+\section{Sequence tagging}
+ 
+\end{document}
+
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:
+
+% LocalWords:  Tokenization
