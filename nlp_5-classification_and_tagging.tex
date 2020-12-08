@@ -18,12 +18,13 @@
 %\usepackage[magyar]{babel}
 %\usepackage{euler}
 \usepackage{tikz}
-\usepackage{tikz-qtree}
-\usepackage{tikz-dependency}
-\usepackage{linguex}
+\usetikzlibrary{matrix}
+%\usepackage{tikz-qtree}
+%\usepackage{tikz-dependency}
+%\usepackage{linguex}
 \usepackage{amsthm}
-
-\tikzset{every tree node/.style={align=center,anchor=north}}
+\usepackage{amsmath}
+%\tikzset{every tree node/.style={align=center,anchor=north}}
 %\usepackage{tabularx}
 %\usepackage{threeparttable}
 %\usepackage{color}
@@ -44,7 +45,7 @@
 \newtheorem{lemma}{Lemma}
 \begin{document}
 
-\title{Natural Language Processing\\~~\\Lecture 5\\Text classification and sequence tagging with linear methods}
+\title{Natural Language Processing\\~~\\Lecture 5\\Text classification and sequence tagging with classical methods}
 % \author{}
 
 \date{2021}
@@ -269,25 +270,166 @@
  \end{slide}
 
  \begin{slide}[toc=Discriminative]{Discriminative linear methods}
-   The alternative within the domain of linear models is obviously to use one of
-   the well known \emph{discriminative learning algorithms}:
+   The most important alternative within the domain of classical learning
+   algorithms is to use one of the well known \emph{discriminative methods} with
+   BOW vectors:
    \begin{itemize}
    \item a perceptron variant,
    \item logistic regression, or  
    \item SVM.
    \end{itemize}
    These models do not assume conditional independence and therefore have no
-   problem with using refined BOW representations as input.
+   problem with using refined (e.g. $N$-gram based) BOW representations as input.
  \end{slide}
 
-\section{Sequence tagging}
+ \section{Sequence tagging}
+
+ \begin{slide}[toc=Tagging tasks in NLP]{Sequence tagging in NLP}
+   The sequence tagging task in general is to tag each element of a variable
+   length input sequence with one of the labels in a given finite $T$ tag set.
+   In NLP, the input sequence is typically a $\langle w_1,\dots,w_n \rangle$
+   sequence of \emph{tokens}.\bigskip
+
+   Some tasks in the traditional NLP pipeline are explicitly sequence tagging
+   tasks, e.g. POS-tagging and morphological tagging. Others, like NP-chunking,
+   NER or keyword identification can be transformed into a sequence tagging task
+   with a simple trick.
+ \end{slide}
+
+ \begin{slide}[toc=IOB tagging]{IOB tagging}
+   These tasks are ostensibly span-finding and span-tagging tasks: the goal is
+   to find token spans belonging the certain categories.
+
+   E.g., in the case of (minimal) noun phrase (NP) chunking:
+   \begin{center}
+     \includegraphics[width=1.0\textwidth]{figures/iob1.eps}
+   \footnotesize(Figure from the \href{http://www.nltk.org/book/ch07.html}{NLTK book}.)
+ \end{center}
+ \end{slide}
+
+ \begin{slide}[toc=]{IOB tagging cont.} 
+   The IOB trick is to reformulate the span identification/tagging task as a
+   sequence tagging task. If there are $T_1,\dots,T_N$ span types to be
+   identified, then we introduce three types of token-level tags:
+   \begin{itemize}
+   \item a $B$ (beginning) tag for all span types: $B-T_1,\dots,B-T_N$
+     indicating the first token of a span of a given type;
+   \item an $I$ (inside) tag for all span types $I-T_1,\dots,I-T_N$; indicating
+     that a token is inside (as second or later element) a span, and, finally,
+   \item a unique $O$ tag for tokens that do not belong to any span type to be
+     found.
+   \end{itemize}
+ \end{slide}
  
+ \begin{slide}[toc=]{IOB tagging cont.}
+   Using these tags the span identification task becomes a sequence tagging
+   task.
+   
+   \begin{center}
+     \includegraphics[width=1.0\textwidth]{figures/iob2.eps}
+     \footnotesize(Figure from the \href{http://www.nltk.org/book/ch07.html}{NLTK book}.)
+    \end{center}
+    
+    
+    Although the IOB scheme is the most well known, others are in use as well,
+    e.g., if one introduces $E-T_i$ \emph{end} tags, then a unique $I$
+    \textit{inside} tag is enough for unambiguous tagging.
+  \end{slide}
+
+  \begin{slide}[toc=Challenges]{Sequence tagging challenges}
+    The main challenge of sequence tagging is the complicated interdependence
+    between the tag of an element and the features of the other elements
+    \emph{including their tags}: in the case of most NLP tagging tasks, the
+    tags are \emph{\gold strongly context dependent}.\bigskip
+
+    Another important problem is feature engineering: which features of the
+    sequence elements are relevant for tagging? If out of vocabulary words are
+    to be handled properly then at least some of the features should probably be
+    based on the word's surface form, e.g. on its capitalization, suffix etc.    
+  \end{slide}
+  
+  \begin{slide}[toc=Supervised methods]{Supervised methods for sequence tagging}
+    These methods assume that a
+    $$D=\{\langle \mathbf{x_1},\mathbf{y_1} \rangle,\dots, \langle \mathbf{x_N},\mathbf{y_N} \rangle\}$$
+    supervised dataset is available, in which each
+    $\langle \mathbf{x}_i, \mathbf{y}_i \rangle$ pair consists of an
+    $\langle x_1^i,\dots,x_{n_i}^i\rangle$ sequence to be tagged and the
+    corresponding $\langle y_1^i,\dots,y_{n_i}^i\rangle$ correct tag sequence.\bigskip
+
+    The methods we will discuss are all \emph{probabilistic}: they model either
+    the $ P(\mathbf{X}, \mathbf{Y}) $ joint distribution (generative model) or
+    the $ P(\mathbf{Y}~|~\mathbf{X}) $ conditional distribution (discriminative
+    model).
+  \end{slide}
+
+  \begin{slide}[toc=HMMs]{Hidden Markov models (HMMs)}
+    HMMs are \emph{generative models} of the $P(\mathbf{X}, \mathbf{Y})$
+    distribution based on the assumption that the elements of the \emph{\gold
+      observable} $\mathbf{x}$ sequences actually depend on the positionally
+    corresponding \emph{\gold hidden} elements of the $\mathbf{y}$ sequences,
+    which, in turn, are distributed according to a Markov model. The conditional
+    independence assumptions collectively follow this graphical model:
+    \begin{center}
+      \begin{tikzpicture}[ampersand replacement=\&]
+        \matrix[matrix of math nodes,column sep=2em,row sep=3em] (m) {
+          Y_1 \& Y_2 \& Y_3 \& \cdots \& Y_{n}\\
+          X_1 \& X_2 \& X_3 \& \dots \& X_n\\
+        };
+        \foreach \X in {1,2,3,4}
+        {\draw[-latex] (m-1-\X) -- (m-1-\the\numexpr\X+1) ;
+          \ifnum\X=4
+          \draw[-latex] (m-1-5) -- (m-2-5) ;
+          \else
+          \draw[-latex] (m-1-\X) -- (m-2-\X);
+          \fi}
+        % \draw[dashed] ([yshift=1ex]m.east) -- ([yshift=1ex]m.east-|m-1-1.east);
+      \end{tikzpicture}
+    \end{center}
+  \end{slide}
+
+  \begin{slide}[toc=]{Hidden Markov models cont.}
+    Because of the Markov model assumption regarding the $Y$s, there is an
+    $A$ matrix specifying all tag
+    transition probabilities, so that for any appropriate $k, i, j$,
+    $$
+    P(Y_k=y_j ~|~Y_{k-1}=y_i) = a_{i j}.
+    $$
+    HMMs also assume that the $P(X~|~Y)$ ``emission'' probabilities are
+    position-independent: there is also a $B$ matrix so that for any
+    $k, i, j$,
+    $$
+    P(X_k= x_j ~|~Y_{k}= y_i) = b_{i j}.
+    $$
+  \end{slide}
+
+  \begin{slide}[toc=]{Hidden Markov models cont.}
+    Assuming, finally, an $\mathbf{s}$ vector containing the start probabilities
+    for each possible $y_i$ tag:
+    $$
+    P(Y_1 = y_i) = s_i,
+    $$
+    the probability of a concrete
+    $\langle \mathbf{x}, \mathbf{y} \rangle =\langle \langle
+    x_{l_1},\dots,x_{l_n} \rangle, \langle y_{m_1},\dots,y_{m_n} \rangle
+    \rangle$ pair can be calculated as
+    $$
+    P(\mathbf{x}, \mathbf{y}) = s_{m_1} b_{m_1 l_1}
+    \prod_{i=2}^na_{m_{i-1} m_i}b_{m_i l_i}.
+    $$
+  \end{slide}
+
+  \begin{slide}[toc=]{Hidden Markov models cont.}
+    The MLE of the probabilities in $A, B$ and $\mathbf{s}$ can be calculated
+    simply by counting:
+
+  \end{slide}
+  
 \end{document}
 
 
 
 %%% Local Variables:
-%%% mode: latex
+%%% mode: latex 
 %%% TeX-master: t
 %%% End:
 
