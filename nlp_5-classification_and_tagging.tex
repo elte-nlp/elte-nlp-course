@@ -30,6 +30,8 @@
 %\usepackage{color}
 %\selectlanguage{english}
 %\frenchspacing
+\usepackage{algpseudocode}
+\usepackage{algorithm} 
 \newcommand{\nd}{\noindent}
 \newcommand{\Val}{\mathop{\mathit{Val}}}
 \newcommand{\gold}{\color{arany}}
@@ -403,25 +405,99 @@
   \end{slide}
 
   \begin{slide}[toc=]{Hidden Markov models cont.}
-    Assuming, finally, an $\mathbf{s}$ vector containing the start probabilities
+    Assuming, finally, an $\Pi$ vector containing the start probabilities
     for each possible $y_i$ tag:
     $$
-    P(Y_1 = y_i) = s_i,
+    P(Y_1 = y_i) = \pi_i,
     $$
     the probability of a concrete
     $\langle \mathbf{x}, \mathbf{y} \rangle =\langle \langle
     x_{l_1},\dots,x_{l_n} \rangle, \langle y_{m_1},\dots,y_{m_n} \rangle
     \rangle$ pair can be calculated as
     $$
-    P(\mathbf{x}, \mathbf{y}) = s_{m_1} b_{m_1 l_1}
+    P(\mathbf{x}, \mathbf{y}) = \pi_{m_1} b_{m_1 l_1}
     \prod_{i=2}^na_{m_{i-1} m_i}b_{m_i l_i}.
     $$
   \end{slide}
 
-  \begin{slide}[toc=]{Hidden Markov models cont.}
-    The MLE of the probabilities in $A, B$ and $\mathbf{s}$ can be calculated
-    simply by counting:
+  \begin{slide}[toc=]{Hidden Markov models cont.} The MLE of the probabilities
+    in $A, B$ and $\mathbf{s}$ can be calculated simply by counting. If the training
+    dataset contains $N$ sequences then
+    \begin{gather*} \pi_i = \frac{C(\mathrm{first~~element~~is~~}
+        y_i)}{N}\\ a_{ij} = \frac{C(\langle y_i,y_j\rangle)}{\sum_kC(\langle
+        y_i,y_k\rangle)}\\ b_{ij} = \frac{C(y_i \mathrm{~~emits~~} x_j)}{\sum_kC(y_i)}
+    \end{gather*}
+    Similarly to other counting based MLE methods, smoothing might be necessary
+    in case of sparse data.
+  \end{slide}
 
+  \begin{slide}[toc=Viterbi]{The Viterbi algorithm}
+    Given a trained HMM with $\pi, A, B$ parameters, and an $\mathbf{x}$
+    input sequence of length $n$, we want to determine the most probable corresponding
+    $\mathbf{y}$ sequence of tags, i.e. find
+    $$
+    \argmax_{\mathbf{y}\in Y^n} P(\mathbf{y} ~|~ \mathbf{x}, \pi, A, B),
+    $$
+    which equals
+    $$
+    \argmax_{\mathbf{y}\in Y^n} P(\mathbf{x}, \mathbf{y} ~|~ \pi, A, B).
+    $$
+    An exhaustive search is unfeasible because there are $|Y|^n$ alternative tag
+    sequences.
+  \end{slide}
+  
+  \begin{slide}[toc=]{The Viterbi algorithm cont.}
+    Fortunately, the HMM conditional independence assumptions have the following
+    consequence: If we know, for all $y_i\in Y$, the values
+    $$
+    \mathbf{y}^{n-1}_i = \argmax_{\mathbf{y}\in Y^{n-1}~\wedge~\mathbf{y}[n-1] = y_i}
+    P(\mathbf{x}[1:n-1], \mathbf{y} ~|~ \pi, A, B),
+    $$
+    then the most probable $\mathbf{y}$ can be computed simply as 
+    \begin{gather*}
+      \argmax_{\mathbf{y}\in \{\langle \mathbf{y}_i^{n-1},~y \rangle ~|~ i \in 1\dots |Y|~\wedge~ y \in Y\}} P(\mathbf{x}, \mathbf{y} ~|~ \pi, A, B),
+    \end{gather*}
+    i.e., we need to search only among the $|Y|^2$ possible continuations of the
+    $\mathbf{y}^{n-1}_i$ sequences.
+  \end{slide}
+
+
+  \begin{slide}[toc=]{The Viterbi algorithm cont.}
+    This suggests the following algorithm (named after Andrew Viterbi, who
+    published a variant in 1967):\bigskip
+
+	\small
+    \begin{algorithmic}[1]
+	
+      \ForAll{$i\in 1\dots |Y|$}
+      \State $\mathbf{y}_i^1 \leftarrow \langle y_i \rangle$
+      \EndFor
+      \ForAll{$t\in 2\dots n-1$}
+      \ForAll{$i\in 1\dots |Y|$}
+      \State{
+        $$\mathbf{y}_i^t \leftarrow  \argmax_{\mathbf{y}\in \{\langle \mathbf{y}_k^{t-1}, y_i \rangle ~|~         k \in 1\dots |Y|\}} P(\mathbf{x}[1:t], \mathbf{y} ~|~ \pi, A, B)
+        $$}
+      \EndFor
+      \EndFor
+      \State{\Return{$\argmax_{\mathbf{y}\in \{\langle \mathbf{y}_i^{n-1},~y \rangle ~|~ i \in 1\dots |Y|~\wedge~ y \in Y\}} P(\mathbf{x}, \mathbf{y} ~|~ \pi, A, B)$}}
+    \end{algorithmic}
+    
+  \end{slide}
+
+  \begin{slide}[toc=]{The Viterbi algorithm cont.}
+    In stark contrast to an exhaustive search, the standard Viterbi algorithm
+    has a time complexity of $\mathcal O(\mathrm{length}(\mathbf{x})|Y|^2)$, and
+    tracking the partial $\mathbf{y}_i^t$ sequence elements and their
+    probabilities can be done using back-pointers within
+    $\mathcal{O}(\mathrm{length}(\mathbf{x})|Y|)$ space.\bigskip
+
+    Calculating the probabilities to be compared directly requires multiplying
+    numbers very close to zero, so it is customary to work with log
+    probabilities (and addition) instead.
+  \end{slide}
+
+  \begin{slide}[toc=Discriminative models]{Discriminative models}
+    
   \end{slide}
   
 \end{document}
