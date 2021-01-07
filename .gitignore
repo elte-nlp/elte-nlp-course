@@ -2,6 +2,7 @@
 !*.tex
 !*.eps
 !*.bib
+!figures/
 !.gitignore
 !.latexmkrc
 _region_.tex
