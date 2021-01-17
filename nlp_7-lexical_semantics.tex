@@ -54,335 +54,252 @@
 \newtheorem{lemma}{Lemma}
 \begin{document}
 
-\title{Natural Language Processing\\~~\\Lecture 7\\Lexical semantics}
+\title{Natural Language Processing\\~~\\Lecture 7\\Lexical semantics and\\ Latent
+  Semantic Analysis}
 % \author{}
 
 \date{2021}
 \maketitle
 
-\begin{slide}[toc=]{FLAIR cont.}
-  \begin{center}
-    \includegraphics[width=1\textwidth]{figures/flair.eps}
-    \footnotesize{(Figure from \cite{akbik2018contextual}).}
-  \end{center}
-\end{slide}
-
-\section[toc=Transformers]{Interlude: Transformers}
-
-\begin{slide}[toc=Introduction]{Contextual embeddings and transformers}
-  The first contextual embeddings were produced by RNNs, but later developments
-  were made possible by the discovery of \emph{\gold transformers}
-  \citep{vaswani2017attention}, a new type of architecture using attention
-  mechanisms as full-fledged layers, not as auxiliary RNN components.\bigskip
-
-  Before discussing the recent transformer-based embedding models, we discuss
-  shortly this new architecture and its building blocks:
-  \begin{itemize}
-  \item attention as soft dictionary lookup,
-  \item self-attention layers, and
-  \item transformer modules.
-  \end{itemize}
-\end{slide}
-
-\begin{slide}[toc=KV-attention]{Attention as soft dictionary lookup}
-  Recall that attention mechanisms provide \emph{query-based aggregation} of an
-  $\langle \mathbf{x}_1,\dots, \mathbf{x}_n\rangle $ vector sequence: given an
-  $\mathbf{x^*}$ \emph{query vector}, they calculate a sequence of relevance
-  scores
-  $$
-  \mathbf{s} = \langle s(\mathbf{x}_1, \mathbf{x}^*),\dots, s(\mathbf{x}_n,
-  \mathbf{x}^*) \rangle
-  $$
-  and returned the weighted sum 
-  $$
-  \softmax (\mathbf{s})\cdot \langle \mathbf{x}_1,\dots, \mathbf{x}_n\rangle 
-  $$
-  as a summary or aggregation of the $\mathbf{x}_i$-s according to their
-  relevance score.
-\end{slide}
-
-\begin{slide}[toc=]{Attention as soft dictionary lookup cont.}
-  The $s(\cdot, \cdot)$ scoring function varies, we saw that one option is to
-  use the scaled dot-product:
-  $$
-  s(\mathbf{x}_i, \mathbf{x}^*) = \frac{\mathbf{x}_i\cdot
-    \mathbf{x}^*}{\sqrt{d}}.
-  $$
-  where $d$ is the dimensionality of $\mathbf{x_i}$ and $\mathbf{x^*}$.\bigskip
-
-  Building on this schema, the transformer attention mechanism makes a crucial
-  change: treats $\langle \mathbf{x}_1,\dots, \mathbf{x}_n\rangle$ as a
-  \emph{\gold dictionary}, for which there are $\mathcal K(\cdot)$ and $\mathcal V(\cdot)$
-  mappings that map each $\mathbf{x}_i$ to a corresponding
-  $\mathcal K(\mathbf{x}_i)$ key and $\mathcal V(\mathbf{x}_i)$ value.
-\end{slide}
-
-
-\begin{slide}[toc=]{Attention as soft dictionary lookup cont.}
-  Assuming also a $\mathcal Q(\cdot)$ \emph{\gold query} mapping which maps
-  $\mathbf{x}^*$ to the range of $\mathcal K$(.) (the ``key-space''), scoring
-  can be reformulated as calculating dot-product based similarity scores between
-  the query and keys
-  $$
-  s(\mathbf{x}_i, \mathbf{x}^*) = \frac{\mathcal K (\mathbf{x}_i)\cdot
-    \mathcal Q (\mathbf{x}^*)}{\sqrt{d}},
-  $$
-  ($d$ is now the dimensionality of the ``key-space'') and the retrieved value
-  will be the weighted sum
-  $$
-  \softmax(\langle
-  s(\mathbf{x}_1,\mathbf{x}^*),\dots,s(\mathbf{x}_n,\mathbf{x}^*) \rangle)\cdot
-  \mathcal V(\langle \mathbf{x_1},\dots,\mathbf{x}_n)\rangle.
-  $$
-\end{slide}
-
-\begin{slide}[toc=Attention layer]{Attention as a layer cont.}
-  The outlined attention mechanism can be used as a standalone layer for
-  transforming an input vector sequence
-  $\mathbf{I} = \langle \mathbf{i}_1,\dots, \mathbf{i}_n \rangle$:\bigskip
-
-  Given another $\mathbf{X} = \langle \mathbf{x}_1,\dots, \mathbf{x}_m \rangle$
-  sequence and $\mathcal K(\cdot),\mathcal V(\cdot),\mathcal Q(\cdot)$ mappings,
-  for each $\mathbf{i_k}$ input, we can calculate the corresponding
-  $\mathcal Q(\mathbf{i}_k)$ query, and use this with $\mathcal K$ and
-  $\mathcal V$ to \emph{attend to} $\mathbf{X}$ and compute a corresponding
-  attention response $\mathbf{o}_k$.\bigskip
-
-  The result is an $\mathbf{O}=\langle \mathbf{o}_1,\dots,\mathbf{o}_n \rangle$
-  sequence of outputs, which collectively is the layer's output for the input
-  $\mathbf{I}$.
-\end{slide}
-
-\begin{slide}[toc=]{Attention as a layer cont.}
-  Depending on where the layer attends to (where $\mathbf{X}$ comes from) we can
-  distinguish self- and outward attention layers.
-  \begin{itemize}
-  \item In \emph{\gold self-attention} layers, the queries generated from the
-    input are used to query the input iself: $\mathbf{X}=\mathbf{I}$.
-  \item In an \emph{\gold outward} attention layer, an external vector sequence
-    is queried, e.g., in encoder-decoder transformer architectures a sequence
-    created by an encoder.
-  \end{itemize}
-  As for the mappings $\mathcal K(\cdot),\mathcal V(\cdot),\mathcal Q(\cdot)$,
-  all three are commonly implemented as \emph{\gold linear projections}, with
-  learned weight matrices $W_K, W_V, W_Q$.
-\end{slide}
-
-\begin{slide}[toc=Multiple heads]{Multi-headed attention}
-  To able to attend to multiple aspects of the input, the attention layers in
-  transformers contain several parallel attention ``heads'' with different
-  $W_K, W_V, W_Q$ triplets:
+\begin{slide}{Word meanings}
+  As we have seen (in Lecture 1), according to the \emph{\gold principle of
+    compositionality},\medskip
   
-  \hspace{0.6cm}\includegraphics[width=0.9\textwidth]{figures/transformer_attention_heads_qkv.eps}
-    
-  \hspace{3cm}\footnotesize{(Figure from \cite{alammar2018illustrated}.)}
+  \emph{The meaning of a complex expression is determined by the meanings of its
+    constituent expressions and the rules used to combine them.}
+  \footnote{\href{https://en.wikipedia.org/wiki/Principle_of_compositionality}{Wikipedia:
+      Principle of Compositionality.}}\medskip
+
+  Although the principle is not without its problems,\footnote{See, e.g.,
+    \cite{sep-compositionality}.} it suggests that to know the meaning of larger
+  textual units (sentences, paragraphs etc.) it is necessary to know the
+  \emph{\gold meaning of words} they are composed of.
 \end{slide}
 
-\begin{slide}[toc=]{Multi-headed attention cont.}
-  The head outputs are combined into a layer output:
+\begin{slide}[toc=]{Word meanings cont.}
+  Intuitively, several words have more than one meanings, e.g. \emph{mouse} has
+  a different meaning in\bigskip
 
-  \includegraphics[width=1\textwidth]{figures/mhead2.eps}    
+  \emph{A {\gold mouse} ate the cheese.}\medskip
+  
+  and in\medskip
 
-  \hspace{3cm}\footnotesize{(Figure adapted from
-    \cite{alammar2018illustrated}.)}
+  \emph{Click on the close button with the {\gold mouse}.}\bigskip
+
+  \emph{mouse} can mean a \emph{type of small rodent} or \emph{an electronic
+    pointing device}. The identification and characterization of word meanings
+  or \emph{\gold word senses} such as these is the task of \emph{\gold lexical
+    semantics}.
 \end{slide}
 
-\begin{slide}[toc=Modules]{Transformer modules}
-  The building blocks of transformers are \emph{\gold transformer modules}
-  consisting of attention and simple piecewise feedforward layers. The simplest
-  variant contains only a single self-attention layer:
+
+\begin{slide}[toc=Dictionaries]{Word senses in dictionaries}
+  One way of characterizing word senses is offered by traditional \textit{\gold
+    dictionaries}. E.g., the online version of the
+  \href{https://www.oxfordlearnersdictionaries.com/definition/english/mouse_1?q=mouse}{\emph{Oxford
+      Advanced Learner's Dictionary}} describes these senses as\bigskip
   
   \begin{centering}
     
-    \includegraphics[width=0.6\textwidth]{figures/transformer_resideual_layer_norm_2.eps}
-
-    \footnotesize{(Figure adapted from \cite{alammar2018illustrated}.)}
+    \includegraphics[width=0.75\textwidth]{figures/oald_mouse1.eps}
     
   \end{centering}
 \end{slide}
 
-\begin{slide}[toc=]{Transformer modules cont.}
-  \begin{wrapfigure}{r}{3.5cm}
-    \includegraphics[width=3.5cm]{figures/transformer_block.eps}
-  \end{wrapfigure}
-  The \emph{decoder} part of transformers is built from more complex modules: in
-  addition to a self-attention layer, they also contains an outward attention
-  layer, which attends to the output of the model's encoder. The self-attention
-  layer is \emph{masked}: attention queries from a decoder position cannot
-  access information in later decoder positions to not use ``future
-  information'' during training with teacher forcing.\medskip
-
-  \footnotesize{(This and the next figure from \cite{vaswani2017attention}.)}
-\end{slide}
-
-\begin{slide}[toc=Seq2seq]{Seq2seq transformer}
-    \begin{wrapfigure}{r}{4.8cm}
-    \includegraphics[width=4.8cm]{figures/transformer_full.eps}
-  \end{wrapfigure}
-  The original \emph{full transformer model} of \citep{vaswani2017attention} was
-  a Seq2seq encoder-decoder model built exclusively of transformer blocks.
-  During inference the decoder part predicts step-by-step, consuming already
-  predicted output similary to RNNs, but during training it requires only a
-  single forward pass with teacher forcing.
-\end{slide}
-
-\section{Transformer-based contextual embeddings}
-
-\begin{slide}[toc=Introduction]{Transformer-based embeddings}
-  The transformer architecture was first used for translation (2017), but
-  starting from 2018, a series of transformer-based models producing contextual
-  embeddings were developed. The most important research areas were
-  \begin{itemize}
-  \item finding self-supervised tasks conducive to learning high-quality
-    representations;
-  \item architectural improvements, importantly, finding more efficient attention variants;
-  \item how to adapt/fine-tune the pretrained representation networks for
-    downstream tasks.
-  \end{itemize}
-\end{slide}
-
-\begin{slide}[toc=GPT]{GPT (Generative Pre-Training, OpenAI, 2018)}
-  GPT is a BPE-based, decoder only transformer model trained with a
-  traditional "predict the next token" language modeling objective. The
-  contextual embeddings are simply the outputs of the top transformer module.\bigskip
-
-  Similarly to ELMo, the main goal of GPT is to provide a useful pretrained
-  "feature extractor" module, which can be fine-tuned for supervised NLP tasks.
-  Fine-tuning means changing also the pretrained GPT weights in an end-to-end
-  fashion on the supervised downstream task.
-\end{slide}
-
-\begin{slide}[toc=]{GPT cont.}
-  In most cases it's enough to add single linear layer(s) to get models with
-  state-of-the-art performance (structured inputs are transformed into token
-  sequences with special delimiter tokens ["delim"]):
+\begin{slide}[toc=]{Word senses in dictionaries cont.}
+  and
   
-  \begin{centering}
+    \begin{centering}
     
-    \includegraphics[width=0.9\textwidth]{figures/gpt.eps}
+    \includegraphics[width=0.8\textwidth]{figures/oald_mouse2.eps}
+    
+  \end{centering}
 
-    \footnotesize{(Figure from \cite{radford2018improving}.)}
-    
-  \end{centering}  
 \end{slide}
 
-\begin{slide}[toc=BERT]{BERT (Google, 2018)}
-  The next highly influential model was Google's BERT (Bidirectional Encoder
-  Representations from Transformers, \cite{devlin2018bert}), whose main
-  innovations were
+\begin{slide}[toc=]{Word senses in dictionaries cont.}
+  Notable features of these sense descriptions are that
   \begin{itemize}
-  \item the use of two new self-supervised objectives instead of traditional
-    language-modeling:
+  \item word senses have precise identifiers: the surface form \emph{mouse}, the
+    POS-tag \emph{noun} and the sense number together unambiguously identify the
+    senses;
+  \item each sense has a \emph{\gold textual definition} which is not formal,
+    but
     \begin{itemize}
-    \item masked language modeling, and
-    \item next sentence prediction (NSP); and
+    \item uses a relatively small definitional vocabulary,
+    \item follows certain conventions, e.g., starts with a more general word
+      plus characteristic property (\emph{small animal}, \emph{small device});
     \end{itemize}
-  \item a corresponding architectural change: the model is based on the
-    \emph{transformer encoder} architecture.
+  \item there are several \emph{\gold example sentences} illustrating typical
+    patterns in which the sense is used.
   \end{itemize}
 \end{slide}
 
-\begin{slide}[toc=]{BERT: masked language modeling}
-  The objective is to guess randomly masked tokens:\medskip
-  
-  \begin{centering}
-    
-    \includegraphics[width=0.9\textwidth]{figures/bert1.eps}
-
-    \footnotesize{(Figure from \cite{horev2018bert}.)}
-    
-  \end{centering}
-\end{slide}
-
-\begin{slide}[toc=]{BERT: next sentence prediction}
-  The second objective was deciding whether two sentences followed each other in
-  the training corpus or were randomly sampled:\medskip
-  
-  \begin{centering}
-    
-    \includegraphics[width=1.\textwidth]{figures/bert2.eps}
-
-    \footnotesize{(Figure from \cite{devlin2018bert}.)}
-    
-  \end{centering}
-\end{slide}
-
-\begin{slide}[toc=Recent trends]{Recent trends}
-  Newer models have been able to improve on the state-of-the-art in NLP tasks
-  again and again, but typically with an \emph{\gold increased number of
-    parameters} and \emph{\gold on larger datasets}:\bigskip
-
-  While the original ELMo model had 93.6 million parameters, GPT-3, the latest
-  GPT version has 175 billion(!) parameters, and the dataset size increased from
-  800 million to 300 billion tokens.
-\end{slide}
-
-\begin{slide}[toc=Distillation]{Knowledge distillation}
-  The huge increases in size led to intensive research into \emph{knowledge
-    distillation} methods to be able to produce smaller and more efficient
-  models based on the original ones without significant performance
-  loss.\bigskip
-
-  A good example is \emph{\gold DistilBERT}, a distilled version of BERT trained
-  to mimic BERT's output \citep{sanh2019distilbert}. DistilBERT retains 97\% of
-  BERT's performance, but with 40\% fewer parameters and is 39\% faster during
-  inference.
-\end{slide}
-
-\begin{slide}[toc=Sparse attention]{Sparse attention variants}
-  Another way of improving efficiency has been reducing the scope of attention
-  in the self-attention layers, since in full attention the number of dot
-  products to be calculated is quadratic in the number of input tokens. Linear
-  alternatives include
+\begin{slide}[toc=Lexical relations]{Lexical relations}
+  Dictionaries may contain information about \emph{\gold lexical relations}
+  between senses, especially about
   \begin{itemize}
-  \item \emph{\gold global attention}: a set of global tokens that attend to
-    the whole sequence;
-  \item \emph{\gold random attention}: for each query, a set of $r$ random keys
-    is calculated to which that query attends;
-  \item \emph{\gold window attention}: only local neighbors within a fix radius
-    are attended to.
+  \item \emph{\gold synonymy}: whether two word senses are (close to) identical;
+  \item \emph{\gold antonimy}: whether two word senses are opposites of each other.
+  \end{itemize}
+  Other important lexical relations include \emph{\gold taxonomical relations}:
+  \begin{itemize}
+  \item sense $s_1$ is a \emph{\gold hyponym} of $s_2$ if it is strictly more
+    specific, e.g. \emph{mouse$_1$} is a hyponym of \emph{animal$_1$};
+  \item conversely, sense $s_1$ is a \emph{\gold hypernym} of $s_2$ if $s_2$ is
+    more specific than $s_1$.
   \end{itemize}
 \end{slide}
 
-\begin{slide}[toc=Sparse attention]{Sparse attention variants cont.}
-  The Big Bird contextual embedding model \citep{zaheer2020big} combines all
-  these linear attention types to increase the number of input tokens
-  significantly without significant change in memory requirements:\medskip
+\begin{slide}[toc=]{Lexical relations cont.}
+  And, finally, \emph{\gold meronymy}, the \emph{part-whole} relation: e.g.,
+  \emph{finger} is a meronym of \emph{hand}.\bigskip
 
+  Collectively, word senses and their lexical relations constitute a \emph{\gold
+    network}, in which
+  \begin{itemize}
+  \item nodes are sets of synonymous word senses, and
+  \item edges are lexical relations. 
+  \end{itemize}
+  Since the hyponymy relation (also called \textit{is\_a}) is transitive, it
+  makes sense to have only \emph{direct hyponymy} edges in the network, i.e.,
+  the have an $s_1 \xrightarrow{is\_a} s_2$ edge only if there is no node $s_3$ for which
+  $s_1 \xrightarrow{is\_a} s_3$ and $s_3 \xrightarrow{is\_a} s_2$.
+\end{slide}
+
+\begin{slide}[toc=WordNet]{WordNet}
+  To be usable for NLP purposes, lexical semantic information has to be
+  accessible as a computational resource with a well defined query API, and,
+  starting from the mid. 1980s a number of projects developed such
+  resources.\bigskip
+  
+  The most important has been the
+  \href{https://wordnet.princeton.edu/}{\emph{WordNet}} English lexical
+  database, which contains a large number of synonym sets with definitions,
+  examples and lexical relations. After its success, WordNets for developed for
+  a large number of other languages, now more than 200 WordNets are available.
+\end{slide}
+
+\begin{slide}[toc=]{WordNet cont.}
+  A part of the English WordNet network:\medskip
+  
   \begin{centering}
     
-    \includegraphics[width=1.\textwidth]{figures/bigbird.eps}
+    \includegraphics[width=0.9\textwidth]{figures/wn.eps}
 
-    \footnotesize{(Figure from \cite{zaheer2020big}.)}
+
+    \footnotesize{(Figure from \cite{navigli2009word}.)}
     
   \end{centering}
 \end{slide}
 
-\begin{slide}[toc=Few-shot learning]{Few- one- and zero-shot learning}
-  An interesting research direction is to try to use the model directly, without
-  added layers and gradient updates on downstream tasks. Some recent models,
-  most importantly, GPT-3 \citep{brown2020language} can perform surprisingly
-  well on various downstream tasks that are explained in the input. There are
-  three learning settings:
+
+\begin{slide}[toc=Knowledge bases]{Knowledge bases as lexical resources}
+  In addition to dedicated lexical databases, \emph{knowledge bases} can also
+  serve as useful lexical semantic resources, since they contain information
+  about \emph{entities} and \emph{concepts}, which can be linked to words in a
+  vocabulary. Important examples include
   \begin{itemize}
-  \item \emph{\gold zero-shot}: The input only contains a short description of
-    the supervised task, and a concrete input instance prompt , e.g. ``Translate
-    English to French: cheese =$>$ ''.
-  \item \emph{\gold one-} and \emph{\gold few-shot}: In addition to the short
-    task description, the input also contains one or a few training examples
-    before the prompt.
+  \item \emph{Wikis}, most importantly the English Wikipedia, here various types
+    of links and references between the entries provide relational information;
+  \item \emph{formal ontologies}: these describe relationships between concepts
+    in a formal logical language.
   \end{itemize}
-  
 \end{slide}
 
-\section {References}
+\begin{slide}[toc=WSD]{Word sense disambiguation}
+  To use the information about word senses provided by these lexical resources,
+  NLP applications must be able to determine in which sense words are used in
+  the input, i.e., perform \emph{\gold word sense disambiguation (WSD)}.
+  The details of the WSD task depend on which lexical resource it is based on
+  and how the resource is used. Given a resource containing word senses, 
+
+  \begin{itemize}
+  \item \emph{\gold supervised WSD} uses machine learning methods on training data
+    which is annotated with the correct word senses; while
+  \item \emph{\gold knowledge-based WSD} exploits the information in the lexical
+    resource, e.g. the lexical relations and definitions in WordNet.
+  \end{itemize}
+\end{slide}
+
+\begin{slide}[toc=Word vectors]{Vector-based lexical semantics}
+  The lexical semantic approach we have seen so far has certain features that
+  make it difficult to achieve large coverage and adapt to new languages or
+  domains:
+  \begin{itemize}
+  \item the lexical databases were manually assembled by highly qualified
+    experts;
+  \item the development of high-performance WSD modules typically requires a
+    large amount of expert-annotated training data.
+  \end{itemize}
+  These problems led to research into alternatives that assign useful word
+  meaning representation in an \emph{\gold unsupervised} fashion, simply
+  learning them from text corpora.
+\end{slide}
+
+\begin{slide}[toc=]{Vector-based lexical semantics cont.}
+  Although there have been attempts to learn \emph{semantic networks} from text
+  corpora, the first successful unsupervised lexical semantic methods have been
+  learning \emph{\gold word vectors} from text corpora, i.e., embedding
+  functions of the form
+  $$
+  E: V \rightarrow R^d
+  $$
+  which assign $d$-dimensional ($d\in \mathbb N$) vectors to each word in the
+  $V$ vocabulary. Of course, not any such function will do: the obvious
+  requirement is that the learned vectors has to convey useful information about
+  the \emph{meaning} of the words they are assigned to.
+\end{slide}
+
+\begin{slide}[toc=]{Vector-based lexical semantics cont.}
+  One way of ensuring the connection is to utilize the \emph{distributional hypothesis}:
+  \begin{itemize}
+  \item ``You shall know a word by the company it keeps.''
+    \footnote{J.R. Firth, \emph{Papers in Linguistics 1934--1951 (1957).}}
+  \item ``Linguistic items with similar distributions have similar meanings.''
+    \footnote{\href{https://en.wikipedia.org/wiki/Distributional_semantics}{Wikipedia:
+        Distributional semantics.}}
+  \end{itemize}
+  This suggests that if the word vectors reflects the \emph{distribution} of the
+  words they are assigned to, then they will also reflect the words' meanings.
+\end{slide}
+
+\begin{slide}[toc=]{Co-occurrence matrices}
+  The most direct way of getting word vectors that reflect the words'
+  distribution in a corpus is to consider \emph{co-ocurrence} matrixes. If there
+  are $D$ documents in the corpus and $V$ is the corpus vocabulary then
+  \begin{itemize}
+  \item \emph{\gold term-document} matrices are $|V|\times D$ dimensional
+    matrices in which each row is a word vector whose $i$-th element is the
+    occurrence count of the word in the $i$-th document, while
+  \item \emph{\gold term-term} matrices are $|V|\times |V|$ dimensional matrices
+    in which each row is a word vector whose $i$-th element is the co-occurrence
+    count of the word with the $i$-th \emph{other word}.
+  \end{itemize}
+\end{slide}
+
+\begin{slide}[toc=LSA]{Latent Semantic Analysis}
+  An important problem of using these vectors directly is their huge
+  dimensionality and sparsity. To solve this problem, \emph{\gold Latent
+    Semantic Analysis} methods apply dimension reducing matrix factorization
+  methods, typically \emph{truncated SVD} to find a \emph{low-rank
+    approximation} of the original $C$ co-occurrence matrix. With SVD the factorization is
+  $$
+  C \approx USV^\intercal
+  $$
+  with $U,V$ orthonormal and $S$ diagonal. In case of truncated SVD, the rows of
+  the $U$ matrix can be used as low-dimensional, approximate representations of
+  the co-occurrence based original word vectors.
+\end{slide}
 
 \begin{slide}{References}
   \bibliographystyle{plainnat}
   \nobibliography{nlp_course.bib}
   \begin{footnotesize}
 
-    \bibentry{akbik2018contextual}.\medskip
+    \bibentry{sep-compositionality}.\medskip
+
+    \bibentry{navigli2009word}.\medskip
 
   \end{footnotesize}
 \end{slide}
