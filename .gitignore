@@ -2,6 +2,7 @@
 !*.tex
 !*.eps
 !*.bib
+!*.pdf
 !figures/
 !.gitignore
 !.latexmkrc
