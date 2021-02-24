@@ -1,11 +1,14 @@
 \documentclass[style=upen, size=14pt]{powerdot}
+\usepackage{natbib}
+\usepackage{bibentry}
 \definecolor{arany}{RGB}{255,242,0}
 \hypersetup{backref=page}
 \hypersetup{
-    colorlinks=true,
-    linkcolor=cyan,
-    filecolor=magenta,      
-    urlcolor=cyan}
+  colorlinks=true,
+  citecolor=cyan,
+  linkcolor=cyan,
+  filecolor=magenta,      
+  urlcolor=cyan}
 \usepackage{graphicx}
 \usepackage{amsmath}
 \DeclareMathOperator*{\argmax}{argmax}
@@ -111,6 +114,44 @@
   complexity).
 \end{slide}
 
+\begin{slide}[toc=]{Regular languages and FS acceptors}
+  Finite state acceptors are finite state machines that consume an input
+  sequence of characters and can "accept" or "reject" the input. They differ
+  from the simplest possible FSA-s by having
+  \begin{itemize}
+  \item an explicit \emph{\gold start state},
+  \item a set of designated \emph{\gold accepting states}, and
+  \item their transitions labeled with symbols from a finite alphabet, or with
+    the empty string.
+  \end{itemize}
+  An FS acceptor \emph{\gold accepts} an input iff it has a sequence of
+  transitions which starts from the start state, ends in an accepting state, and
+  the concatenation of the transition labels is the input in question.
+\end{slide}
+
+\begin{slide}[toc=]{Regular languages and FS acceptors cont.}
+  An acceptor for the words "car", "cars", "cat" and "cats".
+  \begin{center}
+    \includegraphics[width=0.6\textwidth]{figures/fsa1.eps}
+  \end{center}
+  Can be simplified to (figures from \cite{buutbogel2009fsmorph}):
+  \begin{center}
+    \includegraphics[width=0.6\textwidth]{figures/fsa2.eps}
+  \end{center}
+\end{slide}
+
+\begin{slide}[toc=]{Regular languages and FS acceptors cont.}
+  The connection between FS acceptors and regular languages/expressions is
+  established by Kleene's \emph{\gold Equivalence Theorem}:
+  \begin{itemize}
+  \item A language is regular iff there is an FSA acceptor that accepts exactly
+    its elements.\footnote{See, e.g.,
+      \href{https://bit.ly/2ZHlKWG}{https://bit.ly/2ZHlKWG} for a proof.}
+  \end{itemize}
+  This equivalence is important both theoretically and practically: there are
+  very efficient algorithms to simplify/minimize FS acceptors and also to decide
+  whether they accept a string or not.
+\end{slide}
 
 \begin{slide}[toc=]{Regular expressions: extensions}
   \emph{\gold Convenience extensions} not increasing expressive power just adding useful
@@ -432,6 +473,16 @@ analyzer.
 
   As a result, SentencePiece is one of the most popular solutions for generating
   the input for deeep end-to-end models from raw text.
+\end{slide}
+
+\begin{slide}{References}
+  \bibliographystyle{plainnat}
+  \nobibliography{nlp_course.bib}
+  \begin{footnotesize}
+
+    \bibentry{buutbogel2009fsmorph}.\medskip
+
+  \end{footnotesize}
 \end{slide}
 
 \end{document}
