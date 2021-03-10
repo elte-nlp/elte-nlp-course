@@ -210,13 +210,17 @@
    independently from others according to a categorical conditional distribution
    $P(w ~|~ c)$. If $\mathbf{x}$ is a BOW vector and $c$ is a class label this
    means
+   \begin{small}
    $$
    P(\mathbf{x}, c) = P(c) \prod_{i=1}^{|V|}P(w_i~\vert~c)^{x_i}.
    $$
-   Taking the logarithm of both sides for numerical stability reasons:
+   \end{small}
+     Taking the logarithm of both sides for numerical stability reasons:
+   \begin{small}
    $$
    \log P(\mathbf{x}, c) = \log P(c) + \sum_{i=1}^{|V|}x_i \log P(w_i~\vert~c).
    $$
+   \end{small}
  \end{slide}
 
  \begin{slide}[toc=]{Naive Bayes classifier with BOW cont.}
