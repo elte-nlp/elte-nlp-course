@@ -357,6 +357,24 @@
   type of attention mechanism.
 \end{slide}
 
+\begin{slide}[toc=CNNs]{Prologue: CNNs as sequence models}
+  Although our discussion has concentrated on RNNs, {\gold convolutional
+    networks} are rather competitive in many NLP tasks. They use 1d
+  convolutions:
+  \begin{center}
+    \includegraphics[width=0.8\textwidth]{figures/1d_conv.eps}
+  \end{center}
+\end{slide}
+
+\begin{slide}[toc=]{Prologue: CNNs as sequence models}
+  \dots and 1d (typically max- or average) pooling layers. In fact, the surprisingly
+  well performing {\gold fastText} classification model uses pooling
+  \emph{without} convolution:\footnote{Figure from \cite{joulin2016bag}.}
+  \begin{center}
+    \includegraphics[width=0.65\textwidth]{figures/fastext.eps}
+  \end{center}
+\end{slide}
+
 \begin{slide}{References}
   \bibliographystyle{plainnat}
   \nobibliography{nlp_course.bib}
@@ -368,15 +386,17 @@
     
     \bibentry{karpathy2015unreasonable}\medskip
 
-    \bibentry{luong2016neural}\medskip
+    \bibentry{joulin2016bag}\medskip
 
-    \bibentry{minaee2019deep}
+    \bibentry{luong2016neural}\medskip
 
   \end{footnotesize}
 \end{slide}
 
 \begin{slide}[toc=]{References cont.}
   \begin{footnotesize}
+
+    \bibentry{minaee2019deep}\medskip
     
     \bibentry{murphy2021pml}\medskip
     
