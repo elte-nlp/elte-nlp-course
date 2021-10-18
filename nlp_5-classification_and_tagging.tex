@@ -429,7 +429,7 @@
     dataset contains $N$ sequences then
     \begin{gather*} \pi_i = \frac{C(\mathrm{first~~element~~is~~}
         y_i)}{N}\\ a_{ij} = \frac{C(\langle y_i,y_j\rangle)}{\sum_kC(\langle
-        y_i,y_k\rangle)}\\ b_{ij} = \frac{C(y_i \mathrm{~~emits~~} x_j)}{\sum_kC(y_i)}
+        y_i,y_k\rangle)}\\ b_{ij} = \frac{C(y_i \mathrm{~~emits~~} x_j)}{C(y_i)}
     \end{gather*}
     Similarly to other counting based MLE methods, smoothing might be necessary
     in case of sparse data.
