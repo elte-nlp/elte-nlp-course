@@ -315,8 +315,9 @@
   configuration in which the buffer is empty and the created dependency graph is
   a well-formed dependency tree for the whole input:
   \begin{itemize}
-  \item it ends because at every step we decrease the total number of tokens in
-    the buffer and the stack;
+  \item it ends because at every step we decrease the ``collective token
+    distance from the dep. graph''
+    $2 \cdot \#(\mathrm{tokens~in~buffer}) + \#(\mathrm{tokens~in~stack})$;
   \item the buffer must be empty because otherwise the shift action would be
     available, and the stack can contain only the root element for similar
     reasons;
