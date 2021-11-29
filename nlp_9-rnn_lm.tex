@@ -307,10 +307,9 @@
 \begin{slide}[toc=]{Exposure bias: solutions}
   \begin{itemize}
   \item \emph{\gold Scheduled sampling}:\footnote{\cite{bengio2015scheduled}.}
-    randomly choose the at each time step between using the training data as
-    input or sampling from the model's prediction. The probability of choosing
-    from the training set starts from 1.0 and is slowly decreased during
-    training.
+    randomly choose at each time step between using the training data as input
+    or sampling from the model's prediction. The probability of choosing from
+    the training set starts from 1.0 and is slowly decreased during training.
   \item \emph{\gold Differentiable sampling}: In original scheduled sampling the
     error was not backpropagated through the used sampling operation, because it
     was undifferentiable. In response, alternative sampling solutions have been
