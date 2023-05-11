@@ -300,9 +300,52 @@ $(1-\sigma(o(w_2,1)))(1-\sigma(o(w_2,2)))\sigma(o(w_2,3))=
   m_{ij} = \max(0, PMI(w_i, w_j )- \log k),
   $$
   where $PMI(w_i,w_j)$ is the
-  $\frac{P(w_i, w_j)}{P(w_i)P(w_j)}\approx \frac{C(w_i, w_j)}{C(w_i)C(w_j)}$
+  $\log\left(\frac{P(w_i, w_j)}{P(w_i)P(w_j)}\right)$
   \emph{pointwise mutual information} of $w_i$ and $w_j$, and $k$ is the number
   of negative samples.
+\end{slide}
+
+\begin{slide}[toc=PMI]{Pointwise Mutual Information}
+
+  PMI measures how much more or less two words co-occur than if they occurred
+  independently. Lower and upper bounds are provided by the cases when $w_i$ and
+  $w_j$ never ($P(w_i, w_j) = 0$) or always ($P(w_i, w_j) = P(w_i)$ or
+  $P(w_i, w_j) = P(w_j)$) co-occur:
+
+\begin{small}
+  $$-\infty \leq PMI(w_i, w_j) \leq \min(-\log(p(w_i)), -\log(p(w_j))).$$
+\end{small}
+  
+The fraction in the PMI formula can be estimated as
+\begin{small}
+  $$\frac{P(w_i, w_j)}{P(w_i)P(w_j)} \approx \frac{C(w_i,
+    w_j)C(\mathrm{tokens~in~corpus})}{C(w_i)C(w_j)}.$$
+\end{small}
+
+\end{slide}
+
+\begin{slide}[toc=]{Pointwise Mutual Information cont.}
+  Word pairs with the three highest and lowest PMI score in a large Wikipedia
+  fragment:\footnote{Concretely, in the first 50 millions words of a Wikipedia
+    dump (from October 2015), based on a table in the
+    \href{https://en.wikipedia.org/wiki/Pointwise_mutual_information}{PMI
+      Wikipedia entry}.}
+  \begin{center}
+  \begin{small}
+      \begin{tabular}{llr}
+      \hline
+      word 1 & word 2 & PMI \\
+      \hline
+      puerto & rico & 10.03\\
+      hong & kong & 9.72\\
+      los & angeles & 9.56\\
+      $\cdots$ & $\cdots$ & $\cdots$\\
+        to & and & -3.08 \\
+      to & in & -3.12\\
+      of & and & -3.70\\
+    \end{tabular}
+  \end{small}
+    \end{center}
 \end{slide}
 
 \section{GloVe}
