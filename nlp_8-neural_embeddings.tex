@@ -307,19 +307,18 @@ $(1-\sigma(o(w_2,1)))(1-\sigma(o(w_2,2)))\sigma(o(w_2,3))=
 
 \begin{slide}[toc=PMI]{Pointwise Mutual Information}
 
-  PMI measures how much more or less two words co-occur than if they occurred
-  independently. Lower and upper bounds are provided by the cases when $w_i$ and
-  $w_j$ never ($P(w_i, w_j) = 0$) or always ($P(w_i, w_j) = P(w_i)$ or
-  $P(w_i, w_j) = P(w_j)$) co-occur:
+  PMI measures how much more or less words occure in each other's context than
+  if they occurred independently. Lower and upper bounds are provided by the
+  cases when $w_i$ and $w_j$ never ($P(w_i, w_j) = 0$) or always
+  ($P(w_i, w_j) = P(w_i)$ or $P(w_i, w_j) = P(w_j)$) co-occur:
 
 \begin{small}
   $$-\infty \leq PMI(w_i, w_j) \leq \min(-\log(p(w_i)), -\log(p(w_j))).$$
 \end{small}
   
-The fraction in the PMI formula can be estimated as
+The $\frac{P(w_i, w_j)}{P(w_i)P(w_j)}$ fraction in the PMI formula can be estimated as
 \begin{small}
-  $$\frac{P(w_i, w_j)}{P(w_i)P(w_j)} \approx \frac{C(w_i,
-    w_j)C(\mathrm{tokens~in~corpus})}{C(w_i)C(w_j)}.$$
+  $$\frac{C(w_i, w_j)C(\mathrm{\langle target~word, context~word\rangle~pairs~in~corpus})}{C(w_i)C(w_j)}.$$
 \end{small}
 
 \end{slide}
