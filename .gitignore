@@ -3,6 +3,8 @@
 !*.eps
 !*.bib
 !*.pdf
+!*.md
+!*.png
 !figures/
 !.gitignore
 !.latexmkrc
