@@ -290,6 +290,15 @@ $S_{scaled} = ||E_I \cdot W_I ||_{L2} \cdot ||E_T \cdot W_T||_{L2}^T \cdot exp(t
 
 $loss = 0.5 CE_{col}(S_{scaled}, L) + 0.5 CE_{row}(S_{scaled}, L)$
 
+## CLIP Encoder details
+
+- Modified global pooling: attentional pooling [@lee2019set]   
+Cross-attention where the image features are K, V and Q is defined by a learned constant vector (or a set of vectors).
+- ViT (Vision Transformer): Transformer that uses small patches (rectangular parts) of the image as tokens. (Covered in upcoming lectures.)
+- The text encoder is a GPT-2 style model.
+
+
+
 ## CLIP Training
 
 ![CLIP training by [@radford2021learning]](figures/clip_train.png){height=70%}
@@ -368,9 +377,106 @@ ImageBind use-case examples include:
 ![ImageBind re-utilizing text-to-image decoder as audio-to-image using the text-to-audio alignment [@girdhar2023imagebind]](figures/imagebind_decoder.png){width=90%}
 
 
-# Inverted methods
-## CoCa, UnCLIP
+# Decoding Methods
+
+## How to invert a joint embedding?
+
+- Iterative method
+- Prefix decoder
+- Zero-shot decoder
+- Contrastive Captioners (CoCa)
+- *Diffusion processes (detailed later in upcoming lectures)*
+
+Our examples focus on the visual-language modality pair (mainly captioning), but these methods are adaptable for other pairs as well.
+
+## Iterative decoder
+
+Simplest solution, no training involved.
+
+The method relies on a language model. During generation intermediate text outputs are iteratively encoded to the joint CLIP space, where the ones with the best similarities to the encoded image representation are selected.
+New candidate captions (or continuations) are then generated based on these.
+
+Problems: 
+
+- Inaccurate (no proper guiding)
+- Inefficient (scales with vocabulary size / caption length)
+
+## Prefix decoders
+
+Prefix-decoders use classical seq2seq decoding methods. By joining CLIP and a LM (typically GPT) the data needed for such a captioner decreases.
+
+A small mapping network is enough to make the CLIP image embedding space and the LM compatible. Fine-tuning the LM as well usually results in a slight performance increase.
+
+Let's imagine that the mapper is a small MLP or Transformer generating $[p_1^i, ..., p_k^i] = MAP(CLIP(x^i))$ prefix from input image $x^i$.
+
+## Mapping in Prefix decoders
+
+### Why do we need mapping?
+
+- Contrastive loss does not ensure the exact match of positive text-image pair embeddings.
+- Domain-dependent captioning could need a slightly different alignment/structure in the embedding space.
+
+
+## Training of Prefix decoders
+The model is finetuned on captioned images. Using the following loss function:
+
+$L = - \sum_{i=1}^N\sum_{j=1}^M log p_\theta(c_j^i | p_1^i, ..., p_k^i, c_1^i, ..., c_{j-1}^i)$
+
+Where $c_1^i, ..., c_{j-1}^i$ are the previous caption tokens, and $\theta$ represents the trainable params.
+
+![ClipCap architecture with frozen CLIP and GPT. [@mokady2021clipcap]](figures/clipcap.png){height=35%}
+
+## Zero-shot decoders
+
+While prefix decoders are effective and have acceptable performance, they still need domain-dependent (image, caption) training data. 
+
+Most popular solutions use text-only prefix-finetuned decoders with different tricks to replace CLIP space mapping:
+
+- Non-trained projection based on previously encoded text embeddings [@li2023decap]
+- Noise injection to train a robust decoder [@nukrai2022text]
+
+## DeCap
+![DeCap with a text-only finetuned decoder (reconstruction loss) and training-free projection [@li2023decap]](figures/DeCap.png){height=60%}
+
+## CapDec
+![CapDec with a noise-robust decoder (step b) is similar to a denoising VAE) [@nukrai2022text]](figures/CapDec.png){height=60%}
+
+## Contrastive Captioners (CoCa)
+
+Performance and efficiency concerns related prefix decoders:
+
+- Do we need a prefix when we have cross-attention?
+- Why not design the original model with decoding capabilities by training a decoder parallel to the contrastive training phase?
+- Encoders should be transfer-learned.
+
+## CoCa Architecture
+![From [@yu2022coca]](figures/coca_detailed.png){height=75%}
+
+## CoCa Training
+
+1. Initialize models from single-modality pre-trained models
+2. Change vision heads (different attentive pooling for captioning and contrastive learning)
+3. Split the text omitting cross-attention from the first half
+4. Perform simultaneous contrastive and reconstruction (captioning) training.   
+Image-only datasets could also be used in the reconstruction task if the vocabulary is exactly the set of possible classes.
+
+## CoCa Inference
+
+Contrastive Captioner models can be used with further fine-tuning or in a zero-shot manner as any combination of its building blocks.
+
+CoCa-s are not limited to the visual-language modalities.
+[CoCa use cases from [@yu2022coca](figures/coca_usecases.png){width=90%}
+
+
+# Summary
+
+## Summary
+
+Self-supervised learning (SSL) is a strong and cost-efficient training method that can capture the underlying latent distribution of a given dataset. A widespread neural formulation is via Contrastive Learning (defined by InfoNCE-like losses).
+
+Contrastive methods produce joint embeddings of multiple modalities, which create powerful semantic representations by cross-modality alignment.
+These methods are useful for retrieval and zero-shot classification tasks. Decoders (e.g.: captioners) can also be constructed to perform inverse tasks.
 
 
 # References {.allowframebreaks} 
-\small 
+\footnotesize 
