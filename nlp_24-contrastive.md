@@ -8,10 +8,12 @@ theme: Marburg
 colortheme: orchid
 fontsize: 14pt
 linkcolor: blue
-header-includes:
-  - \let\emphasized\emph
-  - \let\strong\textbf
-  - \renewcommand{\textbf}[1]{\textcolor{blue}{\strong{#1}}}
+header-includes: |
+  \let\emphasized\emph
+  \let\strong\textbf
+  \renewcommand{\textbf}[1]{\textcolor{blue}{\strong{#1}}}
+  `\setbeamertemplate{navigation symbols}{}`{=latex}
+  `\setbeamertemplate{footline}[page number]`{=latex}
 link-citations: true
 ---
 
