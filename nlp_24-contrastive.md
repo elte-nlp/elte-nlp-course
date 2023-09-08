@@ -220,11 +220,45 @@ $x_k = T(x_q) \rightarrow k = \acute{T}(q)$
 
 ## Invariant, Equivariant traits
 
-![Rotation equivariant and flip invariant contrastive training. From [@dangovski2021equivariant]](figures/equiv_inv.png){height=70%}
+![Rotation equivariant and flip invariant contrastive training. From [@dangovski2021equivariant]](figures/equiv_inv.png){width=90%}
 
 # Contrastive methods in NLP
-## BERT
-## ?
+## Word2Vec as Contrastive Learning
+
+![](figures/word2vec_contrastive.png){height=70%}
+
+## Word2Vec as Contrastive Learning
+
+Reformulating skipgram, to a multi-encoder joint embedding-type self-supervised problem.
+
+Instead of Softmax we use the Noise Contrastive Estimation loss (SGNS).
+
+Positive pairs maximize similarity (minimize energy according to EBM modeling).
+
+Negative pairs minimize similarity (maximize energy according to EBM modeling).
+
+## BERT Next Sentence Prediction
+
+![[From: Alammar, J (2018). The Illustrated Transformer](http://jalammar.github.io/illustrated-bert/)](figures/bert_nsp.png){height=70%}
+
+## Text-embedding models
+
+Pre-trained and fine-tuned LMs could be used to produce semantic embeddings of text.
+
+- This is good in terms of general language semantics only
+
+![](figures/embedding_finetune.png){height=50%}
+
+## Text-embedding models
+
+Contrastive fine-tuning on additional SSL tasks comes in handy in the case of domain-dependent embeddings or multi-task embedders.
+Such tasks could include [@su2022one]:
+
+- Retrieval, reranking (find/rank documents based on query)
+- Clustering (creating clusters in the embedding space)
+- Text classification
+- Summarization
+- Deduplication
 
 # Contrastive Visual-Language Methods
 ## CLIP
