@@ -260,12 +260,117 @@ Such tasks could include [@su2022one]:
 - Summarization
 - Deduplication
 
-# Contrastive Visual-Language Methods
+# Contrastive Multimodal Methods
 ## CLIP
+
+Contrastive Language-Image Pre-training [@radford2021learning]
+
+**Problem**: Visual classifiers are bound to a finite set of supervised labels.
+
+**Solution**: Use natural language to describe visual features and try to achieve zero/few-shot learning.
+
+**Data**: (image, text) pairs from web crawls (even filenames), including Instagram, Wikipedia-based Image Text, YFCC100M and MS-COCO.
+Open-source large-scale datasets include Laion5B [@schuhmann2022laion5b].
+
+## CLIP Structure
+
+Image embedding ($E_I$) ResNet or **ViT** $[n \times d_I]$
+
+Text embedding ($E_T$) Transformer LM $[n \times d_T]$
+
+Linear projections ($W_I$, $W_T$) $[d_I \times d_E]$, $[d_T \times d_E]$
+
+$t$ temperature parameter for classification
+
+$L$ labels of similarity (usually one-hot) $[n,]$
+
+$CE_{col | row}$ cross-entropy loss by columns (text) or rows (image) of the first argument.
+
+$S_{scaled} = ||E_I \cdot W_I ||_{L2} \cdot ||E_T \cdot W_T||_{L2}^T \cdot exp(t)$ $[n \times n]$
+
+$loss = 0.5 CE_{col}(S_{scaled}, L) + 0.5 CE_{row}(S_{scaled}, L)$
+
+## CLIP Training
+
+![CLIP training by [@radford2021learning]](figures/clip_train.png){height=70%}
+
+## CLIP Zero-shot inference
+
+![CLIP inference by [@radford2021learning]](figures/clip_infer.png){height=70%}
+
+## CLIP Zero-shot inference
+
+CLIP can classify images based on a corresponding text definition of classes.
+
+Selection is done by finding the most similar class definition.
+
+Other use-cases include:
+
+- Base-model for custom classifiers
+- Base-model for transfer-learning (outperforms previous ImageNet models)
+- Image retrieval (search-engine)
+- Condition vectors for image generation
+- Multi-modal semantics
+
+
 ## ImageBind
+
+CLIP demonstrated that additional generalization capabilities can originate from incorporating multiple modalities in one representation space.
+ImageBind [@girdhar2023imagebind] takes it one step further and joins $7$ modalities in one embedding space.
+
+![Modalities and data sources of ImageBind [@girdhar2023imagebind]](figures/imagebind_sources.png){height=40%}
+
+## Emergent Alignment
+::: columns
+
+:::: column
+
+Using InfoNCE again we can construct alignments of $(\mathcal{I}, \mathcal{M}_1)$ and $(\mathcal{I}, \mathcal{M}_2)$.
+It is observed that this alignment is transitive and results in a partial $(\mathcal{M}_1, \mathcal{M}_2)$ alignment.
+Encoders are now initialized from pre-trained models (e.g.: CLIP)
+
+::::
+
+:::: column
+
+![Natural and emergent alignment in ImageBind [@girdhar2023imagebind]](figures/imagebind_pentagram.png){height=40%}
+
+::::
+
+:::
+
+## ImageBind Results
+
+Multimodal contrastive embeddings outperform supervised modality converters in the absence of naturally present multimodal signals (e.g.: text-to-audio).
+
+ImageBind use-case examples include:
+- Cross-modal retrieval
+- Embedding-space arithmetics
+- Cross-modal decoder re-utilization
+
+## Cross-modal retrieval
+![ImageBind retrievals of non-trivial modality pairs [@girdhar2023imagebind]](figures/imagebind_crossmod_1.png){width=90% margin=auto}
+
+## Cross-modal retrieval
+
+![ImageBind retrievals of non-trivial modality pairs (with object detection in the visual modality) [@girdhar2023imagebind]](figures/imagebind_crossmod_2.png){width=90% align=center}
+
+## Cross-modal retrieval
+
+![ImageBind retrievals of non-trivial modality pairs [@girdhar2023imagebind]](figures/imagebind_crossmod_3.png){width=90%}
+
+## Embedding-space Arithmetics
+
+![ImageBind multi-modal embedding arithmetics [@girdhar2023imagebind]](figures/imagebind_vector.png){width=90%}
+
+## Cross-modal decoder re-utilization
+
+![ImageBind re-utilizing text-to-image decoder as audio-to-image using the text-to-audio alignment [@girdhar2023imagebind]](figures/imagebind_decoder.png){width=90%}
+
 
 # Inverted methods
 ## CoCa, UnCLIP
 
 
-# References {.allowframebreaks}
+# References {.allowframebreaks} 
+\small 
