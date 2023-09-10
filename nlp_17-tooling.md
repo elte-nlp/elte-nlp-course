@@ -165,7 +165,7 @@ Using pre-computed tables of $d(c_i, c_j)$, we can easily calculate the distance
 $d(e^i, e^q)=d(q(e^i), q(e^q))=\sqrt{\sum\limits{l \in L}d(q_l(e^i), q_l(e^q))}$
 \normalsize
 
-This results in an average search complexity of $N$ sums plus looking up the corresponding distances in the $L$ lookup tables. This boils down to $O(N + L\ log L \cdot log\ log N )$ if $N>>L$ according to [@jegou2010product].
+This results in an average search complexity of $N$ comparisons plus looking up and summing the corresponding distances in the $L$ lookup tables. This boils down to $O(N + L\ log L \cdot log\ log N )$ if $N>>L$ according to [@jegou2010product].
 
 ## Graph-based
 
