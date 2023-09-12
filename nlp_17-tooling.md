@@ -41,7 +41,6 @@ There are two ways of injecting external information into a transformer-like Lan
 
 Important! Using proper prompting techniques should be considered alongside augmentation. Transformer-based models' context windows have a fixed length, which is a limitation!
 
-# Retrieval Augmentation
 
 ## Retrieval
 
@@ -70,6 +69,8 @@ The most common methods for finding related information are:
 - Taxonomy-based search (lexicon, wiki, WordNet)
 - Direct access (links, documents)
 
+# Search methods
+
 ## Vector-similarity based search methods
 
 Let's assume that we have feature vectors ($e^i$) of certain documents ($i\in I$), where $||e^i||_2^2 = 1$.
@@ -90,6 +91,8 @@ Possible solutions:
 - Quantization
 - Tree structure
 - Graph-based
+
+The above principles are refined and often combined in practice.
 
 ## Hashing
 
@@ -162,495 +165,241 @@ Distances between quantized values of each segment can be calculated and stored 
 Using pre-computed tables of $d(c_i, c_j)$, we can easily calculate the distance of the full vectors $e^i$ and $e^q$. Which, in the Euclidean distance case equals:
 
 \small
-$d(e^i, e^q)=d(q(e^i), q(e^q))=\sqrt{\sum\limits{l \in L}d(q_l(e^i), q_l(e^q))}$
+$d(e^i, e^q)=d(q(e^i), q(e^q))=\sqrt{\sum\limits_{l \in L} d(q_l(e^i), q_l(e^q))}$
 \normalsize
 
 This results in an average search complexity of $N$ comparisons plus looking up and summing the corresponding distances in the $L$ lookup tables. This boils down to $O(N + L\ log L \cdot log\ log N )$ if $N>>L$ according to [@jegou2010product].
 
+## Product Quantization
+
+![Symmetric search using product-quantized approximate NN, from [@jegou2010product]](figures/prodquant_voronoi.png){height=60%}
+
 ## Graph-based
 
-Graph methods excel in 
+Graph methods build an index, that takes the form that suits neighbor-relationship representation. Such as Delaunay-graphs, relative nearest neighbor graphs, k-nearest neighbor graphs, minimal spanning trees, etc...
 
-![How graph-based ANN search works: [@wang2021comprehensive]](figures/approx_nn_example.png){height=30%}
 
-## Approximate nearest neighbor search
+![Example graphs to be used as a Graph index for ANN search, from [@wang2021comprehensive]](figures/graph_types.png){height=35%}
 
-Approximation is needed to successfully capture the graph construction and search problem effectively.
+## Graph-based
 
-## Classical search
+These graphs are hard to construct and store, thus approximation comes in during this building process. Usually, graphs with the "small world" property are built. These networks have the following properties given a regular network's edge rewiring probability $p$:
 
-## Embedding models
+- $L(p)$ shortest path between two vertices on average should be small.
+- $C(p)$ clustering value (ratio of edges originating from a vertex and the number of possible edges that could originate from a vertex in the case of a full graph.)
 
-## RAG
+## Small world
 
-## Entity-knowledge base
+![Graphs with different $p$ rewiring probabilities. [@watts1998collective]](figures/small_world_graphs.png){height=50%}
 
-## RAG pre-trained models (Retro-style)
+## Small world
 
-# Tooling
+![Small world networks are located in the high $C$ low $L$ period of randomity. [@watts1998collective]](figures/small_world.png){height=50%}
 
-## AutoGPT (Inner monologue)
+## Building graphs
 
-## API calling
+NSW (navigable small worlds) is used to create navigable small worlds. Here, vertices are iteratively inserted into the network. Connections are selected with a randomity level that creates a small world network while making sure that the whole network is traversable.
 
-## Tool-finetuned models
+HNSW (hierarchical NSW) takes one further step by organizing the nodes and links into layers. Those layers, that have a long link distance should be inserted into the top layer, while smaller distance (later inserted) nodes are placed in the lower layers.
 
-# References {.allowframebreaks} 
-\footnotesize
+## HNSW inference
 
-<!-- 
-# Self-supervised learning
-
-## Main objective
-Self-supervised learning (SSL) aims to obtain supervision from the data itself.
-
-"Predict everything from everything else."   
-*Yann Lecun*
-
-The data is partially known, and partially unknown.
-An underlying structure of the data is utilized (e.g. sequentiality in language modeling).
-
-## Main objective
-
-![From [@dawid2023introduction]](figures/ssl_meme.png){height=50%}
-
-Why not reinforcement learning?   
-*Trial-and-error is ineffective.*
-
-## Advantages
-
-Self-supervised learning:
-
-- Reduces the cost and complexity of labeling
-- Adds extra generalization capabilities to the system
-- Gives control to use the internal structure of the data
-- Is able to reconstruct latent variables governing an input set
-
-## Energy-based Modeling
-Energy-based modeling (EBM) is a unifying principle of most SSL methods.
-
-EBM solves the "averaging problem" of $L_2$-like losses.
-
-- Imagine a case with multiple viable outputs (such as neighboring words in a Skipgram model)
-- The loss will be minimal to the "average" of these individual outputs
-- We want a loss function that will be close to minimal for each and every viable solution
-
-## Energy function
-
-An energy function $F(x, y)$ over the $x \in X$ input space and $y \in Y$ output space is designed to solve this problem, where low energy means a viable solution.
-
-The inference of such a model could happen by: $\hat{y} = argmin_y F(x, y)$   
-*It is important to note that multiple $\hat{y}$-s could be viable!*
-
-The energy function $F(x, y)$ measures compatibility between $x$ and $y$.
-
-## EBM as a probabilistic model
-
-Using the Gibbs-Boltzmann distribution a generative (joint "distribution") EBM can be converted into a discriminative probabilistic model:
-
-$P(y|x) = \frac{e^{-\beta F(x, y)}}{\int_{\acute{y}} e^{-\beta F(x, \acute{y})}}$
-
-Here $\beta$ is a positive constant, and $\acute{y} \in Y$.
-
-## Multimodal EBM architectures I.
-
-EBMs are useful for creating joint multimodal representations.
-
-![Joint embedding architecture](figures/joint_embed.png){ height=50% }
-
-## Multimodal EBM architectures II.
-
-Latent variables could be used for generative processes (e.g. diffusion).
-$z$ is an independent "explanatory" variable of variation.
-Inference is possible with joint minimization with respect to $y$ and $z$.
-
-![Latent-variable generative architecture](figures/latent_embed.png){ width=70% }
-
-
-## Methods of learning in EBMs
-Main objective: Acquire low energy for viable $x$-$y$ pairs, while maintaining high energy for incompatible pairs.
-
-### Contrastive Methods
-- Push down $F(x, y)$ for each compatible pair (i.e. for *positive* elements of the dataset).
-- Push up $F(x, y')$ for every other possible combination (i.e. for *negative* examples).
-
-
-## Methods of learning in EBMs
-Main objective: Acquire low energy for viable $x$-$y$ pairs, while maintaining high energy for incompatible pairs.
-
-### Regularized Methods
-- Ensure that the extent of low-energy regions is limited or minimized.
-- Regularization, quantization, clustering, etc.
-
-## Methods of learning in EBMs
-Main objective: Acquire low energy for viable $x$-$y$ pairs, while maintaining high energy for incompatible pairs.
-
-![Visualization of learning methods from [@dawid2023introduction]](figures/ebm_method_compare.png){ width=100% }
-
-# Contrastive Learning & Variants
-
-## Learning method
-Contrastive learning generally includes the following main steps:
-
-1. Select a $q$ query and sample the positive key $k^+\sim p^+(.|q)$ and negative key $k^-\sim p^-(.|q)$ distributions.
-2. Apply model transformations that map $\mathcal{X} \rightarrow \mathcal{R}^N$ where $N$ is the resulting embedding dimension and $x \in \mathcal{X} | x = (q, k)$
-3. Scoring the positive and negative pairs using an energy-based or probabilistic approach.
-4. Parameter update
-
-
-## Scoring functions
-
-Scoring functions are the backbone of loss calculation and are determined by the desired embedding space's properties. They are simple functions such as:
-
-- L1 or L2 distance
-- Dot-product
-- Bi-linear models $S(q, k) = qAk$
-
-Distance and probabilistic loss functions are built on top of these measures.
-
-## Distance-based loss functions
-
-### Pair-loss
-$\mathcal{L}_{pair} = \begin{cases} ||q-k^+||_2^2\\ max(0, m-||q-k^-||_2^2) \end{cases}$
-
-where $m$ is a predefined margin around x.
-This minimizes positive distance and tries to push the negative distance over the margin.
-
-### Triplet-loss
-$\mathcal{L}_{triplet} = max(0, ||q-k^+||_2^2 - ||q-k^-||_2^2 + m)$
-This method enforces that the relative distance between the positive and negative examples.
-
-## Softmax-based probabilistic loss functions
-Motivation: Classify the pairs correctly.
-As a classification problem using scoring function $S(.,.)$ we can formulate this as:
-
-$p(k^+|q) = \frac{exp(S(q, k^+))}{\sum_k exp(S(q, k))}$
-
-Introducing negative sampling to the process we can avoid calculating the denominator for all $k$. Instead, we reformulate the calculation as a binary problem.
-
-## Noise Contrastive Estimation (NCE)
-The probability of a pair being positive (C=1), if we sample negative examples $M$ times more frequently from a uniform distribution, is:
-$p(C=1|q,k) = \frac{p(k^+|q)}{p(k^+|q)+m\cdot p(k^-|q)}$
-
-Thus the binary classification loss is (using negative loglikelihoods) over all possible pairs:
-\begin{align*}\begin{split} \mathcal{L}_{bin\_NCE} = - \mathbb{E}_{p^+}[logp(C=1|q,k)] \\ - \mathbb{E}_{p^-}[log(1-p(C=1|q,k))] \end{split}\end{align*}
-where $p^-(.|q)$ is the noise (negative sample) distribution and $p^+(.,.)$ is the positive distribution.
-
- 
-## InfoNCE 
-Instead of a binary classification, we could construct a set of several negative examples and a single positive example $K = \{k^+, k^-_1, k^-_2, ..., k^-_{M}\}$. Then the modified task would be to determine which element is the positive. This results in a softmax-like measure called InfoNCE:
-
-$\mathcal{L}_{InfoNCE} = -log\frac{exp(S(q, k^+))}{\sum_{i=0}^{M+1}exp(S(q, k[i]))}$
-
-$\mathcal{L}_{InfoNCE} = - S(q, k^+) + log\sum_{i=0}^{M+1}e^{S(q, k[i])}$
-
-## Why does it work?
-Training a model $f$ with an InfoNCE-like loss function inverts (decodes) the unknown generative process of data generation $g$.
-Thus the latent distribution behind our data is reconstructed and made accessible.
-
-![From [@zimmermann2022contrastive]](figures/latent_reconstruct.png)
-
-## Examples of sampling
-Data generation processes could include a wide range of self-supervised processes, such as:
-
-- Neighborhood information (spatial or temporal)
-- Masking
-- Various augmentations (visual or audio noise, etc)
-
-## Examples of sampling
-![Visual augmentations from [@le2020contrastive]](figures/sample_example.png){height=60%}
-
-## Examples of sampling
-![Data generation from temporal streams from [@le2020contrastive]](figures/sample_example_temporal.png){height=60%}
-
-## Adding label supervision
-
-Data generation is possible via incorporating label information as well (adding classical supervision). In this case the normal InfoNCE equation will change, as multiple positive examples are present. Resulting in a sum over InfoNCE terms. There are two variants present with the sum inside and outside of the log.
-
-$\mathcal{L}^{sup}_{in} = \sum\limits_{q \in J}-log\left(\frac{1}{|P(q)|}\sum\limits_{k^p\in P(q)}\frac{exp(S(q, k^p))}{\sum\limits_{i\in I}exp(S(q, k[i]))}\right)$
-
-where $J$ is the set of batch elements, $q$ is the selected query element, $I$ is the set of batch elements excluding $q$, $P(q)$ is the set of elements with the same label as $q$.
-
-## Adding label supervision
-
-$\mathcal{L}^{sup}_{out} = \sum\limits_{q \in J}\frac{-1}{|P(q)|}log\sum\limits_{k^p\in P(q)}\frac{exp(S(q, k^p))}{\sum\limits_{i\in I}exp(S(q, k[i]))}$
-
-where $J$ is the set of batch elements, $q$ is the selected query element, $I$ is the set of batch elements excluding $q$, $P(q)$ is the set of elements with the same label as $q$.
-
-![From [@khosla2020supervised]](figures/supcl.png){height=35%}
-
-## Invariant, Equivariant traits
-
-In standard contrastive learning, the positive pairs have a required invariancy. $S(q, k)$ should be high.
-Standard similarity metrics yield this behavior best when $q=k$.
-This behavior will negate the effect of certain differences between the two original inputs $x_q$ and $x_k$
-
-Let $T(.)$ transform represent this difference and $f(.)$ represent our function (or network) trained with CL.
-In the invariant optimal case:
-
-$x_k = T(x_q) \rightarrow k = q$
-
-## Invariant, Equivariant traits
-
-There are some cases where we would like to keep this transformation in the embedding space as well. Meaning that we would require that the same, or a similar transformation ($\acute{T}(.)$) be present in the embedding space as in the input space.
-
-$x_k = T(x_q) \rightarrow k = \acute{T}(q)$
-
-## Invariant, Equivariant traits
-
-![Rotation equivariant and flip invariant contrastive training. From [@dangovski2021equivariant]](figures/equiv_inv.png){width=90%}
-
-# Contrastive methods in NLP
-## Word2Vec as Contrastive Learning
-
-![](figures/word2vec_contrastive.png){height=70%}
-
-## Word2Vec as Contrastive Learning
-
-Reformulating skipgram, to a multi-encoder joint embedding-type self-supervised problem.
-
-Instead of Softmax we use the Noise Contrastive Estimation loss (SGNS).
-
-Positive pairs maximize similarity (minimize energy according to EBM modeling).
-
-Negative pairs minimize similarity (maximize energy according to EBM modeling).
-
-## BERT Next Sentence Prediction
-
-![[From: Alammar, J (2018). The Illustrated Transformer](http://jalammar.github.io/illustrated-bert/)](figures/bert_nsp.png){height=70%}
-
-## Text-embedding models
-
-Pre-trained and fine-tuned LMs could be used to produce semantic embeddings of text.
-
-- This is good in terms of general language semantics only
-
-![](figures/embedding_finetune.png){height=50%}
-
-## Text-embedding models
-
-Contrastive fine-tuning on additional SSL tasks comes in handy in the case of domain-dependent embeddings or multi-task embedders.
-Such tasks could include [@su2022one]:
-
-- Retrieval, reranking (find/rank documents based on query)
-- Clustering (creating clusters in the embedding space)
-- Text classification
-- Summarization
-- Deduplication
-
-# Contrastive Multimodal Methods
-## CLIP
-
-Contrastive Language-Image Pre-training [@radford2021learning]
-
-**Problem**: Visual classifiers are bound to a finite set of supervised labels.
-
-**Solution**: Use natural language to describe visual features and try to achieve zero/few-shot learning.
-
-**Data**: (image, text) pairs from web crawls (even filenames), including Instagram, Wikipedia-based Image Text, YFCC100M and MS-COCO.
-Open-source large-scale datasets include Laion5B [@schuhmann2022laion5b].
-
-## CLIP Structure
-
-Image embedding ($E_I$) ResNet or **ViT** $[n \times d_I]$
-
-Text embedding ($E_T$) Transformer LM $[n \times d_T]$
-
-Linear projections ($W_I$, $W_T$) $[d_I \times d_E]$, $[d_T \times d_E]$
-
-$t$ temperature parameter for classification
-
-$L$ labels of similarity (usually one-hot) $[n,]$
-
-$CE_{col | row}$ cross-entropy loss by columns (text) or rows (image) of the first argument.
-
-$S_{scaled} = ||E_I \cdot W_I ||_{L2} \cdot ||E_T \cdot W_T||_{L2}^T \cdot exp(t)$ $[n \times n]$
-
-$loss = 0.5 CE_{col}(S_{scaled}, L) + 0.5 CE_{row}(S_{scaled}, L)$
-
-## CLIP Encoder details
-
-- Modified global pooling: attentional pooling [@lee2019set]   
-Cross-attention where the image features are K, V and Q is defined by a learned constant vector (or a set of vectors).
-- ViT (Vision Transformer): Transformer that uses small patches (rectangular parts) of the image as tokens. (Covered in upcoming lectures.)
-- The text encoder is a GPT-2 style model.
-
-
-
-## CLIP Training
-
-![CLIP training by [@radford2021learning]](figures/clip_train.png){height=70%}
-
-## CLIP Zero-shot inference
-
-![CLIP inference by [@radford2021learning]](figures/clip_infer.png){height=70%}
-
-## CLIP Zero-shot inference
-
-CLIP can classify images based on a corresponding text definition of classes.
-
-Selection is done by finding the most similar class definition.
-
-Other use-cases include:
-
-- Base-model for custom classifiers
-- Base-model for transfer-learning (outperforms previous ImageNet models)
-- Image retrieval (search-engine)
-- Condition vectors for image generation
-- Multi-modal semantics
-
-
-## ImageBind
-
-CLIP demonstrated that additional generalization capabilities can originate from incorporating multiple modalities in one representation space.
-ImageBind [@girdhar2023imagebind] takes it one step further and joins $7$ modalities in one embedding space.
-
-![Modalities and data sources of ImageBind [@girdhar2023imagebind]](figures/imagebind_sources.png){height=40%}
-
-## Emergent Alignment
 ::: columns
 
 :::: column
 
-Using InfoNCE again we can construct alignments of $(\mathcal{I}, \mathcal{M}_1)$ and $(\mathcal{I}, \mathcal{M}_2)$.
-It is observed that this alignment is transitive and results in a partial $(\mathcal{M}_1, \mathcal{M}_2)$ alignment.
-Encoders are now initialized from pre-trained models (e.g.: CLIP)
+A greedy search algorithm is initialized from one of the top nodes. It then looks for a local minimum (in the layer), and upon finding it switches to a lower layer, until the closest point to the query is found. The algorithm's average complexity is $O(log(N))$.
 
 ::::
 
 :::: column
 
-![Natural and emergent alignment in ImageBind [@girdhar2023imagebind]](figures/imagebind_pentagram.png){height=40%}
+![HNSW inference from [@malkov2018efficient]](figures/hnsw_infer.png){height=70%}
 
 ::::
 
 :::
 
-## ImageBind Results
+## Graph inference
 
-Multimodal contrastive embeddings outperform supervised modality converters in the absence of naturally present multimodal signals (e.g.: text-to-audio).
+In general other graph-based solutions work according to similar principles. They start from a seed vertex, then travel through the graph taking steps in the direction of a lower distance from the query.
 
-ImageBind use-case examples include:
-- Cross-modal retrieval
-- Embedding-space arithmetics
-- Cross-modal decoder re-utilization
+![How graph-based ANN search works: [@wang2021comprehensive]](figures/approx_nn_example.png){height=30%}
 
-## Cross-modal retrieval
-![ImageBind retrievals of non-trivial modality pairs [@girdhar2023imagebind]](figures/imagebind_crossmod_1.png){width=90% margin=auto}
+# Retrieval Augmentation
 
-## Cross-modal retrieval
+## Embedding models
 
-![ImageBind retrievals of non-trivial modality pairs (with object detection in the visual modality) [@girdhar2023imagebind]](figures/imagebind_crossmod_2.png){width=90% align=center}
+::: columns
 
-## Cross-modal retrieval
+:::: column
 
-![ImageBind retrievals of non-trivial modality pairs [@girdhar2023imagebind]](figures/imagebind_crossmod_3.png){width=90%}
+Semantic vectors are used to retrieve documents. These documents are usually split into shorter chunks. Semantic vectors could come from TF-IDF, Word2Vec embeddings, Masked- or Causal-LM embeddings. Multimodal options are also possible.
 
-## Embedding-space Arithmetics
+::::
 
-![ImageBind multi-modal embedding arithmetics [@girdhar2023imagebind]](figures/imagebind_vector.png){width=90%}
+:::: column
 
-## Cross-modal decoder re-utilization
+![Example architecture of a GPT-style embedding model.](figures/text_embedder_gpt.png){height=70%}
 
-![ImageBind re-utilizing text-to-image decoder as audio-to-image using the text-to-audio alignment [@girdhar2023imagebind]](figures/imagebind_decoder.png){width=90%}
+::::
 
+:::
 
-# Decoding Methods
+## Specialized embedding models
 
-## How to invert a joint embedding?
+Language model pretraining might not produce an embedding space with the required properties.
 
-- Iterative method
-- Prefix decoder
-- Zero-shot decoder
-- Contrastive Captioners (CoCa)
-- *Diffusion processes (detailed later in upcoming lectures)*
+Some additional goals could help condition it:
 
-Our examples focus on the visual-language modality pair (mainly captioning), but these methods are adaptable for other pairs as well.
+- Supervised semantic similarity
+- Classification
+- Clustering
+- Supervised retrieval or reranking
+- Q&A mapping
+- Longer (sentence, paragraph) text representations 
 
-## Iterative decoder
+## Sentence embeddings
 
-Simplest solution, no training involved.
+Sentence-level finetuning is needed for the correct semantic representation of longer text.
 
-The method relies on a language model. During generation intermediate text outputs are iteratively encoded to the joint CLIP space, where the ones with the best similarities to the encoded image representation are selected.
-New candidate captions (or continuations) are then generated based on these.
+![Sentence-BERT siamese network during supervised training and inference. [@reimers2019sentence]](figures/sentence_embedding.png){height=80%}
 
-Problems: 
+## Sentence embeddings
 
-- Inaccurate (no proper guiding)
-- Inefficient (scales with vocabulary size / caption length)
+Sentence-level supervised dataset examples include: sentence similarity datasets, sentiment analysis datasets, natural language inference datasets (premise and either an entailment, a contradiction, or a neutral pair), etc.
 
-## Prefix decoders
+![Using NLI datasets as similar-dissimilar (positive-negative) examples for sentence embedding improvement. [@gao2021simcse]](figures/supervised_sent_embed.png){height=35%}
 
-Prefix-decoders use classical seq2seq decoding methods. By joining CLIP and a LM (typically GPT) the data needed for such a captioner decreases.
+## Instruct-embeddings
 
-A small mapping network is enough to make the CLIP image embedding space and the LM compatible. Fine-tuning the LM as well usually results in a slight performance increase.
+Instruction embeddings emerge as multi-task trained embeddings, where the executed task depends on the natural language instruction given to the model. Instruction training improves domain adaptability as well.
 
-Let's imagine that the mapper is a small MLP or Transformer generating $[p_1^i, ..., p_k^i] = MAP(CLIP(x^i))$ prefix from input image $x^i$.
+## Instruct-embedings
 
-## Mapping in Prefix decoders
-
-### Why do we need mapping?
-
-- Contrastive loss does not ensure the exact match of positive text-image pair embeddings.
-- Domain-dependent captioning could need a slightly different alignment/structure in the embedding space.
+![InstructOR [@su2022one]](figures/instruct_embed.png){height=75%}
 
 
-## Training of Prefix decoders
-The model is finetuned on captioned images. Using the following loss function:
+## Retrieval Augmented Generation
 
-$L = - \sum_{i=1}^N\sum_{j=1}^M log p_\theta(c_j^i | p_1^i, ..., p_k^i, c_1^i, ..., c_{j-1}^i)$
+RAG usually consists of the following steps:
 
-Where $c_1^i, ..., c_{j-1}^i$ are the previous caption tokens, and $\theta$ represents the trainable params.
+- **Question-forming**: Reformulating user query as a standalone query (accounting for history), list of keywords, etc.
+- **Retrieval**: Using an embedding and a vector storage system or search engines, etc. to retrieve useful passages.
+- **Document aggregation**: *Stuff* all documents together or *Map* a transform (for example summarization).
+- **Answer-forming**: The query and the context are fed to the LM that produces an answer.
 
-![ClipCap architecture with frozen CLIP and GPT. [@mokady2021clipcap]](figures/clipcap.png){height=35%}
+## Hypothetical document embedding
 
-## Zero-shot decoders
+Hypothetical document embedding [@gao2022precise] helps with generating better queries for embedding vector-based retrieval systems. The HyDE question-forming step is replaced with a generative step that produces a "fake" example answer to the question and uses that as a query in the database.
 
-While prefix decoders are effective and have acceptable performance, they still need domain-dependent (image, caption) training data. 
+![From [@gao2022precise]](figures/hyde.png){height=30%}
 
-Most popular solutions use text-only prefix-finetuned decoders with different tricks to replace CLIP space mapping:
+## Entity memory
 
-- Non-trained projection based on previously encoded text embeddings [@li2023decap]
-- Noise injection to train a robust decoder [@nukrai2022text]
+Another possible, more complex use-case is when the LLM has the ability to modify a database as well. In this database a list of entities and related knowledge is stored. The model is iteratively prompted to update this database, then it can retrieve from the entity information the database stores.
 
-## DeCap
-![DeCap with a text-only finetuned decoder (reconstruction loss) and training-free projection [@li2023decap]](figures/DeCap.png){height=60%}
+![Entity memory-based processing](figures/entity_memory.png){height=30%}
 
-## CapDec
-![CapDec with a noise-robust decoder (step b) is similar to a denoising VAE) [@nukrai2022text]](figures/CapDec.png){height=60%}
+## RAG pre-trained models
 
-## Contrastive Captioners (CoCa)
+Transferring information decoded to text is actually inefficient.
 
-Performance and efficiency concerns related prefix decoders:
+Retrieval augmented pre-training is possible for models, where either pre-embedded vectors are appended to the encoded input, or the information is provided via cross-attention-like mechanisms.
 
-- Do we need a prefix when we have cross-attention?
-- Why not design the original model with decoding capabilities by training a decoder parallel to the contrastive training phase?
-- Encoders should be transfer-learned.
+## REALM
 
-## CoCa Architecture
-![From [@yu2022coca]](figures/coca_detailed.png){height=75%}
+Retrieaval Augmented Language Model Pretraining [@guu2020retrieval] uses a neural retriever composed of BERT-like embedding models. These models are part of the trained network. The retriever concatenates the retrieved document embeddings with the query, during MLM training.
 
-## CoCa Training
+## REALM
 
-1. Initialize models from single-modality pre-trained models
-2. Change vision heads (different attentive pooling for captioning and contrastive learning)
-3. Split the text omitting cross-attention from the first half
-4. Perform simultaneous contrastive and reconstruction (captioning) training.   
-Image-only datasets could also be used in the reconstruction task if the vocabulary is exactly the set of possible classes.
+![REALM pretraining [@guu2020retrieval]](figures/realm.png){height=80%}
 
-## CoCa Inference
+## RETRO
 
-Contrastive Captioner models can be used with further fine-tuning or in a zero-shot manner as any combination of its building blocks.
+Retrieval-Enhanced Transformer [@borgeaud2022improving] introduces a technique where the relevant context information is processed by cross-attention.
+The retrieval is performed by frozen BERT embeddings. The retrieved chunks are then modified based-on the input information using cross attention in the encoder as well.
 
-CoCa-s are not limited to the visual-language modalities.
-[CoCa use cases from [@yu2022coca](figures/coca_usecases.png){width=90%}
+In the decoder cross-attention then incorporates the modified retrieved information into the input.
+
+## RETRO
+
+![RETRO architecture from [@borgeaud2022improving]](figures/retro_arch.png){height=70%}
+
+## RETRO Chunks
+
+The input is sliced up into chunks, which retrieve information separately. Previous chunks (and related information) are processed causally.
+
+The whole model is differentiable, gradients can flow through the network.
+
+During training the retrieved information is pre-computed.
+
+## RETRO Chunks
+
+![Chunked cross-attention from [@borgeaud2022improving]](figures/chunked_cross_attn.png){height=70%}
+
+# Tooling
+
+## API calls
+
+Text-based API-s are easy to call using the API's input and output definition. Most LLMs are fine-tuned to handle JSON or XML formats well.
+
+Some examples of such API-s include:
+
+- Search-engines
+- Web-scraping
+- Real-time data streams
+- Executables, commands (e.g.: calculator)
+- Code interpreters, simulators
+- Other LLM instances
+
+## AutoGPT - Self-monologue
+
+AutoGPT is capable of higher-order planning by applying multiple turns of generation in a Chain of Thought and Reflexion type prompting.
+AutoGPT applies $4+1$ steps of CoT-like process to control actions:
+
+- Thoughts: Interpretation of the user input with respect to the goals.
+- Reasoning: CoT about what to do for this input.
+- Plan: Planned actions to execute.
+- *Action*: Actions with inputs generated by AutoGPT.
+- Criticism: Reflexion on action results.
+
+## AutoGPT - Self-monologue
+
+During the planning and action phase additional expert LLMs, and external tools could be called.
+AutoGPT systems are usually prompted with a set of goals only, the rest is figured out by the model.   
+Example workflow (sending an email):
+
+\footnotesize
+**Thoughts**: Contact Natabara at natabara@inf.elte.hu, Send a polite email indicating that he should finalize the NLP slides.   
+**Reasoning**: The goals are clear. I need to send an email to Natabara at natabara@inf.elte.hu, politely asking him to finalize the NLP slides and indicating that I am an AI assistant.   
+**Plan**: Use the send_email action.   
+{ "action": "send_email", "action_input": \<JSON\>}   
+**Observation** (Criticism): Mail sent.
 
 
-# Summary
+## AutoGPT - Self-monologue
 
-## Summary
+![A single step of AutoGPT [@yang2023autogpt]](figures/AutoGPT.png){height=70%}
 
-Self-supervised learning (SSL) is a strong and cost-efficient training method that can capture the underlying latent distribution of a given dataset. A widespread neural formulation is via Contrastive Learning (defined by InfoNCE-like losses).
+## Tool-finetuned models
 
-Contrastive methods produce joint embeddings of multiple modalities, which create powerful semantic representations by cross-modality alignment.
-These methods are useful for retrieval and zero-shot classification tasks. Decoders (e.g.: captioners) can also be constructed to perform inverse tasks.  -->
+Fine-tuning a model for tool selection is hard. Bootstrapping could be a solution, where a graph of API calls is constructed using a multitude of LLM calls. These successive calls are then ranked by success rate, and the best few passing solutions are selected to be included in the dataset. Such fine-tuning can enhance the tool utilization of language models.
+
+![Dataset construction pipeline for tool-finetuned models [@qin2023toolllm]](figures/tool_llm.png){height=30%}
+
+# Summary 
+
+## Summary I.
+
+Augmented language models use external information sources to enhance their capabilities. One significant group of these sources are vectorized document databases. Embedding models are utilized to retrieve related information via approximate NN search algorithms.
+Other tools include web API-s, or even code interpreters. Models applying a self-monologue process are capable of fulfilling goals by planning and executing successive actions.
+
+## Summary II.
+
+During retrieval augmented generation the retrieved documents are concatenated or summarized, then fed to the model to generate answers in a second LLM step.
+
+Fine-tuning models to use retrieved information or external tools is possible and increases performance.
+
+# References {.allowframebreaks} 
+\footnotesize
