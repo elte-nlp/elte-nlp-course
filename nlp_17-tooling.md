@@ -109,7 +109,7 @@ For more advanced solutions refer to [@wang2021comprehensive]!
 
 ## Tree-based solutions
 
-In tree structures, the branching factor $b$ reduces the search complexity to $log_b(N)$. 
+In tree structures, the branching factor $b$ reduces the search complexity to $\log_b(N)$. 
 
 In case of a binary KD-tree $b=2$ a simple solution for building such a tree is just drawing a hyper-plane at the median orthogonal to the highest-variance data dimension. Then each half is split using the same principle. This continues until each node contains a single element only.
 
@@ -138,9 +138,9 @@ First, the node (or cell) containing the query is selected, then the closest nei
 
 Given a codebook defined by centroids $\mathcal{C} = {c_i | i\in I}$ where $I = {0, 1, ... m-1}$ is finite.
 
-We map $q(.)$ each real vector to the closest centroids. The set of real vectors mapped to $c_i$ is the Voronoi cell of it denoted by $V_i$.
+We map $q(\cdot)$ each real vector to the closest centroids. The set of real vectors mapped to $c_i$ is the Voronoi cell of it denoted by $V_i$.
 
-Meaning that $q(x) = \text{arg}\min\limits_{c_i \in C}d(x, c_i)$, where $d(.)$ is the distance function.
+Meaning that $q(x) = \text{arg}\min\limits_{c_i \in C}d(x, c_i)$, where $d(\cdot)$ is the distance function.
 
 $c_i = E_x[x|i] = \int_{V_i}p(x)\cdot x dx$, then should be defined as the center of the Voronoi cell.
 
@@ -156,7 +156,7 @@ Solution: We should factor the vector into multiple segments (similar to MHA).
 
 In case of a vector split into $L$ segments, each can be quantized by its specific quantizer. That means $\mathcal{C} = \mathcal{C}_1 \times \mathcal{C}_2 \times ... \times \mathcal{C}_L$ and $I = I_1 \times I_2 \times ... \times I_L$ should be decomposed into the Cartesian-product of the sub-quantizers and sub-indices.
 
-In this case the complexity is reduced to $O(dm^{\frac{1}{L}})$ according to [@jegou2010product].
+In this case the complexity is reduced to $O(dm^{\frac{1}{L}})$ according to @jegou2010product.
 
 Distances between quantized values of each segment can be calculated and stored for the search step.
 
@@ -165,10 +165,10 @@ Distances between quantized values of each segment can be calculated and stored 
 Using pre-computed tables of $d(c_i, c_j)$, we can easily calculate the distance of the full vectors $e^i$ and $e^q$. Which, in the Euclidean distance case equals:
 
 \small
-$d(e^i, e^q)=d(q(e^i), q(e^q))=\sqrt{\sum\limits_{l \in L} d(q_l(e^i), q_l(e^q))}$
+$d(e^i, e^q)=d(q(e^i), q(e^q))=\sqrt{\sum\limits_{l \in L} d(q_l(e^i), q_l(e^q))^2}$
 \normalsize
 
-This results in an average search complexity of $N$ comparisons plus looking up and summing the corresponding distances in the $L$ lookup tables. This boils down to $O(N + L\ log L \cdot log\ log N )$ if $N>>L$ according to [@jegou2010product].
+This results in an average search complexity of $N$ comparisons plus looking up and summing the corresponding distances in the $L$ lookup tables. This boils down to $O(N + L\ \log L \cdot \log\ \log N )$ if $N>>L$ according to @jegou2010product.
 
 ## Product Quantization
 
@@ -186,7 +186,7 @@ Graph methods build an index, that takes the form that suits neighbor-relationsh
 These graphs are hard to construct and store, thus approximation comes in during this building process. Usually, graphs with the "small world" property are built. These networks have the following properties given a regular network's edge rewiring probability $p$:
 
 - $L(p)$ shortest path between two vertices on average should be small.
-- $C(p)$ clustering value (ratio of edges originating from a vertex and the number of possible edges that could originate from a vertex in the case of a full graph.)
+- $C(p)$ clustering coefficient (ratio of the fully connected triples (triangles) and all triples in the graph), should be large.
 
 ## Small world
 
@@ -194,7 +194,7 @@ These graphs are hard to construct and store, thus approximation comes in during
 
 ## Small world
 
-![Small world networks are located in the high $C$ low $L$ period of randomity. [@watts1998collective]](figures/small_world.png){height=50%}
+![Small world networks are located in the high $C$ low $L$ interval of randomity. [@watts1998collective]](figures/small_world.png){height=50%}
 
 ## Building graphs
 
@@ -208,7 +208,7 @@ HNSW (hierarchical NSW) takes one further step by organizing the nodes and links
 
 :::: column
 
-A greedy search algorithm is initialized from one of the top nodes. It then looks for a local minimum (in the layer), and upon finding it switches to a lower layer, until the closest point to the query is found. The algorithm's average complexity is $O(log(N))$.
+A greedy search algorithm is initialized from one of the top nodes. It then looks for a local minimum (in the layer), and upon finding it switches to a lower layer, until the closest point to the query is found. The algorithm's average complexity is $O(\log(N))$.
 
 ::::
 

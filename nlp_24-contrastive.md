@@ -209,14 +209,14 @@ In standard contrastive learning, the positive pairs have a required invariancy.
 Standard similarity metrics yield this behavior best when $q=k$.
 This behavior will negate the effect of certain differences between the two original inputs $x_q$ and $x_k$
 
-Let $T(.)$ transform represent this difference and $f(.)$ represent our function (or network) trained with CL.
+Let $T(\cdot)$ transform represent this difference and $f(\cdot)$ represent our function (or network) trained with CL.
 In the invariant optimal case:
 
 $x_k = T(x_q) \rightarrow k = q$
 
 ## Invariant, Equivariant traits
 
-There are some cases where we would like to keep this transformation in the embedding space as well. Meaning that we would require that the same, or a similar transformation ($\acute{T}(.)$) be present in the embedding space as in the input space.
+There are some cases where we would like to keep this transformation in the embedding space as well. Meaning that we would require that the same, or a similar transformation ($\acute{T}(\cdot)$) be present in the embedding space as in the input space.
 
 $x_k = T(x_q) \rightarrow k = \acute{T}(q)$
 
