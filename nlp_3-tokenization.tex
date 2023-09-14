@@ -344,54 +344,58 @@ analyzer.
 
 \begin{slide}[toc=Subword tokenization]{Tokenization vs subword tokenization}
   Classical tokenization aims at segmenting the input character stream precisely
-  into linguistically motivated units: words and punctuation. This type of
-  tokenization
+  into linguistically motivated units: words and punctuation.
+
+  This type of
+  tokenization is useful for human linguistic analysis, but not for building
+  large language models: it
 
   \begin{itemize}
   \item is rather challenging, because there is a wide variety of writing systems
     and languages that all require (sometimes radically) different rules/models;
-  \item does not necessarily find the most important boundaries, because in many
-    cases \emph{subwords}, i.e. smaller than word units are more useful for
-    downstream tasks;
   \item generates huge vocabularies on larger corpora, and still leads to
     problems with out of vocabulary words.
   \end{itemize}
 \end{slide}
 
 \begin{slide}[toc=]{Tokenization vs subword tokenization cont.}
-  A recently developed alternative is \emph{subword tokenization}:
-  \begin{itemize}
-  \item requires no or only very minimal pretokenization;
-  \item statistical and data-driven: learns the segmentation model from a corpus;
-  \item segments input into frequently occurring word and subword units;
-  \item vocabulary size can be freely chosen, and every token is guaranteed to
-    be in the vocabulary;
-  \item writing and language-agnostic;
-  \item the subword segments are in general informative, boundaries are
-    frequently close to morphological ones.
-  \end{itemize}
-\end{slide}
+  A recently developed alternative is \emph{subword tokenization}.
 
-\begin{slide}[toc=]{Tokenization vs subword tokenization cont.}
   A large number of modern deep, end-to-end NLP architectures use
   subword-tokenization instead of classical tokenization for segmenting the
   input.\bigskip
 
   The main advantages are
   \begin{itemize}
-  \item not requiring manual feature engineering or rule writing,
-  \item freely choosable vocabulary size,
-  \item no out-of-vocabulary words,
-  \item providing access to the inner structure of words in many cases: if a
-    word is rare or doesn't occur in the training corpus then it is decomposed
-    into smaller, informative units.
+  \item requires no or only very minimal pretokenization;
+  \item statistical and data-driven: learns the segmentation model from a corpus
+        (no manual rule writing);
+  \item vocabulary size can be freely chosen; it will contain the most frequent
+        word and subword units;
+  \item writing and language-agnostic;
+  \end{itemize}
+\end{slide}
+
+\begin{slide}[toc=]{Tokenization vs subword tokenization cont.}
+  What this means for the text:
+  \begin{itemize}
+  \item the input text will be segmented into the most frequent words and
+        subwords
+  \item quality of the segmentation depends on the vocabulary size,
+      \begin{itemize}
+      \item for a single language, 30,000 types is enough
+      \item a regular vocabulary is in the hundred thousands or even millions
+      \end{itemize}
+  \item \textit{no out-of-vocabulary words} (with the right settings!),
+  \item the subword segments are in usually informative, boundaries are
+        frequently close to morphological ones.
   \end{itemize}
 \end{slide}
 
 \begin{slide}[toc=Byte Pair Encoding]{Byte Pair Encoding (BPE)}
   BPE was originally a simple compression technique for byte sequences, but can
   be generalized to any sequence consisting of symbols from a finite alphabet.
-  To generate an encoded/compressend version of a sequence over an alphabet,
+  To generate an encoded / compressed version of a sequence over an alphabet,
   \begin{enumerate}
   \item initialize the symbol list with the symbols in the alphabet, and
   \item repeatedly count all symbol pairs and replace each occurrence of the
@@ -443,7 +447,7 @@ analyzer.
   \begin{itemize}
   \item WordPiece works with word-start symbols instead of word-end symbols which is
     traditional for BPE;
-  \item merges are peformed depending on which resulting merged symbol could be
+  \item merges are performed depending on which resulting merged symbol could be
     used for a statistical language model with the lowest perplexity (maximal
     likelihood) on the training corpus. (These concepts will be explained in
     detail in a later lecture.)
@@ -453,9 +457,9 @@ analyzer.
 \begin{slide}[toc=Subword sampling]{Subword sampling}
   The default subword tokenization strategy of BPE and WordPiece
   deterministically produces the greedily matching decomposition of words, even
-  if there are informative alternative segmentations in terms of the vocabulary,
-  e.g.,
+  if there are informative alternative segmentations:
   \begin{center}
+    \emph{unrelated} = \emph{unrelate} + \emph{d} \\
     \emph{unrelated} = \emph{un} + \emph{related}
   \end{center}
   To solve this problem, solutions were developed to \emph{probabilistically
@@ -478,11 +482,13 @@ analyzer.
 \begin{slide}{References}
   \bibliographystyle{plainnat}
   \nobibliography{nlp_course.bib}
-  \begin{footnotesize}
-
-    \bibentry{buutbogel2009fsmorph}.\medskip
-
-  \end{footnotesize}
+  \begin{scriptsize}
+    \bibentry{buutbogel2009fsmorph} \\ \medskip
+    \bibentry{heinzerling2017bpemb} \\ \medskip
+    \bibentry{jurafsky2019speech} \\ \medskip
+    \bibentry{kudo-2018-subword} \\ \medskip
+    \bibentry{provilkov-etal-2020-bpe} \\
+  \end{scriptsize}
 \end{slide}
 
 \end{document}
