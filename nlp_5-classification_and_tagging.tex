@@ -512,14 +512,15 @@
     \begin{center}
       \includegraphics[width=0.8\textwidth]{figures/viterbi-5.eps}
       
-      \footnotesize(Figure from the \href{https://cs.rice.edu/~ogilvie/comp571/viterbi-algorithm/}{Species and Gene Evolution blog}.)
+      \footnotesize(Figure from the \href{https://cs.rice.edu/~ogilvie/comp571/viterbi-algorithm/}{Species and Gene Evolution} blog.)
     \end{center}
   \end{slide}
     
   \begin{slide}[toc=]{The Viterbi algorithm cont.}
     Viterbi is a \emph{dynamic programming} algorithm that, in stark contrast
     to an exhaustive search, has a time complexity of
-    $\mathcal O(\mathrm{length}(\mathbf{x})|Y|^2)$.
+    $\mathcal O(\mathrm{length}(\mathbf{x})|Y|^2)$.\bigskip
+
     The table that tracks the partial $\mathbf{y}_i^t$ sequence elements and
     their probabilities only takes up
     $\mathcal{O}(\mathrm{length}(\mathbf{x})|Y|)$ space.\bigskip
@@ -556,21 +557,37 @@
   \begin{slide}[toc=MEMMs]{Maximum entropy Markov models (MEMMs)}
     According to the previous graphical model's assumptions,
     \begin{small}
-    $$
-    P(\mathbf{Y}~|~\mathbf{X}) = P(Y_1~|~ \mathbf{X})\prod_{m=2}^n P(Y_m|Y_{m-1}, \mathbf{X}).
-    $$
-  \end{small}%
-  MEMMs, in turn, model the individual $P(Y_m|Y_{m-1}, \mathbf{X})$
-  probabilities analogously to logistic regression as
+      $$
+      P(\mathbf{Y}~|~\mathbf{X}) = P(Y_1~|~ \mathbf{X})\prod_{m=2}^n P(Y_m|Y_{m-1}, \mathbf{X}).
+      $$
+    \end{small}%
+    MEMMs further constrain this generic model by making $y_m$ conditionally
+    independent of all observations other than $x_m$:
     \begin{small}
-    $$
-    P(Y_m = y_i|Y_{m-1}=y_k,\mathbf{x})=\frac{\exp (\mathbf{w}_i \cdot \mathbf{f}(y_k,
-      \mathbf{x}, m))}{\sum_{j=1}^{|Y|}\exp (\mathbf{w}_j \cdot \mathbf{f}(y_k,
-      \mathbf{x}, m))},
-    $$
-    where $\mathbf{f}(\cdot)$ is a feature vector producing function, and each
-    $\mathbf{w}_i$ is a weight vector for the $y_i\in Y$ label.
+      $$
+      P(\mathbf{Y}~|~\mathbf{X}) = P(Y_1~|~X_1)\prod_{m=2}^n P(Y_m|Y_{m-1},X_m).
+      $$
   \end{small}
+  \end{slide}
+
+  \begin{slide}[toc=MEMMs]{Maximum entropy Markov models (MEMMs)}
+    The individual $P(Y_m|Y_{m-1},X_m)$ probabilities are modelled
+    analogously to \emph{multinomial logistic regression} with the
+    softmax function:
+    \begin{small}
+      $$
+      P(Y_m = y_i|Y_{m-1}=y_k,\mathbf{x})=\frac{\exp (\mathbf{w}_i \cdot \mathbf{f}(y_k,
+        \mathbf{x}, m))}{\sum_{j=1}^{|Y|}\exp (\mathbf{w}_j \cdot \mathbf{f}(y_k,
+        \mathbf{x}, m))},
+      $$
+      where $\mathbf{f}(\cdot)$ is a feature vector producing function, and each
+      $\mathbf{w}_i$ is a weight vector for the $y_i\in Y$ label. (Note how
+      we replaced $x_m$ with $\mathbf{f}(y_{m-1}, \mathbf{x}, m)$; see next
+      slide why!)\bigskip
+    \end{small}
+
+    The name MEMM comes from the fact that in NLP, multinomial logistic
+    regression is better known by the name \emph{maximum entropy}.
   \end{slide}
 
   \begin{slide}[toc=Feature functions]{Feature functions}
@@ -602,9 +619,39 @@
       normalized}: $\sum_{y\in Y}P(y~|y_{m-1}, \mathbf{x}, m)=1$ independently
     of how ``familiar'' a context is to the model, and, therefore, the model
     cannot express a general low confidence about the labels in a given context.
-    This leads to the so-called \emph{label bias} problem: the model prefers
+    This leads to the so-called \emph{\href{https://awni.github.io/label-bias/}{label bias}} problem: the model prefers
     labels with low entropy next label distributions, even if they have low
     confidence. Linear-chain CRF models were designed to address these problems.
+  \end{slide}
+
+  \begin{slide}[toc=]{Label bias}
+    Label bias in action:
+    \begin{small}
+      \begin{itemize}
+        \item A POS tagger receives the sentence ``\textit{cat sat}''
+        \item The output is \texttt{ARTICLE VERB}, because of the
+          posterior distribution of \textit{cat} at \texttt{<S>} with
+          \textbf{local} normalization (left)
+        \item The unnormalized (log) probabilities (right) reveal that that
+          distribution is dwarfed by the other options and \texttt{NOUN VERB}
+          is more probable \textbf{globally}.
+      \end{itemize}
+    \end{small}
+
+    \begin{center}
+      \begin{minipage}{0.45\textwidth}
+        \begin{center}
+        \includegraphics[width=0.9\textwidth]{figures/memm_inference_normalized.eps}
+        \end{center}
+      \end{minipage}\hfill
+      \begin{minipage}{0.45\textwidth}
+        \begin{center}
+        \includegraphics[width=0.9\textwidth]{figures/memm_inference_unnormalized.eps}
+        \end{center}
+      \end{minipage}
+
+      \footnotesize(Figures from the \href{https://awni.github.io/label-bias/}{Awni Hannun -- Writing About Machine Learning} blog.)
+    \end{center}
   \end{slide}
 
   \begin{slide}[toc=]{Conditional Random Fields cont.}
