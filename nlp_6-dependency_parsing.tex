@@ -165,7 +165,7 @@
 \end{slide}
 
 \begin{slide}[toc=Dep. advantages]{The advantages of dependency grammars}
-  Dependency grammars are becoming the dominant syntactic theory used in NLP,
+  Dependency grammars have become the dominant syntactic theory used in NLP,
   since
   \begin{itemize}
   \item dependency trees are in many respect simpler structures than phrase
@@ -174,30 +174,56 @@
     graphs is a very good starting point for event or frame-oriented semantic
     analysis.
   \end{itemize}
+
+  The \href{https://universaldependencies.org/}{\emph{Universal Dependencies (UD)}}
+  framework has been created to facilitate consistent annotation across different
+  languages.
 \end{slide}
 
-\begin{slide}[toc=Semantic representation]{Usability for semantic
-    representation}
-  Compare, for event-semantic aspects
-  \begin{small}
-  \begin{center}
-    \begin{dependency}[theme=simple, edge style={white}, label style={text=white}]
-      \begin{deptext}[column sep=1em, nodes={text=white}]
-        the \& students \& love \& their \& professors \\
-      \end{deptext}
-      \depedge{2}{1}{det}
-      \depedge{3}{2}{nsubj}
-      \depedge{3}{5}{dobj}
-      \depedge{5}{4}{poss}
-    \end{dependency}
-    \Tree[.S [.NP [.Det \textit{the} ]
-               [.Noun {\textit{students}} ]]
+\begin{slide}[toc=]{Usability for semantic representation}
+  Compare, for event-semantic aspects\bigskip
+  \begin{footnotesize}
+    \begin{center}
+      \begin{dependency}[theme=simple, edge style={white}, label style={text=white}]
+        \begin{deptext}[column sep=1em, nodes={text=white}]
+          the \& students \& love \& their \& professors \\
+        \end{deptext}
+        \depedge{2}{1}{det}
+        \depedge{3}{2}{nsubj}
+        \depedge{3}{5}{dobj}
+        \depedge{5}{4}{poss}
+      \end{dependency}
+      \Tree[.S [.NP [.Det \textit{the} ]
+                    [.Noun {\textit{students}} ]]
                [.VP [.Vt {\textit{love}} ]
                [.NP [.Det \textit{their} ]
                [.Noun {\textit{professors}} ]
              ]]]
-           \end{center}
-         \end{small}
+    \end{center}
+  \end{footnotesize}
+\end{slide}
+
+\begin{slide}[toc=]{Usability for semantic representation cont.}
+  Compare, for event-semantic aspects
+  \begin{footnotesize}
+    \begin{center}
+      \begin{dependency}[theme=simple, edge style={white}, label style={text=white}]
+        \begin{deptext}[column sep=1em, nodes={text=white}]
+          their \& professors \& the \& students \& love \\
+        \end{deptext}
+        \depedge{4}{3}{det}
+        \depedge{5}{4}{nsubj}
+        \depedge{5}{2}{dobj}
+        \depedge{2}{1}{poss}
+      \end{dependency}
+      \Tree[.S [.NP [.Det \textit{their} ]
+                    [.Noun {\textit{professors}} ]]
+               [.SBAR [.NP [.Det \textit{the} ]
+                           [.Noun {\textit{students}} ]]
+                      [.VP [.Vt {\textit{love}} ]
+             ]]]
+    \end{center}
+  \end{footnotesize}
 \end{slide}
 
 \begin{slide}[toc=The parsing task]{The dependency parsing task}
