@@ -1,9 +1,12 @@
 \documentclass[style=upen, size=14pt]{powerdot}
+\usepackage{natbib}
+\usepackage{bibentry}
 \definecolor{arany}{RGB}{255,242,0}
 \hypersetup{backref=page}
 \hypersetup{
     colorlinks=true,
     linkcolor=cyan,
+    citecolor=cyan,
     filecolor=magenta,      
     urlcolor=cyan}
 % \pdsetup{trans=Split}
@@ -517,17 +520,22 @@
   \end{slide}
     
   \begin{slide}[toc=]{The Viterbi algorithm cont.}
-    Viterbi is a \emph{dynamic programming} algorithm that, in stark contrast
+    Viterbi is a \emph{\href{https://en.wikipedia.org/wiki/Dynamic_programming}{dynamic programming}} algorithm that, in stark contrast
     to an exhaustive search, has a time complexity of
-    $\mathcal O(\mathrm{length}(\mathbf{x})|Y|^2)$.\bigskip
+    $\mathcal O(\mathrm{length}(\mathbf{x})|Y|^2)$.\medskip
 
     The table that tracks the partial $\mathbf{y}_i^t$ sequence elements and
     their probabilities only takes up
-    $\mathcal{O}(\mathrm{length}(\mathbf{x})|Y|)$ space.\bigskip
+    $\mathcal{O}(\mathrm{length}(\mathbf{x})|Y|)$ space.\medskip
+
 
     Calculating the probabilities to be compared directly requires multiplying
     numbers very close to zero, so it is customary to work with log
-    probabilities (and addition) instead.
+    probabilities instead.\medskip %(and addition) instead.
+
+    \begin{small}
+      Note: the Viterbi algorithm is also known as the \emph{\href{http://www.inference.org.uk/itprnn/book.pdf}{min-sum}} algorithm. See \citet[p. 245]{mackay2003information}.
+    \end{small}
   \end{slide}
 
   \begin{slide}[toc=Discriminative methods]{Discriminative methods}
@@ -698,6 +706,16 @@
     optimization techniques, e.g., gradient descent, and, having trained a
     model, the most likely tag sequence for a given input can be efficiently
     found by using variants of the Viterbi algorithm.
+  \end{slide}
+
+  \begin{slide}{References}
+    \bibliographystyle{plainnat}
+    \nobibliography{nlp_course.bib}
+    \begin{footnotesize}
+
+      \bibentry{mackay2003information}.\medskip
+      
+    \end{footnotesize}
   \end{slide}
 
 \end{document}
