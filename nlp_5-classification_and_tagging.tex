@@ -1,9 +1,12 @@
 \documentclass[style=upen, size=14pt]{powerdot}
+\usepackage{natbib}
+\usepackage{bibentry}
 \definecolor{arany}{RGB}{255,242,0}
 \hypersetup{backref=page}
 \hypersetup{
     colorlinks=true,
     linkcolor=cyan,
+    citecolor=cyan,
     filecolor=magenta,      
     urlcolor=cyan}
 % \pdsetup{trans=Split}
@@ -45,6 +48,9 @@
 \newtheorem{tetel}{Theorem}
 \newtheorem{prop}{Proposition}
 \newtheorem{lemma}{Lemma}
+
+\mathchardef\mhyphen="2D
+
 \begin{document}
 
 \title{Natural Language Processing\\~~\\Lecture 5\\Text classification and sequence tagging with classical methods}
@@ -294,7 +300,8 @@
    The sequence tagging task in general is to tag each element of a variable
    length input sequence with one of the labels in a given finite $T$ tag set.
    In NLP, the input sequence is typically a $\langle w_1,\dots,w_n \rangle$
-   sequence of \emph{tokens}.\bigskip
+   sequence of \emph{tokens}. Hence the alternative name
+   \emph{\gold token classification}.\bigskip
 
    Some tasks in the traditional NLP pipeline are explicitly sequence tagging
    tasks, e.g. POS-tagging and morphological tagging. Others, like NP-chunking,
@@ -315,13 +322,15 @@
 
  \begin{slide}[toc=]{IOB tagging cont.} 
    The IOB trick is to reformulate the span identification/tagging task as a
-   sequence tagging task. If there are $T_1,\dots,T_N$ span types to be
-   identified, then we introduce three types of token-level tags:
+   sequence tagging task. If there are $T_1,\dots,T_N$ span
+   types to be identified, then we introduce three types of token-level tags:
    \begin{itemize}
-   \item a $B$ (beginning) tag for all span types: $B-T_1,\dots,B-T_N$
-     indicating the first token of a span of a given type;
-   \item an $I$ (inside) tag for all span types $I-T_1,\dots,I-T_N$; indicating
-     that a token is inside (as second or later element) a span, and, finally,
+     \item a $B$ (beginning) tag for all span types:
+       $B\mhyphen{}T_1,\dots,B\mhyphen{}T_N$ indicating the first token of a
+       span of a given type;
+   \item an $I$ (inside) tag for all span types
+       $I\mhyphen{}T_1,\dots,I\mhyphen{}T_N$; indicating that a token is inside
+       (as second or later element) a span, and, finally,
    \item a unique $O$ tag for tokens that do not belong to any span type to be
      found.
    \end{itemize}
@@ -336,10 +345,13 @@
      \footnotesize(Figure from the \href{http://www.nltk.org/book/ch07.html}{NLTK book}.)
     \end{center}
     
-    
-    Although the IOB scheme is the most well known, others are in use as well,
-    e.g., if one introduces $E-T_i$ \emph{end} tags, then a unique $I$
-    \textit{inside} tag is enough for unambiguous tagging.
+    Other schemes exist along IOB (BIO), the most popular being BIOES, which
+    introduces $E\mhyphen{}T_i$ \emph{end} tags, as well as $S\mhyphen{}T_i$
+    tags for single-token spans.
+    % Although the IOB (BIO) scheme is the most well known, others are in use as
+    % well.
+    % e.g., if one introduces $E-T_i$ \emph{end} tags, then a unique $I$
+    % \textit{inside} tag is enough for unambiguous tagging.
   \end{slide}
 
   \begin{slide}[toc=Challenges]{Sequence tagging challenges}
@@ -395,12 +407,12 @@
 
   \begin{slide}[toc=]{Hidden Markov models cont.}
     Because of the Markov model assumption regarding the $Y$s, there is an
-    $A$ matrix specifying all tag
-    transition probabilities, so that for any appropriate $k, i, j$,
+    $A$ matrix specifying all tag \emph{\gold transition probabilities}, so
+    that for any appropriate $k, i, j$,
     $$
     P(Y_k=y_j ~|~Y_{k-1}=y_i) = a_{i j}.
     $$
-    HMMs also assume that the $P(X~|~Y)$ ``emission'' probabilities are
+    HMMs also assume that the $P(X~|~Y)$ \emph{\gold emission probabilities} are
     position-independent: there is also a $B$ matrix so that for any
     $k, i, j$,
     $$
@@ -457,14 +469,15 @@
     \mathbf{y}^{n-1}_i = \argmax_{\mathbf{y}\in Y^{n-1}~\wedge~\mathbf{y}[n-1] = y_i}
     P(\mathbf{x}[1:n-1], \mathbf{y} ~|~ \Pi, A, B),
     $$
-    then the most probable $\mathbf{y}$ can be computed simply as 
+    (i.e. the most probable $n-1$-long tag sequences ending in $y_i$),
+    then the most probable $\mathbf{y}$ can be computed by comparing only
+    $|Y|^2$ continuations:
     \begin{gather*}
-      \argmax_{\mathbf{y}\in \{\langle \mathbf{y}_i^{n-1},~y \rangle ~|~ i \in 1\dots |Y|~\wedge~ y \in Y\}} P(\mathbf{x}, \mathbf{y} ~|~ \Pi, A, B),
+      \mathbf{y} = \argmax_{\mathbf{y}\in \{\langle \mathbf{y}_i^{n-1},~y \rangle ~|~ i \in 1\dots |Y|~\wedge~ y \in Y\}} P(\mathbf{x}, \mathbf{y} ~|~ \Pi, A, B).
     \end{gather*}
-    i.e., we need to search only among the $|Y|^2$ possible continuations of the
-    $\mathbf{y}^{n-1}_i$ sequences.
+    % i.e., we need to search only among the $|Y|^2$ possible continuations of the
+    % $\mathbf{y}^{n-1}_i$ sequences.
   \end{slide}
-
 
   \begin{slide}[toc=]{The Viterbi algorithm cont.}
     This suggests the following algorithm (named after Andrew Viterbi, who
@@ -485,19 +498,44 @@
       \EndFor
       \State{\Return{$\argmax_{\mathbf{y}\in \{\langle \mathbf{y}_i^{n-1},~y \rangle ~|~ i \in 1\dots |Y|~\wedge~ y \in Y\}} P(\mathbf{x}, \mathbf{y} ~|~ \Pi, A, B)$}}
     \end{algorithmic}
-    
   \end{slide}
-
+  
   \begin{slide}[toc=]{The Viterbi algorithm cont.}
-    In stark contrast to an exhaustive search, the standard Viterbi algorithm
-    has a time complexity of $\mathcal O(\mathrm{length}(\mathbf{x})|Y|^2)$, and
-    tracking the partial $\mathbf{y}_i^t$ sequence elements and their
-    probabilities can be done using back-pointers within
-    $\mathcal{O}(\mathrm{length}(\mathbf{x})|Y|)$ space.\bigskip
+    The algorithm maintains an $|Y| \times \mathrm{length}(\mathbf{x})$ table.
+    In the \emph{forward pass}, it
+    \begin{enumerate}
+      \item computes the probabilities of the $y_i^t$s x
+      \item maintains backreferences to the most probable $\mathbf{y}^{t-1}$
+    \end{enumerate}
+
+    In the \emph{backward pass}, the most probable $y_i^n$ is
+    selected and $\mathbf{y}$ is recovered by following the
+    backreferences.
+
+    \begin{center}
+      \includegraphics[width=0.8\textwidth]{figures/viterbi-5.eps}
+      
+      \footnotesize(Figure from the \href{https://cs.rice.edu/~ogilvie/comp571/viterbi-algorithm/}{Species and Gene Evolution} blog.)
+    \end{center}
+  \end{slide}
+    
+  \begin{slide}[toc=]{The Viterbi algorithm cont.}
+    Viterbi is a \emph{\href{https://en.wikipedia.org/wiki/Dynamic_programming}{dynamic programming}} algorithm that, in stark contrast
+    to an exhaustive search, has a time complexity of
+    $\mathcal O(\mathrm{length}(\mathbf{x})|Y|^2)$.\medskip
+
+    The table that tracks the partial $\mathbf{y}_i^t$ sequence elements and
+    their probabilities only takes up
+    $\mathcal{O}(\mathrm{length}(\mathbf{x})|Y|)$ space.\medskip
+
 
     Calculating the probabilities to be compared directly requires multiplying
     numbers very close to zero, so it is customary to work with log
-    probabilities (and addition) instead.
+    probabilities instead.\medskip %(and addition) instead.
+
+    \begin{small}
+      Note: the Viterbi algorithm is also known as the \emph{\href{http://www.inference.org.uk/itprnn/book.pdf}{min-sum}} algorithm. See \citet[p. 245]{mackay2003information}.
+    \end{small}
   \end{slide}
 
   \begin{slide}[toc=Discriminative methods]{Discriminative methods}
@@ -527,21 +565,37 @@
   \begin{slide}[toc=MEMMs]{Maximum entropy Markov models (MEMMs)}
     According to the previous graphical model's assumptions,
     \begin{small}
-    $$
-    P(\mathbf{Y}~|~\mathbf{X}) = P(Y_1~|~ \mathbf{X})\prod_{m=2}^n P(Y_m|Y_{m-1}, \mathbf{X}).
-    $$
-  \end{small}
-  MEMMs, in turn, model the individual $P(Y_m|Y_{m-1}, \mathbf{X})$
-  probabilities analogously to logistic regression as
+      $$
+      P(\mathbf{Y}~|~\mathbf{X}) = P(Y_1~|~ \mathbf{X})\prod_{m=2}^n P(Y_m|Y_{m-1}, \mathbf{X}).
+      $$
+    \end{small}%
+    MEMMs further constrain this generic model by making $y_m$ conditionally
+    independent of all observations other than $x_m$:
     \begin{small}
-    $$
-    P(Y_m = y_i|Y_{m-1}=y_k,\mathbf{x})=\frac{\exp (\mathbf{w}_i \cdot \mathbf{f}(y_k,
-      \mathbf{x}, m))}{\sum_{j=1}^{|Y|}\exp (\mathbf{w}_j \cdot \mathbf{f}(y_k,
-      \mathbf{x}, m))},
-    $$
-    where $\mathbf{f}(\cdot)$ is a feature vector producing function, and each
-    $\mathbf{w}_i$ is a weight vector for the $y_i\in Y$ label.
+      $$
+      P(\mathbf{Y}~|~\mathbf{X}) = P(Y_1~|~X_1)\prod_{m=2}^n P(Y_m|Y_{m-1},X_m).
+      $$
   \end{small}
+  \end{slide}
+
+  \begin{slide}[toc=MEMMs]{Maximum entropy Markov models (MEMMs)}
+    The individual $P(Y_m|Y_{m-1},X_m)$ probabilities are modelled
+    analogously to \emph{multinomial logistic regression} with the
+    softmax function:
+    \begin{small}
+      $$
+      P(Y_m = y_i|Y_{m-1}=y_k,\mathbf{x})=\frac{\exp (\mathbf{w}_i \cdot \mathbf{f}(y_k,
+        \mathbf{x}, m))}{\sum_{j=1}^{|Y|}\exp (\mathbf{w}_j \cdot \mathbf{f}(y_k,
+        \mathbf{x}, m))},
+      $$
+      where $\mathbf{f}(\cdot)$ is a feature vector producing function, and each
+      $\mathbf{w}_i$ is a weight vector for the $y_i\in Y$ label. (Note how
+      we replaced $x_m$ with $\mathbf{f}(y_{m-1}, \mathbf{x}, m)$; see next
+      slide why!)\bigskip
+    \end{small}
+
+    The name MEMM comes from the fact that in NLP, multinomial logistic
+    regression is better known by the name \emph{maximum entropy}.
   \end{slide}
 
   \begin{slide}[toc=Feature functions]{Feature functions}
@@ -573,9 +627,39 @@
       normalized}: $\sum_{y\in Y}P(y~|y_{m-1}, \mathbf{x}, m)=1$ independently
     of how ``familiar'' a context is to the model, and, therefore, the model
     cannot express a general low confidence about the labels in a given context.
-    This leads to the so-called \emph{label bias} problem: the model prefers
+    This leads to the so-called \emph{\href{https://awni.github.io/label-bias/}{label bias}} problem: the model prefers
     labels with low entropy next label distributions, even if they have low
     confidence. Linear-chain CRF models were designed to address these problems.
+  \end{slide}
+
+  \begin{slide}[toc=]{Label bias}
+    Label bias in action:
+    \begin{small}
+      \begin{itemize}
+        \item A POS tagger receives the sentence ``\textit{cat sat}''
+        \item The output is \texttt{ARTICLE VERB}, because of the
+          posterior distribution of \textit{cat} at \texttt{<S>} with
+          \textbf{local} normalization (left)
+        \item The unnormalized (log) probabilities (right) reveal that that
+          distribution is dwarfed by the other options and \texttt{NOUN VERB}
+          is more probable \textbf{globally}.
+      \end{itemize}
+    \end{small}
+
+    \begin{center}
+      \begin{minipage}{0.45\textwidth}
+        \begin{center}
+        \includegraphics[width=0.9\textwidth]{figures/memm_inference_normalized.eps}
+        \end{center}
+      \end{minipage}\hfill
+      \begin{minipage}{0.45\textwidth}
+        \begin{center}
+        \includegraphics[width=0.9\textwidth]{figures/memm_inference_unnormalized.eps}
+        \end{center}
+      \end{minipage}
+
+      \footnotesize(Figures from the \href{https://awni.github.io/label-bias/}{Awni Hannun -- Writing About Machine Learning} blog.)
+    \end{center}
   \end{slide}
 
   \begin{slide}[toc=]{Conditional Random Fields cont.}
@@ -622,6 +706,16 @@
     optimization techniques, e.g., gradient descent, and, having trained a
     model, the most likely tag sequence for a given input can be efficiently
     found by using variants of the Viterbi algorithm.
+  \end{slide}
+
+  \begin{slide}{References}
+    \bibliographystyle{plainnat}
+    \nobibliography{nlp_course.bib}
+    \begin{footnotesize}
+
+      \bibentry{mackay2003information}.\medskip
+      
+    \end{footnotesize}
   \end{slide}
 
 \end{document}
