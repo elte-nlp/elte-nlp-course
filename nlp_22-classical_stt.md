@@ -12,6 +12,7 @@ header-includes:
   - \let\emphasized\emph
   - \let\strong\textbf
   - \renewcommand{\textbf}[1]{\textcolor{blue}{\strong{#1}}}
+  - \usepackage{animate}
 link-citations: true
 aspectratio: 1610
 ---
@@ -149,17 +150,206 @@ continuous signal:
 
 ![From @santos2014.](figures/time_speech_cont.png){width=60%}
 
-## Discrete speech signal in time
+## Sampling
 
 This is a continuous, analog signal, which can be digitalized by sampling with a
-certainly rate:
+certain rate (at least 8kHz to to represent the 100 Hz–4 kHz range where
+phonemes can be typically found):
 
 ![From @santos2014.](figures/time_speech_disc.png){width=60%}
 
-## Transforming to the frequency domain
+## Windowing
+
+The digital signal is, in turn, converted into a sequence of short signals by
+taking overlapping windows (20-40 ms is a typical length, and 10 ms is a typical
+step size):
+
+![Source: [StackExchange](https://dsp.stackexchange.com/questions/36509/why-is-each-window-frame-overlapping).](figures/asr_windowing.png){width=60%}
+
+## Windowing cont.
+
+The windows often contain **weighted** values that gradually fade out approaching the
+window ends. A popular weighting scheme is based on the cosine function: for a
+window with original signal values $s_0,\dots,s_{N-1}$ the weights are
+
+$$w(n) = a - (1 - a)\cos\left(\frac{2\pi n}{N}\right).$$
+
+The choice of $a = 0.54$ leads to the frequently used __Hamming__ window.
+
+## Windowing cont.
+
+![Hamming windowing [from @jurafsky2019speech].](figures/hamming.png){width=80%}
+
+## Fourier transform
+
+The windowed signals are, in turn, transformed into individual __spectra__
+using __discrete Fourier transform__ (DFT):
+
+![From @ogorman2023.](figures/fourier.png){width=80%}
+
+## Further processing
+
+Although many recent approaches work directly with the spectrum, traditionally,
+further transformations were done, e.g.,
+
+* using a [filter bank](https://en.wikipedia.org/wiki/Filter_bank),
+* taking the logarithm of the (smoothed) spectrum,
+* performing a further Fourier transform.
+
+The goal was to provide a compressed representation in terms of features that are
+close to how humans perceive and process speech. The historically most important
+representation has been MFCC (Mel-Frequency Cepstral Coefficients), wich
+combines several of the listed steps.
+
+## The mel scale
+
+The spectral information returned by FFT does not correspond to important
+characteristics of how humans perceive sounds:
+
+* our hearing is more sensitive and discriminative as frequencies get lower,
+* the auditory frequency scale, which reflects the perceptual distances between
+  sounds, is actually logarithmic.
+  
+The perceived pitch corresponding to an $f$ frequency can be expressed by
+calculating its location on the logarithmic __mel scale__ (where __mel__ [from
+melody] is a unit of auditory pitch distance): $$ mel(f) = 1127 \ln
+\left(1+\frac{f}{700} \right ). $$
+  
+## Mel filter bank 
+
+A __mel filter bank__ is a set of overlapping (typically triangle or cosine
+shaped) filters that are spaced evenly according to the mel scale. It can be
+used to convert a spectrum to a __mel spectrum__ containing perceptually
+informative frequency bands.
+
+![From @jurafsky2019speech.](figures/mel_filter_bank.png){width=90%}
+
+## MFCC (Mel-Frequency Cepstral Coefficients)
+
+MFCC has been the most widely used spectral representation in the domain of
+speech recognition. The "cepstrum" is the result of the DST step.
+
+![From @akpudo2021cost.](figures/mfcc.png){width=70%}
+
+## MFCC cont.
+
+A typical MFCC frame feature vector contains the following 39 values:
+
+* 12 basic MFCC features (12 energy values in the "cepstrum"),
+* the total energy in the cepstrum,
+* 12 delta MFCC features (MFCC derivatives),
+* 12 double delta MFCC features (MFCC double derivatives),
+* 1 total delta energy feature,
+* 1 total double delta enegry feature.
+
+# Modeling speech
+
+## Modeling speech 
+
+We try to find the most probable $\mathbf w=\langle w_1,\dots,w_n\rangle$ word sequence
+given our (preprocessed) speech signal $\mathbf s$, i.e.,
+
+$$ \underset{\mathbf w}{\operatorname{argmax}} P(\mathbf w \vert \mathbf s). $$
+
+Using Bayes' Rule, this can be reformulated as
+
+$$
+\underset{\mathbf w}{\operatorname{argmax}}(P(\mathbf s \vert \mathbf w) \cdot P(\mathbf w)).
+$$
+
+Here $P(\mathbf w)$ can be modeled by a __language model__, while the the
+conditional $P(\mathbf s \vert \mathbf w)$ probability of the sound signal
+given a sequence of words by an __acoustic model__.
+
+## The acoustic model
+
+In classical STT, the acoustic model typically contains HMM models for the
+phones of the target language. A frequent choice is to model phones with 3-state
+HMMs with self-loops (the 3 states are for phone onset, middle and ending) and
+Gaussian Mixtures as emission distributions:
+
+\centering
+![From @ogorman2023.](figures/acoustic_hmm.png){width=60%}\
+
+## Context dependent phone models
+
+Phones in natural languages are context dependent: their physical realization
+depends on the preceding and succeeding phone. Because of this, more
+sophisticated speech recognizers work with context dependent or "triphon"
+models:
+
+![From @gales2008application.](figures/context_dependent_phones.png){width=65%}
+
+## Context dependent phone models cont.
+
+Because of the large number of phone combinations, some HMM states are shared or
+__"tied"__ together: they are assumed to have the same emission distributions to
+reduce the number of model parameters.
+
+![From @gales2008application.](figures/triphone_tying.png){width=60%}
+
+## Context dependent phone models cont.
+
+MLE-optimized phonetic decision trees are used to cluster hidden states into
+groups whose members can be tied together.
+
+![Decision tree for a class of states
+[@zhao1999decision].](figures/state_tying_tree.png){width=70%}
+
+## Acoustic model training 
+
+
+HMM based acoustic models with GMM emission distributions are trained with
+expectation maximization (EM) using
+
+- transcribed speech samples, in which the transcripts are precisely
+  time-aligned, and
+- a __phonetic lexicon__ describing the pronunciation of all words occurring
+  in the transcripts.
+
+In the early days, transcripts were phonetic and time-aligned phone-by-phone,
+but modern systems work with word or sentence aligned transcripts, whose
+phonetic transcription is automatically generated using the phonetic lexicon.
+
+## Acoustic model training cont.
+
+Since HMMs can be composed (in this case concatenated), using the phonetic
+lexicon the phone models can be used to build word models, and word models in
+turn can provide word sequence models for higher-level training: 
+
+![From @laureys2001assessing.](figures/word_sequence_model.png){width=80%}
+
+## TODO Acoustic model training cont.
+
+TODO Describe a seeding hierarchy
+
+## Adding a language model
+
+Since traditional N-gram language models are also based on the
+Markov-assumption, HMM-based acoustic models can easily be combined with them to
+form a __joint acoustic + language HMM $\mathcal A + \mathcal L$__, which can be
+used to find the most probable word sequence given an acoustic input.
+
+$$ \underset{\mathbf w}{\operatorname{argmax}}~P_{\mathcal A + \mathcal
+L}(\mathbf w \vert \mathbf s). $$
+
+In theory, the full Viterbi algorithm could be used, but its quadratic time
+complexity in terms of the number of states makes this unfeasable as the combined
+HMMs for continuous, large vocabulary speech recognition are really large.
+
+## TODO Decoding
+
+Maybe add an LM + AM joint model figure from here: https://jonathan-hui.medium.com/speech-recognition-asr-model-training-90ed50d93615
+
+
+# TODO Hybrid models
+
+- sthing from here: https://web.stanford.edu/class/cs224s/lectures/224s.22.lec9.pdf
+- describe Bayesian reversion for the (scaled) emission probabilities
 
 # References
-## References 
 
-\small
+## References {.allowframebreaks}
+
+\footnotesize
 
