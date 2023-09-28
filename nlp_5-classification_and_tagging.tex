@@ -569,16 +569,43 @@
       P(\mathbf{Y}~|~\mathbf{X}) = P(Y_1~|~ \mathbf{X})\prod_{m=2}^n P(Y_m|Y_{m-1}, \mathbf{X}).
       $$
     \end{small}%
-    MEMMs further constrain this generic model by making $y_m$ conditionally
-    independent of all observations other than $x_m$:
+    MEMMs formalize this generic model by making $y_m$ conditionally
+    dependent only on the current observation $o_m$:
     \begin{small}
       $$
-      P(\mathbf{Y}~|~\mathbf{X}) = P(Y_1~|~X_1)\prod_{m=2}^n P(Y_m|Y_{m-1},X_m).
+      P(\mathbf{Y}~|~\mathbf{X}) = P(Y_1~|~O_1)\prod_{m=2}^n P(Y_m|Y_{m-1},O_m).
       $$
-  \end{small}
+    \end{small}%
+    How can $Y_m$ depend on $\mathbf{X}$ then? The trick is in how $O_m$ is defined.
   \end{slide}
 
-  \begin{slide}[toc=MEMMs]{Maximum entropy Markov models (MEMMs)}
+  \begin{slide}[toc=]{Feature functions}
+    The $Y_{m-1},O_m$ pair is defined as $\mathbf{f}(y_k,\mathbf{x}, m)$,
+    where $f(\cdot)$ is a function that produces a feature vector at $m$ based
+    on the value $Y_{m-1}=y_k$ and $x$.\medskip
+
+    In NLP, we condition only on \emph{local features} within a
+    \emph{context window} around the element to be tagged. A few example
+    features for POS tagging, designed by linguists:
+
+    \begin{small}
+      \begin{itemize}
+      \item Elements in a context window around $x_m$, e.g.
+        $\langle x_{m-1}, x_{m}, x_{m+1} \rangle$,
+      \item suffixes (of a fixed length) of the context window's elements,
+      \item prefixes (of a fixed length) of the context window's elements,
+      \item capitalization information of the context window's elements,
+      \item the POS tag $y_k$ of the previous element.
+      \end{itemize}
+    \end{small}
+    
+    % WARNING: A typical feature template like the above can actually produce
+    % \emph{thousands of features} because the categoricals have to be one-hot
+    % encoded. In addition to performance implications this also has consequences
+    % for data sparsity: smoothing becomes very important.
+  \end{slide}
+
+  \begin{slide}[toc=]{Maximum entropy Markov models (MEMMs)}
     The individual $P(Y_m|Y_{m-1},X_m)$ probabilities are modelled
     analogously to \emph{multinomial logistic regression} with the
     softmax function:
@@ -588,64 +615,50 @@
         \mathbf{x}, m))}{\sum_{j=1}^{|Y|}\exp (\mathbf{w}_j \cdot \mathbf{f}(y_k,
         \mathbf{x}, m))},
       $$
-      where $\mathbf{f}(\cdot)$ is a feature vector producing function, and each
-      $\mathbf{w}_i$ is a weight vector for the $y_i\in Y$ label. (Note how
-      we replaced $x_m$ with $\mathbf{f}(y_{m-1}, \mathbf{x}, m)$; see next
-      slide why!)\bigskip
+      where each $\mathbf{w}_i$ is a weight vector for the $y_i\in Y$
+      label.\bigskip
     \end{small}
 
     The name MEMM comes from the fact that in NLP, multinomial logistic
     regression is better known by the name \emph{maximum entropy}.
   \end{slide}
 
-  \begin{slide}[toc=Feature functions]{Feature functions}
-    MEMM feature functions were traditionally designed by field experts. In NLP
-    it is customary to condition only on \emph{local features} of the element to
-    be tagged and consider only a \emph{context window}. E.g., for POS tagging,
-    $\mathbf{f}(y_{m-1},\mathbf{x}, m)$ would include the features:
-    \begin{itemize}
-    \item Elements in a context window around $x_m$, e.g.
-      $\langle x_{m-1}, x_{m}, x_{m+1} \rangle$,
-    \item suffixes (of a fixed length) of the context window's elements,
-    \item prefixes (of a fixed length) of the context window's elements,
-    \item capitalization information of the context window's elements.
-    \end{itemize}
-    
-    % WARNING: A typical feature template like the above can actually produce
-    % \emph{thousands of features} because the categoricals have to be one-hot
-    % encoded. In addition to performance implications this also has consequences
-    % for data sparsity: smoothing becomes very important.
-    
-  \end{slide}
-
-  \begin{slide}[toc=CRFs]{Conditional Random Fields (CRFs)}
+  \begin{slide}[toc=Label bias]{Label bias}
     Although MEMMs are more flexible than HMMs (e.g., tags can depend on other
     features of the context than the previous tag), they also have important
     limitations.\bigskip
 
     Perhaps the most important is that the label probabilities are \emph{locally
-      normalized}: $\sum_{y\in Y}P(y~|y_{m-1}, \mathbf{x}, m)=1$ independently
+    normalized}: $\sum_{y\in Y}P(y~|y_{m-1}, \mathbf{x}, m)=1$ independently
     of how ``familiar'' a context is to the model, and, therefore, the model
     cannot express a general low confidence about the labels in a given context.
-    This leads to the so-called \emph{\href{https://awni.github.io/label-bias/}{label bias}} problem: the model prefers
-    labels with low entropy next label distributions, even if they have low
-    confidence. Linear-chain CRF models were designed to address these problems.
+    This leads to the so-called
+    \emph{\href{https://awni.github.io/label-bias/}{\gold label bias}} problem:
+    the model cannot easily recover from past labelling mistakes made in a low
+    confidence situation.
   \end{slide}
 
-  \begin{slide}[toc=]{Label bias}
-    Label bias in action:
+  \begin{slide}[toc=]{Label bias -- example}
     \begin{small}
+      A POS tagger tags the sentence ``\textit{cat sat}'' as
+      \texttt{\footnotesize ARTICLE VERB}, as
       \begin{itemize}
-        \item A POS tagger receives the sentence ``\textit{cat sat}''
-        \item The output is \texttt{ARTICLE VERB}, because of the
-          posterior distribution of \textit{cat} at \texttt{<S>} with
-          \textbf{local} normalization (left)
-        \item The unnormalized (log) probabilities (right) reveal that that
-          distribution is dwarfed by the other options and \texttt{NOUN VERB}
-          is more probable \textbf{globally}.
+        \item The tagger cannot
+          recover from the skewed posterior distribution of \textit{cat} at
+          \texttt{\footnotesize <S>} with \textbf{\gold local} normalization
+          (left).
+        \item The unnormalized $\mathbf{w}_i \cdot \mathbf{f}(\cdot)$
+          observations (right) reveal that
+          \begin{enumerate}
+            \item the tagger is not confident about ``\textit{cat}'' starting a
+              sentence,
+            \item \textbf{\gold globally} \texttt{\footnotesize NOUN VERB} has
+              a higher score ($\log$ so summed along the edges).
+          \end{enumerate}
       \end{itemize}
     \end{small}
 
+    \vspace{-1em}
     \begin{center}
       \begin{minipage}{0.45\textwidth}
         \begin{center}
@@ -658,13 +671,13 @@
         \end{center}
       \end{minipage}
 
-      \footnotesize(Figures from the \href{https://awni.github.io/label-bias/}{Awni Hannun -- Writing About Machine Learning} blog.)
+      \footnotesize(Example from the \href{https://awni.github.io/label-bias/}{Awni Hannun -- Writing About Machine Learning} blog.)
     \end{center}
   \end{slide}
 
-  \begin{slide}[toc=]{Conditional Random Fields cont.}
-    Linear chain CRFs are discriminative models assuming the following
-    \emph{undirected} structure:
+  \begin{slide}[toc=CRFs]{Conditional Random Fields cont.}
+    Linear chain CRFs are discriminative models designed to avoid the label
+    bias. They assume the following \emph{undirected} structure:
     \begin{center}
       \begin{tikzpicture}[ampersand replacement=\&]
         \matrix[matrix of math nodes,column sep=2em,row sep=3em] (m) {
@@ -679,6 +692,7 @@
         \draw[dashed] ([yshift=0ex]m.east-|m-1-5.east) -- ([yshift=0ex]m.east-|m-1-1.west);
       \end{tikzpicture}
     \end{center}
+    \vspace{-1em}
     According to these assumptions,
     $$
     P(\mathbf{Y}~|~\mathbf{X}) = \frac{1}{Z(\mathbf{X})}\prod_{m=1}^{n-1} \phi_{m}(Y_m, Y_{m+1}, \mathbf{X}).
@@ -686,13 +700,15 @@
   \end{slide}
 
   \begin{slide}[toc=]{Conditional Random Fields cont.}
-    Somewhat similarly to MEMMs, the $\phi_m(\cdot)$ potential functions are
-    modeled linearly using a feature function and a corresponding weight vector:
+    Somewhat similarly to MEMMs, the $\phi_m(\cdot)$ \emph{\gold potential
+    functions} are modeled linearly using a feature function and a
+    corresponding weight vector. They are basically the nominators of the
+    softmax.
     $$
     \phi_m(y_m, y_{m+1},\mathbf{x})={\exp (\mathbf{w} \cdot
       \mathbf{f}(y_m,y_{m+1}, \mathbf{x}, m))}.
     $$
-    The crucial difference compared to MEMMs is that the normalization is \emph{global}:
+    The crucial difference is that the normalization is \emph{global}:
     $$
     P(\mathbf{y}~|~\mathbf{x}) =
     \frac{\exp(\sum_{m=1}^{n-1}\mathbf{w}\cdot\mathbf{f}(y_m,y_{m+1}, \mathbf{x}, m))}
