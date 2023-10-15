@@ -22,7 +22,6 @@ bibliography: nlp_14-prompt_engineering.bib
 
 # Pretrain, prompt and predict
 
-
 ## Pretrain, prompt and predict
 
 The paper describing GPT-3 [@brown2020language]  introduced a new paradigm of using
@@ -39,6 +38,17 @@ distinguish 3 scenarios:
 ## Pretrain, prompt and predict cont.
 
 ![Few-shot or in-context learning [from @brown2020language].](./figures/few-shot.png){width=80%}
+
+## General prompting rules of thumb
+
+-   Instructions should be as __detailed, specific__ and __precise__ as possible;
+-   Specifying the __intended audience__ of the output, if applicable, is typically useful;
+-   Complex prompts can also include
+    -   persona description,
+    -   in context examples,
+    -   constraints (e.g., template for the expected output format),
+    -   required steps for solution &#x2013; this leads to the idea of "Chain of
+        thought prompting".
 
 ## Pretrain, prompt and predict cont.
 
@@ -112,7 +122,7 @@ $\vdots$
 Builds a prompt template consisting of **trigger tokens**, e.g., the AutoPrompt
 algorithm [@shin2020autoprompt]:
 
-![img](./figures/autoprompt.png)
+![Figure from @shin2020autoprompt.](./figures/autoprompt.png)
 
 
 
@@ -138,10 +148,16 @@ doesn't require __changing__ the parameters.
 One can treat prompt generation as a conditional text generation problem and use
 a standard seq2seq model to solve it. E.g., @gao2020making uses a 
 pretrained T5 to generate prompt candidates having high log-likelihood on the
-dataset (using beam search) and then fine-tune them (presumably using
-gradient-based search):
+dataset (using beam search):
 
-![img](./figures/generation.png){width=70%}
+![img](./figures/generation.png){width=80%}
+
+## Prompt generation cont.
+
+A more radical approach is prompting LLMs
+to generate instructions:
+
+![Figure from @zhou2023large.](./figures/promptprompt.png){width=50%}
 
 ## Prompt scoring
 
@@ -171,7 +187,7 @@ model (measuring "coherence").
 
 ## Similar examples in embedding space
 
-@liu2021makes chooses the most similar examples from the training data
+@liu2021makes chooses both similar and random examples from the training data
 for few-shot prediction:
 
 ![img](./figures/kate.png)\
@@ -192,7 +208,7 @@ The proposed method is to
 
 
 
-# Continuous ("soft")
+# Continuous ("soft") strategies
 ## Prefix tuning
 
 Learns task-specific embedding vector sequences to be prefixed to the actual
@@ -248,8 +264,6 @@ Using the LM output "as is" can work for some tasks, e.g., for text generation,
 but a mapping is needed when the $\mathcal{Y}$ output space is different or constrained,
 e.g., for classification  or NER tasks.
 
-
-
 ## Answer engineering cont.
 
 A trivial mapping example: a $v(\cdot)$ "verbalizer" function maps the
@@ -290,24 +304,13 @@ Combining prompts for text generation is not so straightforward, but one way of
 doing it is to use the average of all next word probability distributions for
 generating the next word at every generation time step.
 
-## General instruction prompting strategies
-
--   Instructions should be as detailed, specific and precise as possible;
--   Specifying the *intended audience* of the output, if applicable, is typically useful;
--   Complex instruction prompts can also include
-    -   persona description,
-    -   in context examples,
-    -   constraints (e.g., template for the expected output format),
-    -   required steps for solution &#x2013; this leads to "Chain of thought prompting".
-
-
-
-# Thought-structure based prompting 
+# Reasoning-structure based prompting 
 
 ## Chain of thought prompting
 
 For tasks involving complex reasoning, e.g. math problem solving or planning,
-providing step by steps demonstrations can hugely improve performance. E.g.,
+providing step by steps demonstrations can significantly improve performance.
+E.g.,
 
 ### 
 \footnotesize
@@ -318,7 +321,7 @@ climb the hill. How many hours does it take Tom to climb up the hill?
 Answer: It takes Tom 30*4 = 120 minutes to climb the hill. It takes
 Tom 120/60 = 2 hours to climb the hill. So the answer is 2.
 
-&#x2014;
+--
 
 Question: Jack is a soccer player. He needs to buy two pairs of socks and a pair
 of soccer shoes. Each pair of socks cost $9.50, and the shoes cost $92. Jack has
@@ -329,9 +332,7 @@ socks is $9.50 x 2 = 19. The total cost of the socks and the shoes
 is $19 + $92 = 111. Jack need $111 - $40 = $71 more.
 So the answer is 71.
 
-&#x2014;
-
-
+--
 
 ## Chain of thought prompting cont.
 
@@ -364,7 +365,9 @@ Answer: Let's think step by step.
 
 Results can often be improved by sampling several answers, i.e., several
 reasoning paths instead of a single, say, greedy, decoding, and ensembling the
-results, e.g., by taking the majority vote.
+results, e.g., by taking the majority vote:
+
+![From @wang2023selfconsistency.](./figures/self-consistency.png){width=100%}
 
 ## Self-ask
 
@@ -372,6 +375,128 @@ Prompting the model to explicitly ask and answer follow up questions is also a
 useful strategy [@press2023measuring]:
 
 ![img](./figures/self-ask.png){width=70%}
+
+## Knowledge generation
+
+For common sense reasoning task, prompting LLMs to generate relevant knowledge
+can also be beneficial. (Details of formulation and examples are task-specific.)
+The generated pieces of knowledge are used to answer the question:
+
+![Knowledge generation prompt from @liu2021generated.](./figures/knowledge_generation.png){width=80%}
+
+## Knowledge generation cont.
+
+@liu2021generated generate several answers to the knowledge prompt by sampling,
+and use  them to generate an answer to the question. The best answer
+can be selected, e.g., by majority voting [figure from @liu2021generated]:
+
+![Knowledge generation prompt from @liu2021generated.](./figures/knowledge_generation_2.png){width=68%}
+
+## More complex thought structures
+
+A frequent observation about CoT prompting is that it assumes a __sequential
+chain__ of thought directly leading to the answer, but complex human reasoning frequently
+involves
+
+* exploring alternative thought sequences that are __branching__ from a common
+  start,
+* __discarding__ some thought branches,
+* and __backtracking__
+
+until the final conclusion is found. 
+
+__Tree-of-thought__ prompting frameworks like that of @yao2023tree support
+performing this type of reasoning steps using LLMs with suitable prompting.
+
+## Tree-of-thoughts prompting
+
+![From @yao2023tree.](./figures/tree-of-thought.png){width=100%}
+
+## Tree-of-thoughts prompting cont.
+
+The main components  are:
+
+* explicitly defining what a __unit thought__ is for the current task (a paragraph,
+  a formula etc.),
+* continuation thoughts __generation__ for a branch (e.g., by sampling), 
+* thought __evaluation__,
+* a __search strategy__ to decide which node to expand next (e.g., BFS).
+
+## Tree-of-thoughts prompting cont.
+
+![An application of T-o-T prompting to the game of 24 task [from @yao2023tree].
+The task is to find arithmetic operations on the input numbers that lead to 24
+as their result.](./figures/t-o-t-2.png){width=100%}
+
+## Tree-of-thoughts prompting cont.
+
+There are attempts to elicit tree-of-thought like reasoning with a single prompt, e.g., 
+@tree-of-thought-prompting uses the following example prompt:
+
+### 
+Imagine three different experts are answering this question.
+All experts will write down 1 step of their thinking,
+then share it with the group.
+Then all experts will go on to the next step, etc.
+If any expert realises they're wrong at any point then they leave.
+The question is...
+
+## Graph-of-thoughts prompting
+
+A natural extension of the tree of thought idea is to add __aggregation__ of
+thought paths. This leads to generalizing T-o-t prompting to a
+__Graph-of-thoughts__ framework supporting arbitrary directed acyclic graph
+topologies [@besta2023graph]:
+
+![x](./figures/g-o-t.png){width=70%}
+
+## Graph-of-thoughts prompting cont.
+
+Of course, the added complexity requires a more complex architecture, e.g., the
+framework of @besta2023graph uses the following modules (that are adapted to the
+actual task): a
+
+
+* __Prompter__ for preparing prompts that encode graph structure,
+* __Parser__ that extracts __thought states__ from outputs and updates a dynamic
+  __Graph Reasoning State__ structure,
+* __Scorer__ and __Validator__ for evaluating thoughts, and
+* __Controller__ for controlling the steps of the graph building process.
+
+## Program-aided CoT reasoning with LLMs
+
+::: columns
+
+:::: column
+
+\bigskip An interesting research direction in CoT prompting [@lyu2023faithful;
+@gao2023pal] is to prompt an LLM for __formal reasoning__ or __calculation__
+steps (e.g., Python statements) and generate the final answer by executing the
+steps with an external interpreter or reasoner [figure from @gao2023pal].
+
+::::
+
+:::: column
+
+![From @davison2019commonsense.](./figures/program-aided.png){width=95%}\
+
+::::
+
+:::
+
+# Vulnerabilities
+
+## Vulnerabilities
+
+In addition to the usual problems associated with LLMs (possible hallucinations,
+dangerous or toxic content etc.), prompting methods that incorporate external
+input into LLM prompts can be vulnerable to and have to be safeguarded against
+various types of __adversarial prompting__:
+
++ __prompt injection__ influences the behavior of the LLM to do something
+  unintended by ignoring the original instructions, and, specifically
+* __prompt leaking__ injects content that makes the LLM leak
+  details of their prompts that may contain sensitive information.
 
 # References
 
