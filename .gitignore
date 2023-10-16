@@ -4,6 +4,7 @@
 !*.bib
 !*.md
 !*.png
+!*.jpg
 !figures/
 !.gitignore
 !.latexmkrc
