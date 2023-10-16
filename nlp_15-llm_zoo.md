@@ -9,7 +9,6 @@ colortheme: orchid
 fontsize: 12pt
 linkcolor: blue
 header-includes: |
-  \usepackage{calc}
   \let\emphasized\emph
   \let\strong\textbf
   \renewcommand{\textbf}[1]{\textcolor{blue}{\strong{#1}}}
@@ -375,36 +374,15 @@ XLM-RoBERTa proved that Wikipedia is not enough to train a competitive model.
   - The BLOOMZ variant went through multilingual multitask fine-tuning;
   - The most powerful multilingual LLM to date.
 
-# Open Source Models
-
-## Open Source Models
-
-Most of the models discussed above are closed source; often, the training data
-consists of proprietary corpora as well. There have been attempts to create
-free and open source LLMs:
-
-- LLaMa was trained on open data, although only LLaMa 2 is free to use;
-- BLOOM is fully open source, both the data and the model. However, its
-  development is finished and it is not updated further.
-
-## LAION
-
-[LAION](https://laion.ai/) (Large-scale Artificial Intelligence Open Network)
-aims to provide a 100\% free and open LLM pipeline including datasets, tools
-and models.
-
-A few select projects:
-
-- [Openclip](https://github.com/mlfoundations/open_clip): an open source
-  reimplementation of CLIP
-- LAION5B: a corpus of almost 6B image-text pairs
-- [OpenAssistant](https://open-assistant.io/): open source conversational AI
-  in development. You can also help by
-  - adding new conversations,
-  - labelling existing ones,
-  - etc.
-
 # Coding
+
+```{=latex}
+\begin{center}
+```
+![](figures/coding_monkey.jpg){width=60%}
+```{=latex}
+\end{center}
+```
 
 ## Coding
 
@@ -508,6 +486,35 @@ generate text based on a mixed textual and visual input.
 
 It uses frozen vision and text encoders (e.g. CLIP and Chinchilla) and only
 trains the LM that operates on their output.
+
+# Open Source Models
+
+## Open Source Models
+
+Most of the models discussed above are closed source; often, the training data
+consists of proprietary corpora as well. There have been attempts to create
+free and open source LLMs:
+
+- LLaMa was trained on open data, although only LLaMa 2 is free to use;
+- BLOOM is fully open source, both the data and the model. However, its
+  development is finished and it is not updated further.
+
+## LAION
+
+[LAION](https://laion.ai/) (Large-scale Artificial Intelligence Open Network)
+aims to provide a 100\% free and open LLM pipeline including datasets, tools
+and models.
+
+A few select projects:
+
+- [Openclip](https://github.com/mlfoundations/open_clip): an open source
+  reimplementation of CLIP
+- LAION5B: a corpus of almost 6B image-text pairs
+- [OpenAssistant](https://open-assistant.io/): open source conversational AI
+  in development. You can also help by
+  - adding new conversations,
+  - labelling existing ones,
+  - etc.
 
 # References
 
