@@ -111,10 +111,10 @@ independent.
 
 [XLNet](https://github.com/zihangdai/xlnet) [@yang2019xlnet]
 
-- does not use `[MASK]` tokens at all
+- does not use `[MASK]` tokens or MLM at all
 - **autoregressive** training task on a **permutated** sequence (still
   bidirectional context!) 
-- models dependencies between context and target
+- can model dependencies between context and target
 
 ## Performance
 
@@ -181,7 +181,7 @@ NLP tasks;
 Results:
 
 - GPT-1 achieves state of the art on 9 out of the 12 tasks it was tested on;
-- it exhibited some zero-short capabilities.
+- it exhibited some zero-shot capabilities.
 
 ## GPT-2
 
@@ -195,7 +195,7 @@ Larger model size allowed better zero-shot performance:
 
 Architectural and training changes:
 
-- Alternating dense and sparse attention leyers;
+- Alternating dense and sparse attention layers;
 - Sampled training (not all training data is used).
 
 Few-shot performance very close to SOTA on several tasks.
@@ -225,7 +225,7 @@ Bigger, better, multimodal (visual). Human-level performance on exams (top 10\%)
 Instructions:
 
 - Didn't help with the exams;
-- Skew **confidence calibration** (correlation of log-likelihood of the answer
+- Skews **confidence calibration** (correlation of log-likelihood of the answer
   with the actual performance).
 
 Two approaches to safety:
