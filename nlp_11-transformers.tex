@@ -54,162 +54,22 @@
 \newtheorem{lemma}{Lemma}
 \begin{document}
 
-\title{Natural Language Processing\\~~\\Lecture 11\\Contextual embeddings and\\
-  transformers}
+\title{Natural Language Processing\\~~\\Lecture 11\\Transformers and\\
+  contextual embeddings}
 % \author{}
 
-\date{2021}
+\date{2023}
 \maketitle
 
-\section{Contextual embeddings}
+\section[toc=Transformers]{Transformers}
 
-\begin{slide}[toc=Embedding limitations]{Word embedding limitations}
-  Traditional co-occurrence matrix-based word vectors and the first generation
-  of neural word embeddings had several important limitations:
-  \begin{itemize}
-  \item \emph{\gold Context independence:} One surface form has only one
-    representation. E.g., \emph{bank} will have the same embedding in the
-    sentences\medskip
-
-    \emph{I went to my bank to withdraw some money.}\medskip
-
-
-    \emph{We explored the river bank.}\medskip
-
-    even though the two meanings are clearly different.
-  \end{itemize}
-\end{slide}
-
-\begin{slide}[toc=]{Word embedding limitations cont.}
-  \begin{itemize}
-  \item \emph{\gold Words are black boxes:} Words have internal structure: they
-    consist of characters and can be composed of several morphemes, but
-    Word2vec, GloVe etc. ignore word internals.
-  \item \emph{\gold No useful representation for unseen or rare words:} As words
-    are treated as black boxes, these models cannot produce useful
-    representations for words that do not occur or are very rare in the training
-    corpus.
-  \item \emph{\gold Good coverage requires huge model dimensions:} A word gets a
-    meaningful representation only if it's explicitly included in the vocabulary
-    of the model, but the memory consumption is typically a linear function of
-    the covered vocabulary.
-  \end{itemize}
-\end{slide}
-
-\begin{slide}[toc=]{Word embedding limitations cont.}
-  The problem of utilizing internal word structure, handling OOV words and
-  reducing the vocabulary size was efficiently solved both by
-  \begin{itemize}
-  \item fastText embeddings, and, especially,
-  \item subword embeddings,
-  \end{itemize}
-  but these embeddings were still \emph{\gold static}, i.e., mapped tokens
-  of the same form to the same embedding vector.
-
-  One of the most important recent developments in NLP has been the appearance
-  of \emph{\gold contextual embeddings}, which, in contrast, can vary the
-  embedding of the same surface form from context to context to reflect
-  linguistic differences.
-\end{slide}
-
-\begin{slide}[toc=Contextual embeddings]{Contextual embeddings}
-  \emph{\gold Contextual embeddings} are word or subword representations
-  produced by deep networks (commonly LSTM or self-attention based) that are
-  (pre)trained on self-supervised, broadly language modeling objectives.
-  \bigskip
-
-  Unlike static embeddings, these representations cannot be simply stored and
-  deployed in the form of lookup tables, because they are \emph{dynamically}
-  computed for each token based on their context: For a
-  $\mathbf{w} = \langle w_1,\dots ,w_n \rangle$ input token sequence the network
-  produces an
-  $$
-  E(\langle w_1,\dots ,w_n \rangle) = \langle
-  E_\mathbf{w}(w_1),\dots,E_\mathbf{w}(w_n)\rangle
-  $$
-  embedding sequence.
-\end{slide}
-
-\begin{slide}[toc=]{Contextual embeddings cont.}
-  Because of this dynamic nature, the network itself has to be used as a
-  \emph{\gold feature extractor module}.\bigskip
-
-  The envisaged use of contextual embedding producing networks in NLP is similar
-  to the role of processing pipelines in traditional NLP: they are supposed to
-  produce feature vectors that are useful for downstream tasks, in fact, the
-  hope is that only little further processing (e.g., in the form of shallow
-  neural networks) is needed to build useful NLP models.\bigskip
-
-  The huge difference is that contextual embeddings can be learned in a
-  \emph{\gold self-supervised fashion}, without costly supervised training sets.
-\end{slide}
-
-\begin{slide}[toc=ELMo]{ELMo (Allen Institute for AI, 2018)}
-  ELMo (Embeddings from Language Models, \cite{peters2018deep}), the
-  first historically important contextual embedding model, learns word
-  representations via two standard one-directional language modeling
-  tasks.\bigskip
-
-  The architecture starts with producing context-independent embeddings using
-  character-level convolutions, and then uses forward and backward bidirectional
-  LSTM layers (their number, $n$, is a changeable hyperparameter) to predict the
-  next/previous token via weight-shared softmax layers:
-\end{slide}
-
-\begin{slide}[toc=]{ELMo cont.}
-  \hspace{0.3cm}\includegraphics[width=0.95\textwidth]{figures/elmo.eps}
-
-  \footnotesize{\hspace{3.3cm}(Figure from \cite{peters2018deep}).}
-  
-  \normalsize At first approximation, the context dependent embeddings are all
-  the $2n +1 $ intermediate representations produced by the model ($2n$
-  contextual LSTM-based and one static character-based).
-\end{slide}
-
-\begin{slide}[toc=]{ELMo cont.}
-  Although these vectors together can be considered the "full" ELMo
-  representation, for actual downstream NLP tasks ELMo's creators actually
-  suggest not to use this very high-dimensional representation, but a lower
-  dimensional combination of these vectors. Solutions they suggest are
-  \begin{itemize}
-  \item simply taking the concatenation of the output of the top LSTM layers (forward
-    and backward);
-  \item learning a task-specific linear combination of the ELMO representations on
-    the supervised task.
-  \end{itemize}
-\end{slide}
-
-\begin{slide}[toc=FLAIR]{FLAIR (Zalando, 2018)}
-  FLAIR \citep{akbik2018contextual} is a contextual embedding model closely
-  related to ELMo, but 
-  \begin{itemize}
-  \item consists exclusively of recurrent \emph{character level} language models
-    (a forward and a backward one),
-  \item produces token-level embeddings from the LSTM hidden states at the
-    first and last character of tokens (first character from the backward and
-    last from the forward LM).
-  \end{itemize}
-  FLAIR embeddings proved to be pretty useful in sequence tagging tasks, and
-  shallow models using them are currently 2nd best (!) in NER and POS-tagging.
-\end{slide}
-
-\begin{slide}[toc=]{FLAIR cont.}
-  \begin{center}
-    \includegraphics[width=1\textwidth]{figures/flair.eps}
-    \footnotesize{(Figure from \cite{akbik2018contextual}).}
-  \end{center}
-\end{slide}
-
-\section[toc=Transformers]{Interlude: Transformers}
-
-\begin{slide}[toc=Introduction]{Contextual embeddings and transformers}
-  The first contextual embeddings were produced by RNNs, but later developments
-  were made possible by the invention of \emph{\gold transformers}
+\begin{slide}[toc=Introduction]{Transformers}
+  The first influental seq2seq models were RNNs, but later developments were
+  made possible by the invention of \emph{\gold transformers}
   \citep{vaswani2017attention}, a new type of architecture using attention
   mechanisms as full-fledged layers, not as auxiliary RNN components.\bigskip
 
-  Before discussing the recent transformer-based embedding models, we discuss
-  shortly this new architecture and its building blocks:
+  The new architecture's main building blocks were:
   \begin{itemize}
   \item attention as soft dictionary lookup,
   \item self-attention layers, and
@@ -359,6 +219,145 @@
   single forward pass with teacher forcing.
 \end{slide}
 
+\section{Contextual embeddings}
+
+\begin{slide}[toc=Embedding limitations]{Word embedding limitations}
+  Traditional co-occurrence matrix-based word vectors and the first generation
+  of neural word embeddings had several important limitations:
+  \begin{itemize}
+  \item \emph{\gold Context independence:} One surface form has only one
+    representation. E.g., \emph{bank} will have the same embedding in the
+    sentences\medskip
+
+    \emph{I went to my bank to withdraw some money.}\medskip
+
+
+    \emph{We explored the river bank.}\medskip
+
+    even though the two meanings are clearly different.
+  \end{itemize}
+\end{slide}
+
+\begin{slide}[toc=]{Word embedding limitations cont.}
+  \begin{itemize}
+  \item \emph{\gold Words are black boxes:} Words have internal structure: they
+    consist of characters and can be composed of several morphemes, but
+    Word2vec, GloVe etc. ignore word internals.
+  \item \emph{\gold No useful representation for unseen or rare words:} As words
+    are treated as black boxes, these models cannot produce useful
+    representations for words that do not occur or are very rare in the training
+    corpus.
+  \item \emph{\gold Good coverage requires huge model dimensions:} A word gets a
+    meaningful representation only if it's explicitly included in the vocabulary
+    of the model, but the memory consumption is typically a linear function of
+    the covered vocabulary.
+  \end{itemize}
+\end{slide}
+
+\begin{slide}[toc=]{Word embedding limitations cont.}
+  The problem of utilizing internal word structure, handling OOV words and
+  reducing the vocabulary size was efficiently solved both by
+  \begin{itemize}
+  \item fastText embeddings, and, especially,
+  \item subword embeddings,
+  \end{itemize}
+  but these embeddings were still \emph{\gold static}, i.e., mapped tokens
+  of the same form to the same embedding vector.
+
+  One of the most important recent developments in NLP has been the appearance
+  of \emph{\gold contextual embeddings}, which, in contrast, can vary the
+  embedding of the same surface form from context to context to reflect
+  linguistic differences.
+\end{slide}
+
+\begin{slide}[toc=Contextual embeddings]{Contextual embeddings}
+  \emph{\gold Contextual embeddings} are word or subword representations
+  produced by deep networks (commonly LSTM or self-attention based) that are
+  (pre)trained on self-supervised, broadly language modeling objectives.
+  \bigskip
+
+  Unlike static embeddings, these representations cannot be simply stored and
+  deployed in the form of lookup tables, because they are \emph{dynamically}
+  computed for each token based on their context: For a
+  $\mathbf{w} = \langle w_1,\dots ,w_n \rangle$ input token sequence the network
+  produces an
+  $$
+  E(\langle w_1,\dots ,w_n \rangle) = \langle
+  E_\mathbf{w}(w_1),\dots,E_\mathbf{w}(w_n)\rangle
+  $$
+  embedding sequence.
+\end{slide}
+
+\begin{slide}[toc=]{Contextual embeddings cont.}
+  Because of this dynamic nature, the network itself has to be used as a
+  \emph{\gold feature extractor module}.\bigskip
+
+  The envisaged use of contextual embedding producing networks in NLP is similar
+  to the role of processing pipelines in traditional NLP: they are supposed to
+  produce feature vectors that are useful for downstream tasks, in fact, the
+  hope is that only little further processing (e.g., in the form of shallow
+  neural networks) is needed to build useful NLP models.\bigskip
+
+  The huge difference is that contextual embeddings can be learned in a
+  \emph{\gold self-supervised fashion}, without costly supervised training sets.
+\end{slide}
+
+\begin{slide}[toc=ELMo]{ELMo (Allen Institute for AI, 2018)}
+  ELMo (Embeddings from Language Models, \cite{peters2018deep}), the
+  first historically important contextual embedding model, learns word
+  representations via two standard one-directional language modeling
+  tasks.\bigskip
+
+  The architecture starts with producing context-independent embeddings using
+  character-level convolutions, and then uses forward and backward bidirectional
+  LSTM layers (their number, $n$, is a changeable hyperparameter) to predict the
+  next/previous token via weight-shared softmax layers:
+\end{slide}
+
+\begin{slide}[toc=]{ELMo cont.}
+  \hspace{0.3cm}\includegraphics[width=0.95\textwidth]{figures/elmo.eps}
+
+  \footnotesize{\hspace{3.3cm}(Figure from \cite{peters2018deep}).}
+  
+  \normalsize At first approximation, the context dependent embeddings are all
+  the $2n +1 $ intermediate representations produced by the model ($2n$
+  contextual LSTM-based and one static character-based).
+\end{slide}
+
+\begin{slide}[toc=]{ELMo cont.}
+  Although these vectors together can be considered the "full" ELMo
+  representation, for actual downstream NLP tasks ELMo's creators actually
+  suggest not to use this very high-dimensional representation, but a lower
+  dimensional combination of these vectors. Solutions they suggest are
+  \begin{itemize}
+  \item simply taking the concatenation of the output of the top LSTM layers (forward
+    and backward);
+  \item learning a task-specific linear combination of the ELMO representations on
+    the supervised task.
+  \end{itemize}
+\end{slide}
+
+\begin{slide}[toc=FLAIR]{FLAIR (Zalando, 2018)}
+  FLAIR \citep{akbik2018contextual} is a contextual embedding model closely
+  related to ELMo, but 
+  \begin{itemize}
+  \item consists exclusively of recurrent \emph{character level} language models
+    (a forward and a backward one),
+  \item produces token-level embeddings from the LSTM hidden states at the
+    first and last character of tokens (first character from the backward and
+    last from the forward LM).
+  \end{itemize}
+  FLAIR embeddings proved to be pretty useful in sequence tagging tasks, and
+  shallow models using them are currently 2nd best (!) in NER and POS-tagging.
+\end{slide}
+
+\begin{slide}[toc=]{FLAIR cont.}
+  \begin{center}
+    \includegraphics[width=1\textwidth]{figures/flair.eps}
+    \footnotesize{(Figure from \cite{akbik2018contextual}).}
+  \end{center}
+\end{slide}
+
 \section{Transformer-based contextual embeddings}
 
 \begin{slide}[toc=Introduction]{Transformer-based embeddings}
@@ -440,14 +439,35 @@
   \end{centering}
 \end{slide}
 
-\begin{slide}[toc=Recent trends]{Recent trends}
+
+\begin{slide}[Fine\-tuning]{Fine-tuning contextual embeddings}
+  The contextual embeddings produced by a pretrained language model are not
+  necesserily optimal for concrete downstream tasks (classification, semantic
+  search etc.), and therefore the pretrained weights can be \emph{\gold fine-tuned} to
+  increase performance.
+
+  \bigskip 
+  
+  Fine-tuning can performed
+  \begin{itemize}
+  \item using \emph{\gold unsupervised tasks} on a corpus that is more representative of the
+    target domain (the tasks are frequently identical to the pretraining tasks); or
+  \item on a \emph{\gold supervised task} that is identical or related to the
+    target task, e.g., similarity ranking for semantic search.
+  \end{itemize}
+  
+\end{slide}
+
+\section{Later trends}
+
+\begin{slide}[toc=Later trends]{Later trends}
   Newer models have been able to improve on the state-of-the-art in NLP tasks
   again and again, but typically with an \emph{\gold increased number of
     parameters} and \emph{\gold on larger datasets}:\bigskip
 
-  While the original ELMo model had 93.6 million parameters, GPT-3, the latest
-  GPT version has 175 billion(!) parameters, and the dataset size increased from
-  800 million to 300 billion tokens.
+  While the original ELMo model had 93.6 million parameters, GPT-3 has 175
+  billion(!) parameters, and the dataset size increased from 800 million to 300
+  billion tokens.
 \end{slide}
 
 \begin{slide}[toc=Distillation]{Knowledge distillation}
@@ -492,7 +512,7 @@
 \end{slide}
 
 \begin{slide}[toc=Few-shot learning]{Few- one- and zero-shot learning}
-  An interesting research direction is to try to use the model directly, without
+  An interesting direction is to try to use the model directly, without
   added layers and gradient updates on downstream tasks. Some recent models,
   most importantly, GPT-3 \citep{brown2020language} can perform surprisingly
   well on various downstream tasks that are explained in the input. There are

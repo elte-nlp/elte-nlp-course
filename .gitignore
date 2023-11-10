@@ -2,9 +2,9 @@
 !*.tex
 !*.eps
 !*.bib
-!*.pdf
 !*.md
 !*.png
+!*.jpg
 !figures/
 !.gitignore
 !.latexmkrc

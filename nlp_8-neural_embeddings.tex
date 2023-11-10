@@ -1,5 +1,5 @@
 \documentclass[style=upen, size=14pt]{powerdot}
-\usepackage{natbib}
+\usepackage[round]{natbib}
 \usepackage{bibentry}
 \usepackage{mathtools}
 \definecolor{arany}{RGB}{255,242,0}
@@ -440,22 +440,34 @@ estimated on the basis of target word--context word co-occurrence counts as
 \end{slide}
 
 \begin{slide}[toc=Intrinsic]{Intrinsic evaluation}
-  The two most used intrinsic metrics are
-  \begin{itemize}
-  \item how well the \emph{\gold cosine similarity} of two representations,
-    $\frac{E(w_1)\cdot E(w_2)}{\|E(w_1)\|\times \|E(w_2)\|} $, correlates with
-    human-assigned similarity scores;
-  \item how well similar \emph{\gold relationships} between words, e.g,.
-    $king:queen$ and $man:woman$ correspond to similar geometric relationships
-    between the vectors. It is typical to look at the \emph{difference} between
-    the vectors, i.e., whether $E(king)-E(queen)\approx E(man)-E(woman)$, or, in
-    a slightly different formulation, whether the word whose embedding is the
-    closest to $E(king)-E(queen) + E(woman)$ is $man$.
-  \end{itemize}
+  The two most used intrinsic ways to evaluate word embeddings is to test
+  their correlation with human judgement in two lexical semantic tasks:
+  \begin{enumerate}
+    \item \emph{\gold Word similarity}
+    \item \emph{\gold Analogy}
+  \end{enumerate}
 \end{slide}
 
-\begin{slide}[toc=]{Intrinsic evaluation cont.}
-  These intrinsic metrics can be nicely visualized using dimension reduction
+\begin{slide}[toc=]{Intrinsic evaluation -- Similarity}
+  Similar words should have similar vectors.
+  \begin{itemize}
+    \item semantic: dog -- hound
+    \item grammatical: dog\textbf{s} -- pear\textbf{s}
+  \end{itemize}\bigskip
+
+  The similarity of two words in measured by the
+  \emph{\gold cosine similarity} of their representations:
+  $\frac{E(w_1)\cdot E(w_2)}{\|E(w_1)\|\times \|E(w_2)\|}$.\bigskip
+
+  \begin{small}
+    Note: normalization is important as the vectors' length is roughly
+    proportional to the logarithm of the word's frequency
+    \citep{arora2016latent}.
+  \end{small}
+\end{slide}
+
+\begin{slide}[toc=]{Intrinsic evaluation -- Similarity cont.}
+  Similarity can be nicely visualized using dimension reduction
   techniques such as t-SNE or UMAP, e.g., 
   \begin{center}
     \includegraphics[width=0.8\textwidth]{figures/w2v_tsne.eps}
@@ -464,13 +476,37 @@ estimated on the basis of target word--context word co-occurrence counts as
   \end{center}  
 \end{slide}
 
-\begin{slide}[toc=]{Intrinsic evaluation cont.}
+\begin{slide}[toc=]{Intrinsic evaluation -- Analogy}
+  Analogy tasks test how well \emph{\gold relationships}
+  between words, e.g,. $king:queen$ and $man:woman$ correspond to similar
+  geometric relationships between their vectors.\bigskip
+
+  The relationships correspond to the vector \emph{difference}, i.e.
+  $E(king)-E(queen)\approx E(man)-E(woman)$\bigskip
+
+  Or, in a slightly different formulation, whether the word whose embedding is
+  the closest to $E(king)-E(queen) + E(woman)$ is $man$.
+\end{slide}
+
+\begin{slide}[toc=]{Intrinsic evaluation -- Analogy cont.}
+  Examples for semantic and syntactic analogies:
+  \begin{center}
+    \includegraphics[width=0.8\textwidth]{figures/analogy.eps}
+    
+    (\footnotesize Figure from \citet{mikolov2013linguistic}.)
+  \end{center}  
+\end{slide}
+
+\begin{slide}[toc=]{Intrinsic evaluation -- Datasets}
   There are also purpose built \emph{datasets} for intrinsic evaluation, e.g.,
   \begin{itemize}
   \item the
-    \href{http://alfonseca.org/eng/research/wordsim353.html}{WorsSim-353}
+    \href{http://alfonseca.org/eng/research/wordsim353.html}{WordSim-353}
     dataset containing 353 English word pairs with semantic similarity scores
-    between 1.0 and 10.0;
+    between 0.0 and 10.0. (Note: the original dataset confused \emph{similarity}
+    with \emph{relatedness}; the linked version mostly fixes this.)
+  \item \href{https://fh295.github.io/simlex.html}{SimLex-999} superceded
+    WordSim-353 with 999 word pairs with a similarity score on the same scale.
   \item \href{https://vecto.space/projects/BATS/}{BATS} (The Bigger Analogy Test
     Set) containing 98000 analogy questions for testing the correspondence
     between word analogies and vector offsets.
@@ -563,6 +599,8 @@ estimated on the basis of target word--context word co-occurrence counts as
   \bibliographystyle{plainnat}
   \nobibliography{nlp_course.bib}
   \begin{footnotesize}
+
+    \bibentry{arora2016latent}\medskip
     
     \bibentry{bengio2003neural}\medskip
 
@@ -572,14 +610,13 @@ estimated on the basis of target word--context word co-occurrence counts as
 
     \bibentry{jurafsky2019speech}\medskip
 
-    \bibentry{levy2014neural}\medskip
-  
-    
   \end{footnotesize}
 \end{slide}
 
 \begin{slide}[toc=]{References cont.}
   \begin{footnotesize}
+
+    \bibentry{levy2014neural}\medskip
 
     \bibentry{levy2015improving}\medskip
 
@@ -587,15 +624,20 @@ estimated on the basis of target word--context word co-occurrence counts as
 
     \bibentry{mikolov2013distributed}\medskip
     
+  \end{footnotesize}
+\end{slide}
+
+\begin{slide}[toc=]{References cont.}
+  \begin{footnotesize}
+
+    \bibentry{mikolov2013linguistic}\medskip
+
     \bibentry{pennington2014glove}\medskip
     
   \end{footnotesize}
 \end{slide}
 
-
 \end{document}
-
-
 
 %%% Local Variables:
 %%% mode: latex 
