@@ -124,11 +124,11 @@ the text representations used in modern language models:
 A prominent way of producing these discrete representations relies on 
 __Discrete Variational Autoencoders__.
 
-# Variational Autoencoders
+# Variational Autoencoders^[This and the next section on discrete VAEs closely follow the "Variational autoencoders" chapter of @pml2Book.]
 
 ## Variational methods
 
-The following situation frequently arises in probabilistic modeling: 
+The following situation frequently arises in probabilistic modeling:
 
 + We are interested in the properties of a complex $p^{*}$ distribution,
 
