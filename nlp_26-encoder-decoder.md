@@ -649,7 +649,105 @@ need for stronger pre-training methods has emerged. With additional pre-training
 tasks, these models have a better generalization capability, and even a
 possibility for few-shot learning.
 
-# Mini Model-Zoo
+# Mini Model Zoo
+
+## TrOCR
+
+TrOCR [@li2023trocr] is a simple, transformer-based encoder-decoder model
+performing __optical character recognition__.
+
+It is based on the original, full encoder-decoder transformer architecture, and
+consists of 
+
++ a __visual transformer__ as encoder, and
++ a __text transformer__ decoder.
+
+Both the encoder and decoder's weights are initalized from pretrained unimodal
+models, and are pretrained and fine-tuned on OCR-specific training data.
+
+## TrOCR: encoder
+
+::: columns
+:::: {.column width=40%}
+\ 
+
+The encoder resizes the input to a fixed size, decomposes it into patches, and
+linearly projects each flattened patch to an embedding. The absolute spatial positions of
+the patches are represented by learnable 1D (!) positional embeddings.
+::::
+:::: {.column width=60%}
+![TrOCR encoder from @li2023trocr.](figures/trocr_encoder.png){height=60%}
+::::
+:::
+
+## TrOCR: decoder
+
+
+The decoder is a standard transformer decoder cross-attending to the output of
+the encoder:
+
+![TrOCR decoder from @li2023trocr.](figures/trocr_decoder.png){height=60%}
+
+## TrOCR: initialization and training
+
++ The encoder weights are initialized using pretrained visual transformer weights
+  (DeiT or BEiT).
++ The decoder weights are initialized using decoder-only LLM weights (RoBERTa or
+  MiniLM), so structural differences (size, missing cross-attention) are taken
+  care of by manually set mappings and random initialization.
++ The full model is first __pretrained__ on a very large synthetic dataset and
+  then on a smaller collection of real-life datasets.
++ Final testing on downstream tasks was done using task-specific fine-tuning.
+
+## LLaVA
+
+LLaVA [Large Language and Vision Assistant, @liu2023visual] is a large
+vision-language model which was trained for __visual instruction following__ by
+extending an instruction fine-tuned LLM to be able to handle
+multimodal instructions mixing visual and linguistic input.
+
+LLaVA is based on
+
++ __Vicuna__, an instruction fine-tuned LLaMA, which is a transformer decoder-based
+  LLM,
++ a pretrained, ViT-based __CLIP__ image encoder, and a
++ a trainable projection matrix mapping visual CLIP embeddings into the word
+  embedding input space of the LLaMA model.
+
+## LLaVA cont.
+
+Architecturally, unlike TrOCR, LLaVA is not based on the original full transformer
+architecture, because the decoder is not cross-attending to the encoded visual
+input, it processes it with causal self-attention.
+
+![LLaVA architecture from @liu2023visual.](figures/llava.png){width=80%}
+
+## LLaVA: dataset
+
+The visual instruction following dataset was generated using language-only GPT-4
+as a strong teacher:
+
++ The visual context is always a single image.
++ The image's description was provided in two forms:
+  + as a list of captions describing the context image, and
+  + as a list of bounding box coordinates together with their respective type
+    [figure from @liu2023visual].
+
+![From @liu2023visual.](figures/llava_context.png){width=100%}
+
+## LLaVA: dataset
+
+Using images from the [COCO dataset](https://cocodataset.org), GPT-4 was
+few-shot prompted to generate
+
++ __conversations__ between an assistant and a user asking questions about the image,
++ __detailed descriptions__ of the image, and
++ __in-depth step-by-step reasoning__ based on the image.
+
+![Synthetic data generating prompt detail from
+@liu2023visual.](figures/llava_prompt.jpeg){width=100%}
+
+## LLaVA: training
 
 # References
 
