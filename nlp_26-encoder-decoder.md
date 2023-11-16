@@ -749,6 +749,17 @@ few-shot prompted to generate
 
 ## LLaVA: training
 
+In general, cross-entropy loss was only generated for the assistant answer
+parts of the examples. Training consisted of two phases:
+
++ __Pretraining__: First, the model was pretrained with frozen CLIP-encoder and
+  Vicuna decoder on 595K image-caption pairs with simple image description
+  instruction contexts. This can be interpreted as training the projection
+  matrix to be a visual tokenizer for Vicuna.
++ __End-2-End fine-tuning__: The Vicuna weights were unfreezed, and the
+  projection matrix + LLM weights were jointly fine-tuned on the GPT-4 generated 
+  158K multimodal instruction following dataset.
+
 # References
 
 ## References {.allowframebreaks} 
