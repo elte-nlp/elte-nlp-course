@@ -5,6 +5,7 @@
 !*.md
 !*.png
 !*.jpg
+!*.jpeg
 !figures/
 !.gitignore
 !.latexmkrc
