@@ -146,7 +146,7 @@ parameterized by some $\Theta$ adjustable parameters.
 Approximation requires some kind of distance metric, and the KL-divergence
 
 $$ \mathbb{KL}(p^*\Vert q) = \mathbb E_{\mathbf x \sim p^*}\log\frac{p^*(\mathbf
-x)}{q(\mathbf x)}d\mathbf x $$
+x)}{q(\mathbf x)} $$
 
 would be a natural choice, but, of course, calculating this is also problematic,
 because it would require calculating an expectation over $p^*$.
@@ -156,7 +156,7 @@ because it would require calculating an expectation over $p^*$.
 Choosing the reverse KL-divergence
 
 $$ \mathbb{KL}(q\Vert p^*) = \mathbb E_{\mathbf x\sim q}\log\frac{q(\mathbf
-x)}{p^*(\mathbf x)}d\mathbf x $$
+x)}{p^*(\mathbf x)} $$
 
 would take the expectation over $q$ which is assumed to be tractable but still
 requires pointwise evaluation of $p^*$, so the __variational objective__ is to
@@ -164,14 +164,14 @@ minimize the "quasi KL-divergence" between $q$ and the unnormalized $\tilde
 p$: We try to find
 
 $$ \underset{\Theta}{\operatorname{argmin}} \left(\mathbb E_{\mathbf x \sim q_\Theta}\log\frac{q_\Theta(\mathbf
-x)}{\tilde p(\mathbf x)}d\mathbf x\right).$$
+x)}{\tilde p(\mathbf x)}\right).$$
 
 ## Variational methods cont.
 
 In terms of our target $p^*$ the objective can be written as 
 
 $$ \mathbb E_ {\mathbf x \sim q_\Theta}\log\frac{q_\Theta(\mathbf x)}{p^*(\mathbf
-x)Z}d\mathbf x = \mathbb{KL}(q_\Theta\Vert p^*)-\log Z.$$
+x)Z} = \mathbb{KL}(q_\Theta\Vert p^*)-\log Z.$$
 
 Since $\mathbb{KL}(q_\Theta\Vert p^*)\geq 0$ is guaranteed by the Gibbs
 inequality, all values will be upper bounds of $-\log Z$, and the task is to
