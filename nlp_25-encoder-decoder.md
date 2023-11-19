@@ -48,7 +48,7 @@ is -- at least in part -- visual, others include
 + __visual question answering (VQA)__: answer a question about an image,
 + __natural language visual reasoning (NLVR)__: determine whether a natural
 language statement is true about two images,
-+ __multimodal tramslation__: translate from a language to another based on a
++ __multimodal translation__: translate from a language to another based on a
   context image,
 + __multimodal chat__: chat with mixed image and text user input.
 
@@ -759,6 +759,19 @@ parts of the examples. Training consisted of two phases:
 + __End-2-End fine-tuning__: The Vicuna weights were unfreezed, and the
   projection matrix + LLM weights were jointly fine-tuned on the GPT-4 generated 
   158K multimodal instruction following dataset.
+
+## LLaVA 1.5
+
+Recently (Oct 2023), a new, improved version 1.5 of LLaVA was released
+[@liu2023improved], which is currently the best performing VLM on public VL
+benchmarks. The changes were relatively minor:
+
++ using a 3-layer perceptron for the vision-language mapping instead of a linear
+  projection,
++ using a larger LLaMA model (13B parameters instead of 7B),
++ upscaling the input image resolution,
++ refining prompts,
++ training on additional academic VQA datasets.
 
 # References
 
