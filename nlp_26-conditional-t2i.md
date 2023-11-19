@@ -240,7 +240,7 @@ Forward (encoding) and reverse (decoding) diffusions could be seen as a VAE equi
 
 ## DDPM: Denoising Diffusion Probabilistic Models
 
-![DDPM processing chain from [@ho2020denoising]](figures/ddim_chain.png){height=20%}
+![DDPM processing chain from [@ho2020denoising]](figures/ddpm_chain.png){height=20%}
 
 **Forward process**
 
@@ -250,7 +250,7 @@ Each step $q(x_t|x_{t-1})=\mathcal{N}(x_t;\sqrt{1-\beta_t}x{t-1}, \beta_tI)$ Mar
 
 ## DDPM: Denoising Diffusion Probabilistic Models
 
-![DDPM processing chain from [@ho2020denoising]](figures/ddim_chain.png){height=20%}
+![DDPM processing chain from [@ho2020denoising]](figures/ddpm_chain.png){height=20%}
 
 **Reverse process**
 
@@ -324,12 +324,287 @@ DDPM works with small step sizes accumulating around $500-1000$ steps of generat
 
 ![The results depend on the step at which the images are interpolated. "Deeper" mixing results in high fidelity, but the original information is lost [@ho2020denoising]](figures/ddpm_interpol_result.png){height=70%}
 
+## DDIM: Denoising Diffusion Implicit Models
 
-# Multi-stage networks (+ superres)
+DDPM reports that sampling a batch of $128$ images of $256\times256$ size takes around $300$ seconds to sample. This is due to the large number of small denoising steps.
 
-# Costumization (DreamBooth, Adapters, ControlNet)
+DDIM [@song2022denoising] solves this by loosening the Markovian constraint and using fewer denoising steps by formulating implicit steps during the forward and reverse processes.
 
-# Extra methods (inpaint, animate(?), instruct, poison, realistic fill) 1-2 slides each
+![DDIM processing chain from [@song2022denoising]](figures/ddim_chain.png){height=20%}
+
+## DDIM: Redefine as non-Markovian
+
+In DDPM @ho2020denoising formulates an approach by which we can directly compute the forward distribution $q(x_t|x_0)$ for each step. Utilizing this property we can directly compute $L$ at any given step $t$ with a known $x_0$, as DDPM loss depends on the predicted error $\epsilon_\theta(x_0, t)$ only.
+
+DDIM extends this loss even further by using a $\gamma$ positive coefficient vector to weigh each step (as $t$ only influences the added noise $\epsilon$ we denote the $t$ dependency with $\epsilon^t$):
+
+$L_{\gamma}(\epsilon_\theta) = \mathbb{E}_{x_0, \epsilon^t, t} \sum\limits_{t=1}^T\gamma_t||\epsilon^t - \epsilon_\theta^t(x_0, \epsilon^t)||^2$
+
+By fixing $\gamma = 1$ for all steps we get the original DDPM loss.  
+
+## DDIM: Redefine as non-Markovian
+
+If we select a set of $Q$ forward distributions in such a way that they can be marginalized to the same $q(x_t|x_0)$ distribution DDPM uses we get the same traning goal thus the same DDPM trained models could be used for forward and reverse processes, even if these processes are non-Markovian due to the selection of our $Q$ distributions.
+
+Such a non-Markovian process exists for a given vector of positive $\sigma$ stds. It can be defined by the generative process first.
+
+$q_\sigma(x_{1:T}|x_0) = q_\sigma(x_T|x_0)\prod\limits_{t=2}^Tq_\sigma(x_{t-1}|x_{t},x_0)$
+
+## DDIM: Redefine as non-Markovian
+
+By taking the posterior (with Bayes) of $q_\sigma(x_{t-1}|x_{t},x_0)$ we get $q_\sigma(x_{t}|x_{t-1},x_0)$. By marginalizing over $x_{t-1}$ we get $q_\sigma(x_{t}|x_{0})$, thus we can use the ($\gamma$) generalized DDPM training scheme.
+
+We can redefine the reverse process $p_\theta(x_{t-1}|x_t)$ as well, which should approximate $q_\sigma(x_{t-1}|x_{t},x_0)$. During generation $x_0$ is unknown, but we can approximate it if we know all the errors $\epsilon_t$. We have an approximator for this as well, which is $\epsilon_\theta^t$.
+
+Let $f_\theta(x_t)$ approximate this $x_0$ original input via subtracting the properly scaled error approximation $\epsilon_\theta^t$ from $x_t$.
+
+The reverse is then $p_\theta(x_{t-1}|x_t) = q_\sigma(x_{t-1}|x_t, f_\theta(x_t))$ for $t>1$ and $\mathcal{N}(f_\theta(x_1), \sigma_1^2I)$ for $t=1$.
+
+
+## DDIM: Redefine as non-Markovian
+
+The optimization goal can then be formulated as the ELBO, where $\simeq$ is used to describe equal up to a constant that does not depend on $\theta$ for $t>1$:
+
+$\mathbb{E}_{x_{0:T}}(\sum\limits_{t=2}^TD_{KL}(q_\sigma(x_{t-1}|x_{t},x_0)||p_\theta(x_{t-1}|x_t)) - logp_\theta(x_1|x_0))$
+
+$\simeq \mathbb{E}_{x_0, x_t}(\sum\limits_{t=2}^TD_{KL}(q_\sigma(x_{t-1}|x_{t},x_0)||q_\sigma(x_{t-1}|x_{t},f_\theta(x_t))))$
+
+$\simeq \mathbb{E}_{x_0, x_t}(\sum\limits_{t=2}^T||x_0 - f_\theta(x_t)||^2) \simeq \mathbb{E}_{x_0, \epsilon, x_t}(\sum\limits_{t=2}^T||\epsilon - \epsilon_\theta^t(x_0, \epsilon)||^2)$
+$=L_{\gamma}(\epsilon_\theta)+C$
+
+Given this we get the original DDPM loss back if we select the correct $\gamma$ and $C$ terms.
+
+## DDIM reverse process
+
+If we define $p_\theta(x_{t-1}|x_t) = q_\sigma(x_{t-1}|x_t, f_\theta(x_t))$ and use the reparametrization trick on it (without the details contained by [@song2022denoising]) we get the following:
+
+$x_{t-1} = \sqrt{\alpha_{t-1}}f_\theta(x_t)+\sqrt{1-\bar\alpha_{t-1}-\sigma_t^2}\epsilon_\theta^t + \sqrt{\sigma_t}\epsilon$
+
+Where the first term is the scaled predicted $x_0$ input (which includes the $\epsilon_\theta^t$ error term as well), the second term is the "direction" that points to $x_t$ and the third random term is the independent noise difference between $x_{t-1}$ and $x_t$.
+
+## DDIM reverse process
+If we select $\sigma_t = \sqrt{(1-\bar\alpha_{t-1})/(1-\bar\alpha_t)}\sqrt{1-\bar\alpha_t/\bar\alpha_{t-1}}$ for all $t$ the forward process is Markovian and the reverse process is DDPM. 
+
+If $\sigma_t = 0$, then the forward process becomes deterministic given a known $x_0$ and $x_{t-1}$. The reverse process then will not contain the independent noise term, thus a fixed procedure could be used for prediction.
+
+We can also interpolate between the two versions by a hyperparameter $\eta$:
+
+$\sigma_t = \eta \sqrt{(1-\bar\alpha_{t-1})/(1-\bar\alpha_t)}\sqrt{1-\bar\alpha_t/\bar\alpha_{t-1}}$
+
+## DDIM accelerated generation
+
+![DDIM accelerated generation from [@song2022denoising]](figures/ddim_accel.png){height=30%}
+
+Since we can now use a fixed reverse process (with the exception that we have to predict $x_0$ from $x_t$) we can directly sample from the reverse process at any set of $x_t$-s including skipping steps, or subsampling steps. @song2022denoising even considers continuous time-based sampling.
+
+
+## DDIM accelerated generation
+
+Accelerated generation holds for a $\tau_i \in [0, T]$ set of steps as long as $q_\sigma(x_{\tau_i}|x_{\tau_{i-1}},x_0)$ is known, as the reverse process could then approximate $q_\sigma(x_{\tau_{i-1}}|x_{\tau_i},x_0)$ by predicting $\epsilon_\theta^{\tau_i}$ which is utilized in $f_\theta(x_{\tau_i})$ as well.
+
+The important part is that only by approximating $\epsilon_\theta^t$ this rescheduling of sampling steps is possible (at least in the DDIM $\eta=0$ case), as we can mathematically account for the changes.
+
+This way the sampling is not tied to the training (forward) step number and about $10-50$ times faster generation is possible facilitating the use of larger models in close-to-real-time applications.
+
+## DDIM results
+
+![DDIM results from [@song2022denoising]. The model was trained on T=1000 forward steps. DDIM slightly benefits from longer sampling as well (estimation errors add less noise as the estimated distributions are closer to Gaussians which we approximate them with). $\hat\sigma$ stands for the original DDPM parameter designed for 1000 steps.](figures/ddim_results.png){height=60%}
+
+## Beyond DDIM
+
+By reformulating DDIM as an ODE solver (ordinary differential equation) @song2022denoising conclude that it is equivalent to the Euler method of ODE solving. Other, expanded ODE solvers could also be used such as DPM++ propozed by @lu2023dpmsolver. Late 2023 these are the most popular diffusion samplers. There has been some research in the domain of higher-order ODE solvers, but no wide-spread use could be observed yet.
+
+@karras2022elucidating also proposes new ways of noise scheduling beyond the linear $\beta$-s used by DDPM and DDIM.
+
+## Guided Diffusion - Classifier
+
+Diffusion guidance is also possible similarly to the case of text dependent GANs and VAEs. In this case our diffusion model's estimator should be perturbed by the guidance signal (e.g. text embedding).
+
+Given a noise estimator $\epsilon_\theta$ in a reverse process we add conditional shift additively to this estimation of the noise term.
+
+$\hat\epsilon_\theta(x_t,y) = \epsilon_\theta(x_t,y) + s\sigma_t \nabla_{x_t}logp_\phi(y|x_t)$
+
+Where $s$ is the guidance scale, $p_\phi(y|x_t)$ is a classifier that guides the diffusion process using the derivative of the log-likelihood with respect to the class we want to generate.
+
+
+## Guided Diffusion - Classifier-free
+
+This needs the diffusion model to be trained with a classifier as well, and the classifier gradients are also needed during generation. In order to avoid this classifier-free networks operate on an unconditional estimator $\epsilon_\theta(x_t)$ and a conditional estimator $\epsilon_\theta(x_t,y)$ by differing from the unconditioned prediction $\hat\epsilon_\theta(x_t,y) = \epsilon_\theta(x_t,y) + s(\epsilon_\theta(x_t,y)-\epsilon_\theta(x_t))$
+
+This is essentially done by adding $0$ labels to the classifier during training, thus the classifier-free estimator is just $\epsilon_\theta(x_t,0)$.
+
+Read @ho2022classifierfree for more details!
+
+## CLIP-guided Diffusion: GLIDE
+
+@nichol2022glide introduces a method where they replace the classifier with a CLIP [@radford2021learning] dot-product similarity measure.
+
+$\hat\epsilon_\theta(x_t,y) = \epsilon_\theta(x_t,y) + s\sigma_t \nabla_{x_t}(f(x_t)\cdot g(y))$
+
+Here $f$ is the image encoder and $g$ is the text encoder. Importantly this CLIP version is trained with noisy images in order to match the noise level of the diffusion model.
+
+@nichol2022glide also concludes that classifier-free guidance seems to be more effective on niche tasks, than CLIP-guidance. Here text is encoded by a GPT-like model utilizing the last embedding vector.
+
+## GLIDE results
+
+![GLIDE results from [@nichol2022glide].](figures/glide_results.png){height=75%}
+
+## Latent Diffusion
+
+Latent diffusion refers to the method, where diffusion is performed in the latent space of a VAE or GAN. DALL-E 2 [@ramesh2022hierarchical] and Stable Diffusion [rombach2022highresolution] offer two popular examples to this method.
+
+While DALL-E 2 uses a CLIP-like model as the VAE with a Transformer-based diffusion prior, Stable Diffusion utilizes a VQ-GAN generator and a U-Net style prior. 
+
+## DALL-E 2
+
+![DALL-E 2 architecture from [@ramesh2022hierarchical]](figures/dalle2_arch.png){height=75%}
+
+## DALL-E 2 Decoder
+
+DALL-E 2 includes a VAE that is built from the CLIP text encoder and a diffusion model that is used as an image decoder (thus OpenAI also names the model behind DALL-E 2 "unCLIP"). This decoder is conditioned on CLIP image embeddings and optionally on caption text embeddings as well. It uses GLIDE's architecture and includes some classifier-free improvements by dropping the CLIP embedding and caption embedding occasionally during the decoder training.
+The training uses Sharpness Aware Minimization [@foret2021sharpnessaware].
+
+The decoder uses $\eta>0$ in the DDIM process to allow for variations in the generated images.
+
+
+## DALL-E 2 Prior
+
+The priors they compare for the VAE are DALL-E (1) style autoregressive prior, and a diffusion prior that turns out to be superior. The diffusion process uses Transformer decoder as well in order to predict the next latent token version. The loss is not $\epsilon$-based but an L2 loss between the predicted and the true latent representation. This is interpreted as a loss on the predicted $x_0$ parametrized by $f_\theta(x_t, t, y)$ in the diffusion process.
+
+During generation the prior is generated two times, the one with the higher dot-product with the text embedding is selected.
+
+## Stable Diffusion - Architecture
+
+![Stable Diffusion architecture from [@rombach2022highresolution]](figures/stable_arch.png){height=75%}
+
+## Stable Diffusion - VQ-GAN
+
+In Stable Diffusion [@rombach2022high], to project the images to the latent space a VQ-GAN from @esser2021taming is utilized to encode the images. The VQ-GAN consists of a VQ-VAE generator and a discriminator on adversarial and perceptual loss. This in the case of Stable Diffusion the VQ-VAE gets a slight KL-divergence regularization to produce latent representations closer to a Gaussian distribution.
+
+Furthermore the discriminator is later ignored and only the generator VQ-VAE is used in a way that the quantization is merged with the decoder. Compression factors of $4-8$ found to perform best using 2D representations.
+
+## Stable Diffusion - VQ-GAN
+
+![VQ-GAN [@rombach2022highresolution]](figures/stable_vqgan.png){height=70%}
+
+## Stable Diffusion - Prior
+
+The prior itself is a convolutional U-Net architecture with cross-attention blocks in every layer. These cross-attentions attend to an encoded conditional modality. This U-Net performs the reverse diffusion process (predicting $\epsilon_\theta$).
+
+Modalities that are encoded as a condition could be text (transformer-decoder or CLIP), image, segmentation masks, etc... Even low-resolution images could be used to construct a latent super resolution model. Classifier-free guidance is also explored and beneficial.
+
+This is a latent diffusion which implies the name LDM (Latent Diffusion Model) which is a generalization of the model used in Stable Diffusion.
+
+## Stable Diffusion - Examples
+
+# Extensions to Diffusion Models
+
+## Multi-stage Networks
+
+Multi-stage networks are utilized to improve efficiency of diffusion and latent diffusion models. DALL-E 2 [@ramesh2022hierarchical] uses a multi-stage diffusion in the pixel space with a CLIP + caption-based text-conditional super-resolution model. The DALL-E 3 paper [@BetkerImprovingIG] also mentions that they use a three-stage diffusion model on different resolutions. Details are not disclosed.
+
+![High resolution DALL-E 3 generation from [@BetkerImprovingIG]](figures/dalle3_results.png){height=27%}
+
+
+
+## Multi-stage Networks
+
+Imagen [@saharia2022photorealistic] uses a text-only condition on the prior diffusion, then two text-conditioned super-resolutions in the pixel space.
+
+![Imagen architecture from [@saharia2022photorealistic]](figures/imagen_arch.png){height=53%}
+
+## Multi-stage Networks
+
+Autoregressive models could also be used in a multi-stage fashion. Parti [@yu2022scaling] for example consists of a ViT-VQ-GAN tokenizer and detokenizer to encode and decode images. The autoregressive model is a full-stack Transformer where the condition is encoded and the image is generated.
+
+![Parti architecture from [@yu2022scaling]](figures/parti_arch.png){height=75%}
+
+## Multi-stage Networks
+
+A recent upgrade, Würstchen [@pernias2023wuerstchen] is a latent model, that uses an encoder-decoder architecture similar to Stable Diffusion's VQ-GAN generator (which is a VQ-VAE), however the quantization is later dropped. The prior is a multi-stage diffusion model, that uses a text-only condition on a highly-compressed step, then this compressed latent prior and the text is used as a conditioning step for a latent upscaler, which generates the final prior.
+
+## Multi-stage Networks
+
+![Würtschen architecture from [@pernias2023wuerstchen]](figures/wurstchen_arch.png){height=75%}
+
+## Multi-stage Networks
+
+![Würtschen training steps from [@pernias2023wuerstchen]](figures/wurstchen_training.png){height=75%}
+
+## Inpainting
+
+Inpainting is possible by replacing parts of the original image (either in the pixel or the latent space) with a generated part. This is done by using a mask that is provided by the user. During the diffusion process the sufficently noised version of the unmasked part is used at each step of the diffusion process. The masked part is initialized by either the noised original $x_0 \rightarrow x_T$ or a generated random initial value.
+
+## Inpainting
+
+![Inpainting from [@rombach2022highresolution]](figures/inpaint_example.png){width=100%}
+
+## Textual Inversions
+
+Textual inversions [@gal2022image] are used to extend the capabilities of text-to-image models. They are trained on a small set of images that are fed to a pre-trained text-to-image model. The model is frozen except the text encoder's embedding layer. This embedding layer is extended by a small set of embedding vectors (could be more than one), that are trained on the diffusion loss of a small set of images. This way the model learns to generate images with the same object or style encoded in the newly added embedding vectors.
+
+## Textual Inversions
+
+![Textual inversion from [@gal2022image]](figures/textual_inversion.png){width=100%}
+
+## Textual Inversions
+
+![Textual inversion from [@gal2022image]](figures/textual_inversion_arch.png){height=75%}
+
+## Adapters / LoRA-s
+
+Open-source diffusion models are usually fine-tuned using full fine-tuning or adapters like LoRA-s [@hu2022lora]. This needs a higher ammount of GPU memory, training data and time in order to train, but the quality is higher as well.
+
+Fusing such adapters or textual inversions is possible in multiple ways as outlined by @gu2023mixofshow. These LoRA-s could be combined by taking a weighted average of them or by training a fused LoRA on features extracted from the individual LoRA-s.
+$W = \sum\limits_{i=1}^n w_i W_i$
+
+$W = argmin_W \sum\limits_{i=1}^n ||(W_0 + \Delta W_i) X_i - W X_i||_F^2$
+
+## Adapters / LoRA-s
+
+![LoRA fusion results from [@gu2023mixofshow]](figures/lora_fusion.png){width=100%}
+
+## Latent Consistency
+
+@luo2023latent introduced another speedup for LDMs which is Latent Consistency Model. Instead of predicting $\epsilon_\theta$ in the reverse process LCMs predict $x_0$ directly training the $f_\theta$ estimator. As a self-distillation task we could run the reverse process for a long generation sequence and then use a lower-ranked timestep's $x_0$ prediction as the target.
+
+$\mathcal{L}_{LCM} = \mathbb{E}_{x, y, w, i} [d(f_\theta(x_{\tau_{i+1}}, w, y, \tau_{i+1}), f_{\theta'}(x^{\psi,w}_{\tau_{i}}, w, y, \tau_{i}))]$
+
+Where $\theta'$ is an extended set of parameters, $\psi$ is a solver such as DDIM, $w$ is a guidance weight, $d$ is a distance function and $\tau$ is a set of decoding time steps.
+
+DALL-E 3 uses this method to achieve $2-4$ step generations.
+
+## Latent Consistency Results
+
+![Latent Consistency results from [@luo2023latent]](figures/lcm_results.png){height=75%}
+
+## Latent Consistency LoRA
+
+This above mentioned training goal is suitable for LoRA training as well [@luo2023lcmlora]. This LoRA model is then usable as an accelerator for multiple LDMs and the original LDM's adapters are also usable together with this LCM-LoRA.
+
+![Latent Consistency LoRA from [@luo2023latent]](figures/lcm_lora_results.png){height=40%}
+
+## ControlNet
+
+Controlling the condition injection of an LDM is hard, adding extra control modalities would need re-training. The family of ControlNets create a set of adapting methods that could be used to control a text-to-image model without re-training.
+
+The original ControlNet [@zhang2023adding] is a full parallel copy of the SD UNet encoder that is trained to guide the original model on the extra modalities such as segmentation masks, pose, scribbles, etc.
+
+Text-to-image adapters and LoRAs [@mou2023t2iadapter] could also be used to achieve control without re-training.
+
+These methods can be mixed with each other at inference time.
+
+## ControlNet
+
+![ControlNet unit from [@zhang2023adding]](figures/controlnet.png){height=75%}
+
+## T2I Adapter
+
+![T2I Adapter from [@mou2023t2iadapter]](figures/t2i_adapter.png){height=75%}
+
+## ControlNet Results
+
+![ControlNet results from [@zhang2023adding]](figures/controlnet_results.png){height=75%}
 
 # References
 
@@ -342,469 +617,3 @@ For more information on the topic, please refer to the following review article 
 
 ## References {.allowframebreaks}
 \footnotesize
-
-<!-- ## Acknowledgement
-
-### Acknowledgement {.alert}
-
-The following slides are based on the following review articles [@le2020contrastive; @jaiswal2020survey] as well as Yann LeCun's hybrid lecture on Energy-based SSL available [online](https://www.youtube.com/watch?v=4lthJd3DNTM).
-
-# Self-supervised learning
-
-## Main objective
-Self-supervised learning (SSL) aims to obtain supervision from the data itself.
-
-"Predict everything from everything else."   
-*Yann Lecun*
-
-The data is partially known, and partially unknown.
-An underlying structure of the data is utilized (e.g. sequentiality in language modeling).
-
-## Main objective
-
-![From [@dawid2023introduction]](figures/ssl_meme.png){height=50%}
-
-Why not reinforcement learning?   
-*Trial-and-error is ineffective.*
-
-## Advantages
-
-Self-supervised learning:
-
-- Reduces the cost and complexity of labeling
-- Adds extra generalization capabilities to the system
-- Gives control to use the internal structure of the data
-- Is able to reconstruct latent variables governing an input set
-
-## Energy-based Modeling
-Energy-based modeling (EBM) is a unifying principle of most SSL methods.
-
-EBM solves the "averaging problem" of $L_2$-like losses.
-
-- Imagine a case with multiple viable outputs (such as neighboring words in a Skipgram model)
-- The loss will be minimal to the "average" of these individual outputs
-- We want a loss function that will be close to minimal for each and every viable solution
-
-## Energy function
-
-An energy function $F(x, y)$ over the $x \in X$ input space and $y \in Y$ output space is designed to solve this problem, where low energy means a viable solution.
-
-The inference of such a model could happen by: $\hat{y} = argmin_y F(x, y)$   
-*It is important to note that multiple $\hat{y}$-s could be viable!*
-
-The energy function $F(x, y)$ measures compatibility between $x$ and $y$.
-
-## EBM as a probabilistic model
-
-Using the Gibbs-Boltzmann distribution a generative (joint "distribution") EBM can be converted into a discriminative probabilistic model:
-
-$P(y|x) = \frac{e^{-\beta F(x, y)}}{\int_{\acute{y}} e^{-\beta F(x, \acute{y})}}$
-
-Here $\beta$ is a positive constant, and $\acute{y} \in Y$.
-
-## Multimodal EBM architectures I.
-
-EBMs are useful for creating joint multimodal representations.
-
-![Joint embedding architecture](figures/joint_embed.png){ height=50% }
-
-## Multimodal EBM architectures II.
-
-Latent variables could be used for generative processes (e.g. diffusion).
-$z$ is an independent "explanatory" variable of variation.
-Inference is possible with joint minimization with respect to $y$ and $z$.
-
-![Latent-variable generative architecture](figures/latent_embed.png){ width=70% }
-
-
-## Methods of learning in EBMs
-Main objective: Acquire low energy for viable $x$-$y$ pairs, while maintaining high energy for incompatible pairs.
-
-### Contrastive Methods
-- Push down $F(x, y)$ for each compatible pair (i.e. for *positive* elements of the dataset).
-- Push up $F(x, y')$ for every other possible combination (i.e. for *negative* examples).
-
-
-## Methods of learning in EBMs
-Main objective: Acquire low energy for viable $x$-$y$ pairs, while maintaining high energy for incompatible pairs.
-
-### Regularized Methods
-- Ensure that the extent of low-energy regions is limited or minimized.
-- Regularization, quantization, clustering, etc.
-
-## Methods of learning in EBMs
-Main objective: Acquire low energy for viable $x$-$y$ pairs, while maintaining high energy for incompatible pairs.
-
-![Visualization of learning methods from [@dawid2023introduction]](figures/ebm_method_compare.png){ width=100% }
-
-# Contrastive Learning & Variants
-
-## Learning method
-Contrastive learning generally includes the following main steps:
-
-1. Select a $q$ query and sample the positive key $k^+\sim p^+(.|q)$ and negative key $k^-\sim p^-(.|q)$ distributions.
-2. Apply model transformations that map $\mathcal{X} \rightarrow \mathcal{R}^N$ where $N$ is the resulting embedding dimension and $x \in \mathcal{X} | x = (q, k)$
-3. Scoring the positive and negative pairs using an energy-based or probabilistic approach.
-4. Parameter update
-
-
-## Scoring functions
-
-Scoring functions are the backbone of loss calculation and are determined by the desired embedding space's properties. They are simple functions such as:
-
-- L1 or L2 distance
-- Dot-product
-- Bi-linear models $S(q, k) = qAk$
-
-Distance and probabilistic loss functions are built on top of these measures.
-
-## Distance-based loss functions
-
-### Pair-loss
-$\mathcal{L}_{pair} = \begin{cases} ||q-k^+||_2^2\\ max(0, m-||q-k^-||_2^2) \end{cases}$
-
-where $m$ is a predefined margin around x.
-This minimizes positive distance and tries to push the negative distance over the margin.
-
-### Triplet-loss
-$\mathcal{L}_{triplet} = max(0, ||q-k^+||_2^2 - ||q-k^-||_2^2 + m)$
-This method enforces that the relative distance between the positive and negative examples.
-
-## Softmax-based probabilistic loss functions
-Motivation: Classify the pairs correctly.
-As a classification problem using scoring function $S(.,.)$ we can formulate this as:
-
-$p(k^+|q) = \frac{exp(S(q, k^+))}{\sum_k exp(S(q, k))}$
-
-Introducing negative sampling to the process we can avoid calculating the denominator for all $k$. Instead, we reformulate the calculation as a binary problem.
-
-## Noise Contrastive Estimation (NCE)
-The probability of a pair being positive (C=1), if we sample negative examples $M$ times more frequently from a uniform distribution, is:
-$p(C=1|q,k) = \frac{p(k^+|q)}{p(k^+|q)+m\cdot p(k^-|q)}$
-
-Thus the binary classification loss is (using negative loglikelihoods) over all possible pairs:
-\begin{align*}\begin{split} \mathcal{L}_{bin\_NCE} = - \mathbb{E}_{p^+}[logp(C=1|q,k)] \\ - \mathbb{E}_{p^-}[log(1-p(C=1|q,k))] \end{split}\end{align*}
-where $p^-(.|q)$ is the noise (negative sample) distribution and $p^+(.,.)$ is the positive distribution.
-
- 
-## InfoNCE 
-Instead of a binary classification, we could construct a set of several negative examples and a single positive example $K = \{k^+, k^-_1, k^-_2, ..., k^-_{M}\}$. Then the modified task would be to determine which element is the positive. This results in a softmax-like measure called InfoNCE:
-
-$\mathcal{L}_{InfoNCE} = -log\frac{exp(S(q, k^+))}{\sum_{i=0}^{M+1}exp(S(q, k[i]))}$
-
-$\mathcal{L}_{InfoNCE} = - S(q, k^+) + log\sum_{i=0}^{M+1}e^{S(q, k[i])}$
-
-## Why does it work?
-Training a model $f$ with an InfoNCE-like loss function inverts (decodes) the unknown generative process of data generation $g$.
-Thus the latent distribution behind our data is reconstructed and made accessible.
-
-![From [@zimmermann2022contrastive]](figures/latent_reconstruct.png)
-
-## Examples of sampling
-Data generation processes could include a wide range of self-supervised processes, such as:
-
-- Neighborhood information (spatial or temporal)
-- Masking
-- Various augmentations (visual or audio noise, etc)
-
-## Examples of sampling
-![Visual augmentations from [@le2020contrastive]](figures/sample_example.png){height=60%}
-
-## Examples of sampling
-![Data generation from temporal streams from [@le2020contrastive]](figures/sample_example_temporal.png){height=60%}
-
-## Adding label supervision
-
-Data generation is possible via incorporating label information as well (adding classical supervision). In this case the normal InfoNCE equation will change, as multiple positive examples are present. Resulting in a sum over InfoNCE terms. There are two variants present with the sum inside and outside of the log.
-
-$\mathcal{L}^{sup}_{in} = \sum\limits_{q \in J}-log\left(\frac{1}{|P(q)|}\sum\limits_{k^p\in P(q)}\frac{exp(S(q, k^p))}{\sum\limits_{i\in I}exp(S(q, k[i]))}\right)$
-
-where $J$ is the set of batch elements, $q$ is the selected query element, $I$ is the set of batch elements excluding $q$, $P(q)$ is the set of elements with the same label as $q$.
-
-## Adding label supervision
-
-$\mathcal{L}^{sup}_{out} = \sum\limits_{q \in J}\frac{-1}{|P(q)|}log\sum\limits_{k^p\in P(q)}\frac{exp(S(q, k^p))}{\sum\limits_{i\in I}exp(S(q, k[i]))}$
-
-where $J$ is the set of batch elements, $q$ is the selected query element, $I$ is the set of batch elements excluding $q$, $P(q)$ is the set of elements with the same label as $q$.
-
-![From [@khosla2020supervised]](figures/supcl.png){height=35%}
-
-## Invariant, Equivariant traits
-
-In standard contrastive learning, the positive pairs have a required invariancy. $S(q, k)$ should be high.
-Standard similarity metrics yield this behavior best when $q=k$.
-This behavior will negate the effect of certain differences between the two original inputs $x_q$ and $x_k$
-
-Let $T(\cdot)$ transform represent this difference and $f(\cdot)$ represent our function (or network) trained with CL.
-In the invariant optimal case:
-
-$x_k = T(x_q) \rightarrow k = q$
-
-## Invariant, Equivariant traits
-
-There are some cases where we would like to keep this transformation in the embedding space as well. Meaning that we would require that the same, or a similar transformation ($\acute{T}(\cdot)$) be present in the embedding space as in the input space.
-
-$x_k = T(x_q) \rightarrow k = \acute{T}(q)$
-
-## Invariant, Equivariant traits
-
-![Rotation equivariant and flip invariant contrastive training. From [@dangovski2021equivariant]](figures/equiv_inv.png){width=90%}
-
-# Contrastive methods in NLP
-## Word2Vec as Contrastive Learning
-
-![](figures/word2vec_contrastive.png){height=70%}
-
-## Word2Vec as Contrastive Learning
-
-Reformulating skipgram, to a multi-encoder joint embedding-type self-supervised problem.
-
-Instead of Softmax we use the Noise Contrastive Estimation loss (SGNS).
-
-Positive pairs maximize similarity (minimize energy according to EBM modeling).
-
-Negative pairs minimize similarity (maximize energy according to EBM modeling).
-
-## BERT Next Sentence Prediction
-
-![[From: Alammar, J (2018). The Illustrated Transformer](http://jalammar.github.io/illustrated-bert/)](figures/bert_nsp.png){height=70%}
-
-## Text-embedding models
-
-Pre-trained and fine-tuned LMs could be used to produce semantic embeddings of text.
-
-- This is good in terms of general language semantics only
-
-![](figures/embedding_finetune.png){height=50%}
-
-## Text-embedding models
-
-Contrastive fine-tuning on additional SSL tasks comes in handy in the case of domain-dependent embeddings or multi-task embedders.
-Such tasks could include [@su2022one]:
-
-- Retrieval, reranking (find/rank documents based on query)
-- Clustering (creating clusters in the embedding space)
-- Text classification
-- Summarization
-- Deduplication
-
-# Contrastive Multimodal Methods
-## CLIP
-
-Contrastive Language-Image Pre-training [@radford2021learning]
-
-**Problem**: Visual classifiers are bound to a finite set of supervised labels.
-
-**Solution**: Use natural language to describe visual features and try to achieve zero/few-shot learning.
-
-**Data**: (image, text) pairs from web crawls (even filenames), including Instagram, Wikipedia-based Image Text, YFCC100M and MS-COCO.
-Open-source large-scale datasets include Laion5B [@schuhmann2022laion5b].
-
-## CLIP Structure
-
-Image embedding ($E_I$) ResNet or **ViT** $[n \times d_I]$
-
-Text embedding ($E_T$) Transformer LM $[n \times d_T]$
-
-Linear projections ($W_I$, $W_T$) $[d_I \times d_E]$, $[d_T \times d_E]$
-
-$t$ temperature parameter for classification
-
-$L$ labels of similarity (usually one-hot) $[n,]$
-
-$CE_{col | row}$ cross-entropy loss by columns (text) or rows (image) of the first argument.
-
-$S_{scaled} = ||E_I \cdot W_I ||_{L2} \cdot ||E_T \cdot W_T||_{L2}^T \cdot exp(t)$ $[n \times n]$
-
-$loss = 0.5 CE_{col}(S_{scaled}, L) + 0.5 CE_{row}(S_{scaled}, L)$
-
-## CLIP Encoder details
-
-- Modified global pooling: attentional pooling [@lee2019set]   
-Cross-attention where the image features are K, V and Q is defined by a learned constant vector (or a set of vectors).
-- ViT (Vision Transformer): Transformer that uses small patches (rectangular parts) of the image as tokens. (Covered in upcoming lectures.)
-- The text encoder is a GPT-2 style model.
-
-
-
-## CLIP Training
-
-![CLIP training by [@radford2021learning]](figures/clip_train.png){height=70%}
-
-## CLIP Zero-shot inference
-
-![CLIP inference by [@radford2021learning]](figures/clip_infer.png){height=70%}
-
-## CLIP Zero-shot inference
-
-CLIP can classify images based on a corresponding text definition of classes.
-
-Selection is done by finding the most similar class definition.
-
-Other use-cases include:
-
-- Base-model for custom classifiers
-- Base-model for transfer-learning (outperforms previous ImageNet models)
-- Image retrieval (search-engine)
-- Condition vectors for image generation
-- Multi-modal semantics
-
-
-## ImageBind
-
-CLIP demonstrated that additional generalization capabilities can originate from incorporating multiple modalities in one representation space.
-ImageBind [@girdhar2023imagebind] takes it one step further and joins $7$ modalities in one embedding space.
-
-![Modalities and data sources of ImageBind [@girdhar2023imagebind]](figures/imagebind_sources.png){height=40%}
-
-## Emergent Alignment
-::: columns
-
-:::: column
-
-Using InfoNCE again we can construct alignments of $(\mathcal{I}, \mathcal{M}_1)$ and $(\mathcal{I}, \mathcal{M}_2)$.
-It is observed that this alignment is transitive and results in a partial $(\mathcal{M}_1, \mathcal{M}_2)$ alignment.
-Encoders are now initialized from pre-trained models (e.g.: CLIP)
-
-::::
-
-:::: column
-
-![Natural and emergent alignment in ImageBind [@girdhar2023imagebind]](figures/imagebind_pentagram.png){height=40%}
-
-::::
-
-:::
-
-## ImageBind Results
-
-Multimodal contrastive embeddings outperform supervised modality converters in the absence of naturally present multimodal signals (e.g.: text-to-audio).
-
-ImageBind use-case examples include:
-- Cross-modal retrieval
-- Embedding-space arithmetics
-- Cross-modal decoder re-utilization
-
-## Cross-modal retrieval
-![ImageBind retrievals of non-trivial modality pairs [@girdhar2023imagebind]](figures/imagebind_crossmod_1.png){width=90% margin=auto}
-
-## Cross-modal retrieval
-
-![ImageBind retrievals of non-trivial modality pairs (with object detection in the visual modality) [@girdhar2023imagebind]](figures/imagebind_crossmod_2.png){width=90% align=center}
-
-## Cross-modal retrieval
-
-![ImageBind retrievals of non-trivial modality pairs [@girdhar2023imagebind]](figures/imagebind_crossmod_3.png){width=90%}
-
-## Embedding-space Arithmetics
-
-![ImageBind multi-modal embedding arithmetics [@girdhar2023imagebind]](figures/imagebind_vector.png){width=90%}
-
-## Cross-modal decoder re-utilization
-
-![ImageBind re-utilizing text-to-image decoder as audio-to-image using the text-to-audio alignment [@girdhar2023imagebind]](figures/imagebind_decoder.png){width=90%}
-
-
-# Decoding Methods
-
-## How to invert a joint embedding?
-
-- Iterative method
-- Prefix decoder
-- Zero-shot decoder
-- Contrastive Captioners (CoCa)
-- *Diffusion processes (detailed later in upcoming lectures)*
-
-Our examples focus on the visual-language modality pair (mainly captioning), but these methods are adaptable for other pairs as well.
-
-## Iterative decoder
-
-Simplest solution, no training involved.
-
-The method relies on a language model. During generation intermediate text outputs are iteratively encoded to the joint CLIP space, where the ones with the best similarities to the encoded image representation are selected.
-New candidate captions (or continuations) are then generated based on these.
-
-Problems: 
-
-- Inaccurate (no proper guiding)
-- Inefficient (scales with vocabulary size / caption length)
-
-## Prefix decoders
-
-Prefix-decoders use classical seq2seq decoding methods. By joining CLIP and a LM (typically GPT) the data needed for such a captioner decreases.
-
-A small mapping network is enough to make the CLIP image embedding space and the LM compatible. Fine-tuning the LM as well usually results in a slight performance increase.
-
-Let's imagine that the mapper is a small MLP or Transformer generating $[p_1^i, ..., p_k^i] = MAP(CLIP(x^i))$ prefix from input image $x^i$.
-
-## Mapping in Prefix decoders
-
-### Why do we need mapping?
-
-- Contrastive loss does not ensure the exact match of positive text-image pair embeddings.
-- Domain-dependent captioning could need a slightly different alignment/structure in the embedding space.
-
-
-## Training of Prefix decoders
-The model is finetuned on captioned images. Using the following loss function:
-
-$L = - \sum_{i=1}^N\sum_{j=1}^M log p_\theta(c_j^i | p_1^i, ..., p_k^i, c_1^i, ..., c_{j-1}^i)$
-
-Where $c_1^i, ..., c_{j-1}^i$ are the previous caption tokens, and $\theta$ represents the trainable params.
-
-![ClipCap architecture with frozen CLIP and GPT. [@mokady2021clipcap]](figures/clipcap.png){height=35%}
-
-## Zero-shot decoders
-
-While prefix decoders are effective and have acceptable performance, they still need domain-dependent (image, caption) training data. 
-
-Most popular solutions use text-only prefix-finetuned decoders with different tricks to replace CLIP space mapping:
-
-- Non-trained projection based on previously encoded text embeddings [@li2023decap]
-- Noise injection to train a robust decoder [@nukrai2022text]
-
-## DeCap
-![DeCap with a text-only finetuned decoder (reconstruction loss) and training-free projection [@li2023decap]](figures/DeCap.png){height=60%}
-
-## CapDec
-![CapDec with a noise-robust decoder (step b) is similar to a denoising VAE) [@nukrai2022text]](figures/CapDec.png){height=60%}
-
-## Contrastive Captioners (CoCa)
-
-Performance and efficiency concerns related prefix decoders:
-
-- Do we need a prefix when we have cross-attention?
-- Why not design the original model with decoding capabilities by training a decoder parallel to the contrastive training phase?
-- Encoders should be transfer-learned.
-
-## CoCa Architecture
-![From [@yu2022coca]](figures/coca_detailed.png){height=75%}
-
-## CoCa Training
-
-1. Initialize models from single-modality pre-trained models
-2. Change vision heads (different attentive pooling for captioning and contrastive learning)
-3. Split the text omitting cross-attention from the first half
-4. Perform simultaneous contrastive and reconstruction (captioning) training.   
-Image-only datasets could also be used in the reconstruction task if the vocabulary is exactly the set of possible classes.
-
-## CoCa Inference
-
-Contrastive Captioner models can be used with further fine-tuning or in a zero-shot manner as any combination of its building blocks.
-
-CoCa-s are not limited to the visual-language modalities.
-[CoCa use cases from [@yu2022coca](figures/coca_usecases.png){width=90%}
-
-
-# Summary
-
-## Summary
-
-Self-supervised learning (SSL) is a strong and cost-efficient training method that can capture the underlying latent distribution of a given dataset. A widespread neural formulation is via Contrastive Learning (defined by InfoNCE-like losses).
-
-Contrastive methods produce joint embeddings of multiple modalities, which create powerful semantic representations by cross-modality alignment.
-These methods are useful for retrieval and zero-shot classification tasks. Decoders (e.g.: captioners) can also be constructed to perform inverse tasks.
-
-
-# References {.allowframebreaks} 
-\footnotesize  -->
