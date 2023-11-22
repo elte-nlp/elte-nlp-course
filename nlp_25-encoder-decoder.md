@@ -234,11 +234,31 @@ In the second form,
   __similarity__ between the prior on $\mathbf z$ and approximated posterior
   $q_\Phi(\mathbf z | \mathbf x)$ can be computed in a closed form, while
 * $-\mathbb E_{\mathbf z \sim q_\Phi(\mathbf z | \mathbf x)}(\log p_\Theta(\mathbf x | \mathbf
-  z))$ can be interpreted as the expected __reconstruction error__ if $\mathbf z$ is
-  sampled from $q_\Phi(\mathbf z | \mathbf x)$ and decoded into an $\hat{\mathbf
-  x}$ centered distribution;
-  with a suitable Gaussian $\pi_d$ 
-  it can be actually equal to $\lVert \mathbf x - \mathbf{\hat{x}}\rVert^2$.
+  z))$ can be interpreted as the expected __reconstruction error__.
+  
+## Variational autoencoder: reconstuction error
+
+The reconstruction error interpretation of the 
+$$-\mathbb E_{\mathbf z \sim q_\Phi(\mathbf z | \mathbf x)}\log p_\Theta(\mathbf x | \mathbf
+  z)$$
+part of the VAE loss requires rewriting 
+$$- \log p_\Theta(\mathbf x | \mathbf z) = -\log \pi_d(d_\Theta(\mathbf z))$$
+as some kind of distance between $\mathbf x$ and the mode of the
+$p_\Theta(\mathbf x | \mathbf z)$ distribution, but this can be done very easily
+in most cases. 
+
+E.g., if $\pi_d$ is a standard spherical $m$-dimensional
+Gaussian with $d_\Theta(\mathbf z)$ mean then
+$$p_\Theta(\mathbf x | \mathbf z)= (2\pi)^{-m/2}\exp(-\Vert d_\Theta(\mathbf
+z) - \mathbf x\Vert^2/2).$$
+
+## Variational autoencoder: reconstuction error
+
+Hence $$ - \log p_\Theta(\mathbf x | \mathbf z)= \Vert d_\Theta(\mathbf z) -
+\mathbf x\Vert^2/2 - \log (2\pi)^{-m/2}, $$ that is, the negative log
+probability is a shifted and scaled version of the squared Eucledian distance
+between $\mathbf x$ and the $d_e(\mathbf z)$ mean of the distribution, which can
+be seen as the "reconstructed $\mathbf x$", that is, $\mathbf{\hat{x}}$.
 
 ## Variational autoencoder cont.
 
@@ -395,12 +415,12 @@ corresponding cookbook entry $\mathbf e_{z_i}$ in the first decoding step:
 
 ## VQ-VAE distributions and loss
 
-In the simplest case the encoder is deterministic, therefore the $\mathbb
-{KL}(q(\mathbf z| \mathbf x)\Vert p(\mathbf z))$ similarity loss is constant and
-can be ignored. Quantization is non-differentiable, so only the
+As the VQ-VAE decoder is deterministic and the prior is uniform, the
+$\mathbb {KL}(q(\mathbf z| \mathbf x)\Vert p(\mathbf z))$ similarity loss is
+constant and can be ignored. Quantization is non-differentiable, so only the
 so-called __straight-through estimator__ can be used, in which the gradient from
-the decoder is passed through the quantization layer as it was the
-identity function [figure from @askary2020intuitive]:
+the decoder is passed through the quantization layer as it was the identity
+function [figure from @askary2020intuitive]:
 
 ![From @van2017neural.](figures/pass-through.png){width=80%}
 
