@@ -255,7 +255,7 @@ z) - \mathbf x\Vert^2/2).$$
 ## Variational autoencoder: reconstuction error
 
 Hence $$ - \log p_\Theta(\mathbf x | \mathbf z)= \Vert d_\Theta(\mathbf z) -
-\mathbf x\Vert^2/2 - \log (2\pi)^{-m/2}, $$ that is, the negative log
+\mathbf x\Vert^2/2 - \log ((2\pi)^{-m/2}), $$ that is, the negative log
 probability is a shifted and scaled version of the squared Eucledian distance
 between $\mathbf x$ and the $d_e(\mathbf z)$ mean of the distribution, which can
 be seen as the "reconstructed $\mathbf x$", that is, $\mathbf{\hat{x}}$.
