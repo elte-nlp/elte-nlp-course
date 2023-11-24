@@ -500,8 +500,8 @@ temperature parameter:
 
 $$
 softmax_\tau(\langle x_1,\dots,x_n\rangle)=
-\left\langle\frac{e^{-\tau x_1}}{\sum_{i=1}^n e^{-\tau x_i}},\dots,
-\frac{e^{-\tau x_n}}{\sum_{i=1}^n e^{-\tau x_n}}\right\rangle
+\left\langle\frac{e^{ x_1/\tau}}{\sum_{i=1}^n e^{ x_i/ \tau}},\dots,
+\frac{e^{x_n/\tau}}{\sum_{i=1}^n e^{x_n  / \tau}}\right\rangle
 $$
 
 and therefore $\tau$ is gradually decreased during the training until it reaches
