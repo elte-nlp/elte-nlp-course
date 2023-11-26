@@ -48,7 +48,7 @@ is -- at least in part -- visual, others include
 + __visual question answering (VQA)__: answer a question about an image,
 + __natural language visual reasoning (NLVR)__: determine whether a natural
 language statement is true about two images,
-+ __multimodal tramslation__: translate from a language to another based on a
++ __multimodal translation__: translate from a language to another based on a
   context image,
 + __multimodal chat__: chat with mixed image and text user input.
 
@@ -146,7 +146,7 @@ parameterized by some $\Theta$ adjustable parameters.
 Approximation requires some kind of distance metric, and the KL-divergence
 
 $$ \mathbb{KL}(p^*\Vert q) = \mathbb E_{\mathbf x \sim p^*}\log\frac{p^*(\mathbf
-x)}{q(\mathbf x)}d\mathbf x $$
+x)}{q(\mathbf x)} $$
 
 would be a natural choice, but, of course, calculating this is also problematic,
 because it would require calculating an expectation over $p^*$.
@@ -156,7 +156,7 @@ because it would require calculating an expectation over $p^*$.
 Choosing the reverse KL-divergence
 
 $$ \mathbb{KL}(q\Vert p^*) = \mathbb E_{\mathbf x\sim q}\log\frac{q(\mathbf
-x)}{p^*(\mathbf x)}d\mathbf x $$
+x)}{p^*(\mathbf x)} $$
 
 would take the expectation over $q$ which is assumed to be tractable but still
 requires pointwise evaluation of $p^*$, so the __variational objective__ is to
@@ -164,14 +164,14 @@ minimize the "quasi KL-divergence" between $q$ and the unnormalized $\tilde
 p$: We try to find
 
 $$ \underset{\Theta}{\operatorname{argmin}} \left(\mathbb E_{\mathbf x \sim q_\Theta}\log\frac{q_\Theta(\mathbf
-x)}{\tilde p(\mathbf x)}d\mathbf x\right).$$
+x)}{\tilde p(\mathbf x)}\right).$$
 
 ## Variational methods cont.
 
 In terms of our target $p^*$ the objective can be written as 
 
 $$ \mathbb E_ {\mathbf x \sim q_\Theta}\log\frac{q_\Theta(\mathbf x)}{p^*(\mathbf
-x)Z}d\mathbf x = \mathbb{KL}(q_\Theta\Vert p^*)-\log Z.$$
+x)Z} = \mathbb{KL}(q_\Theta\Vert p^*)-\log Z.$$
 
 Since $\mathbb{KL}(q_\Theta\Vert p^*)\geq 0$ is guaranteed by the Gibbs
 inequality, all values will be upper bounds of $-\log Z$, and the task is to
@@ -234,11 +234,31 @@ In the second form,
   __similarity__ between the prior on $\mathbf z$ and approximated posterior
   $q_\Phi(\mathbf z | \mathbf x)$ can be computed in a closed form, while
 * $-\mathbb E_{\mathbf z \sim q_\Phi(\mathbf z | \mathbf x)}(\log p_\Theta(\mathbf x | \mathbf
-  z))$ can be interpreted as the expected __reconstruction error__ if $\mathbf z$ is
-  sampled from $q_\Phi(\mathbf z | \mathbf x)$ and decoded into an $\hat{\mathbf
-  x}$ centered distribution;
-  with a suitable Gaussian $\pi_d$ 
-  it can be actually equal to $\lVert \mathbf x - \mathbf{\hat{x}}\rVert^2$.
+  z))$ can be interpreted as the expected __reconstruction error__.
+  
+## Variational autoencoder: reconstuction error
+
+The reconstruction error interpretation of the 
+$$-\mathbb E_{\mathbf z \sim q_\Phi(\mathbf z | \mathbf x)}\log p_\Theta(\mathbf x | \mathbf
+  z)$$
+part of the VAE loss requires rewriting 
+$$- \log p_\Theta(\mathbf x | \mathbf z) = -\log \pi_d(d_\Theta(\mathbf z))$$
+as some kind of distance between $\mathbf x$ and the mode of the
+$p_\Theta(\mathbf x | \mathbf z)$ distribution, but this can be done very easily
+in most cases. 
+
+E.g., if $\pi_d$ is a standard spherical $m$-dimensional
+Gaussian with $d_\Theta(\mathbf z)$ mean then
+$$p_\Theta(\mathbf x | \mathbf z)= (2\pi)^{-m/2}\exp(-\Vert d_\Theta(\mathbf
+z) - \mathbf x\Vert^2/2).$$
+
+## Variational autoencoder: reconstuction error
+
+Hence $$ - \log p_\Theta(\mathbf x | \mathbf z)= \Vert d_\Theta(\mathbf z) -
+\mathbf x\Vert^2/2 - \log ((2\pi)^{-m/2}), $$ that is, the negative log
+probability is a shifted and scaled version of the squared Eucledian distance
+between $\mathbf x$ and the $d_e(\mathbf z)$ mean of the distribution, which can
+be seen as the "reconstructed $\mathbf x$", that is, $\mathbf{\hat{x}}$.
 
 ## Variational autoencoder cont.
 
@@ -395,12 +415,12 @@ corresponding cookbook entry $\mathbf e_{z_i}$ in the first decoding step:
 
 ## VQ-VAE distributions and loss
 
-In the simplest case the encoder is deterministic, therefore the $\mathbb
-{KL}(q(\mathbf z| \mathbf x)\Vert p(\mathbf z))$ similarity loss is constant and
-can be ignored. Quantization is non-differentiable, so only the
+As the VQ-VAE decoder is deterministic and the prior is uniform, the
+$\mathbb {KL}(q(\mathbf z| \mathbf x)\Vert p(\mathbf z))$ similarity loss is
+constant and can be ignored. Quantization is non-differentiable, so only the
 so-called __straight-through estimator__ can be used, in which the gradient from
-the decoder is passed through the quantization layer as it was the
-identity function [figure from @askary2020intuitive]:
+the decoder is passed through the quantization layer as it was the identity
+function [figure from @askary2020intuitive]:
 
 ![From @van2017neural.](figures/pass-through.png){width=80%}
 
@@ -480,8 +500,8 @@ temperature parameter:
 
 $$
 softmax_\tau(\langle x_1,\dots,x_n\rangle)=
-\left\langle\frac{e^{-\tau x_1}}{\sum_{i=1}^n e^{-\tau x_i}},\dots,
-\frac{e^{-\tau x_n}}{\sum_{i=1}^n e^{-\tau x_n}}\right\rangle
+\left\langle\frac{e^{ x_1/\tau}}{\sum_{i=1}^n e^{ x_i/ \tau}},\dots,
+\frac{e^{x_n/\tau}}{\sum_{i=1}^n e^{x_n  / \tau}}\right\rangle
 $$
 
 and therefore $\tau$ is gradually decreased during the training until it reaches
@@ -759,6 +779,19 @@ parts of the examples. Training consisted of two phases:
 + __End-2-End fine-tuning__: The Vicuna weights were unfreezed, and the
   projection matrix + LLM weights were jointly fine-tuned on the GPT-4 generated 
   158K multimodal instruction following dataset.
+
+## LLaVA 1.5
+
+Recently (Oct 2023), a new, improved version 1.5 of LLaVA was released
+[@liu2023improved], which is currently the best performing VLM on public VL
+benchmarks. The changes were relatively minor:
+
++ using a 3-layer perceptron for the vision-language mapping instead of a linear
+  projection,
++ using a larger LLaMA model (13B parameters instead of 7B),
++ upscaling the input image resolution,
++ refining prompts,
++ training on additional academic VQA datasets.
 
 # References
 
