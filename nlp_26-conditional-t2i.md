@@ -246,7 +246,7 @@ Forward (encoding) and reverse (decoding) diffusions could be seen as a VAE equi
 
 $x_0$ is the starting image, while $x_T$ is the final step of the diffusion process $t\in[0,..., T]$.
 
-Each step $q(x_t|x_{t-1})=\mathcal{N}(x_t;\sqrt{1-\beta_t}x{t-1}, \beta_tI)$ Markovian transition distribution adds noise regulated by fixed $\beta_t$.
+Each step $q(x_t|x_{t-1})=\mathcal{N}(x_t;\sqrt{1-\beta_t}x_{t-1}, \beta_tI)$ Markovian transition distribution adds noise regulated by fixed $\beta_t$.
 
 ## DDPM: Denoising Diffusion Probabilistic Models
 
@@ -272,7 +272,7 @@ Given $\alpha_t = 1-\beta_t$ and $\bar\alpha_t=\prod\limits_{s=1}^t\alpha_s$ dir
 
 We have to optimize (the authors negate and minimize) the variational lower bound $L = \sum\limits_{t=0}^TL_t$ again (applying directly computed terms):
 
-$L_T = \mathbb{E}_q(D_{KL}(q_(x_T|x_0)||p_\theta(x_T)))$ this ensures that the first reverse step is close to the final forward step.
+$L_T = \mathbb{E}_q(D_{KL}(q(x_T|x_0)||p_\theta(x_T)))$ this ensures that the first reverse step is close to the final forward step.
 
 $L_{t-1} = \mathbb{E}_q(D_{KL}(q(x_{t-1}|x_t,x_0)||p_\theta(x_{t-1}|x_t)))$
 Here $q(x_{t-1}|x_t,x_0)$ is the posterior (after Bayes) distribution which is the optimal reverse distribution for each step.
@@ -288,7 +288,7 @@ If we fix the standard deviation of both processes and tie them together at each
 
 $L_{t-1} = \mathbb{E}_q\left(\frac{1}{2\sigma_t^2}||\tilde\mu(x_t,x_0)-\mu_\theta(x_t, t)||^2\right) + C$
 
-Here $\tilde\mu_\theta(x_t,x_0)$ is the mean of the forward posterior distribution (reversed by Bayes) and $\mu_\theta(x_t, t)$ is the mean of the learnable reverse distribution. $C$ is a constant.
+Here $\tilde\mu(x_t,x_0)$ is the mean of the forward posterior distribution (reversed by Bayes) and $\mu_\theta(x_t, t)$ is the mean of the learnable reverse distribution. $C$ is a constant.
 
 ## DDPM: Simplify everything
 
@@ -298,17 +298,20 @@ $x_t = \sqrt{\bar\alpha_t}x_0 + \sqrt{1-\bar\alpha_t}\epsilon$ where $\epsilon\s
 
 Reordering the equation gives: $x_0 = \frac{x_t-\sqrt{1-\bar\alpha_t}\epsilon}{\sqrt{\bar\alpha_t}}$
 
-After Bayes (for details see [@ho2020denoising]): $\tilde\mu_\theta(x_t,x_0)=\frac{\sqrt{\bar\alpha_{t-1}}\beta_t}{1-\bar\alpha_t}x_t+\frac{\sqrt{\alpha_t}(1-\alpha_{t-1})}{1-\bar\alpha_t}x_0$
+After Bayes (for details see [@ho2020denoising]): $\tilde\mu(x_t,x_0)=\frac{\sqrt{\bar\alpha_{t-1}}\beta_t}{1-\bar\alpha_t}x_t+\frac{\sqrt{\alpha_t}(1-\alpha_{t-1})}{1-\bar\alpha_t}x_0$
 
-Substituting $x_t$ and $x_0$ we get: $\tilde\mu_\theta(x_t,x_0)=\frac{1}{\sqrt{\alpha_t}}\left(x_t - \frac{\beta_t}{\sqrt{1-\bar\alpha_t}}\epsilon\right)$
+Substituting $x_0$ we get: $\tilde\mu(x_t,\epsilon)=\frac{1}{\sqrt{\alpha_t}}\left(x_t - \frac{\beta_t}{\sqrt{1-\bar\alpha_t}}\epsilon\right)$
 
 ## DDPM: Noise prediction
 
-Finally we arrive to the conclusion that in order to minimize the KL-divergence (which is minimized by approximating $\tilde\mu(x_t,x_0)$ with $\mu_\theta(x_t,t)$) We have to predict the unknown part of $\tilde\mu(x_t,x_0)$ which is $\epsilon$, since $x_t$, the $\alpha$-s and $\beta$-s are known. In order to do this we create an approximator for $\epsilon$, which is $\epsilon_\theta(x_t, t)$.
+Finally we arrive to the conclusion that in order to minimize the KL-divergence (which is minimized by approximating $\tilde\mu(x_t,x_0)$ with $\mu_\theta(x_t,t)$) We have to predict the unknown part of $\tilde\mu(x_t,x_0)$ which is $\epsilon$, since $x_t$, the $\alpha$-s and $\beta$-s are known. In order to do this we create an approximator for $\epsilon$, which is $\epsilon_\theta(x_t, t)$, thus $\mu_\theta(x_t, \epsilon_\theta(x_t, t))=\frac{1}{\sqrt{\alpha_t}}\left(x_t - \frac{\beta_t}{\sqrt{1-\bar\alpha_t}}\epsilon_\theta\right)$. This could be used during inference.
 
 If we neglect $C$, $L_0$ and $L_T$ we get the following function to optimize:
+$L_{simp}(\theta) = \mathbb{E}_{t, x_0, \epsilon} ||\epsilon - \epsilon_\theta(x_t, t) ||^2 = \mathbb{E}_{t, x_0, \epsilon} ||\epsilon - \epsilon_\theta\left(\sqrt{\bar\alpha_t}x_0 + \sqrt{1-\bar\alpha_t}\epsilon, t\right) ||^2$, during training we use the second form as $x_0$ and $t$ are inputs.
 
-$L_{simp}(\theta) = \mathbb{E}_{t, x_0, \epsilon} ||\epsilon - \epsilon_\theta(x_t, t) ||^2 = \mathbb{E}_{t, x_0, \epsilon} ||\epsilon - \epsilon_\theta\left(\sqrt{\bar\alpha_t}x_0 + \sqrt{1-\bar\alpha_t}\epsilon, t\right) ||^2$
+## DDPM Training and Inference
+
+![DDPM training and inference from [@ho2020denoising]. Gradient is calculated based on the image and the timestep. Inference is calculated via the predicted noise term and an independently sampled noise term.](figures/ddpm_train.png){height=70%}
 
 ## DDPM Properties
 
@@ -495,7 +498,21 @@ Modalities that are encoded as a condition could be text (transformer-decoder or
 
 This is a latent diffusion which implies the name LDM (Latent Diffusion Model) which is a generalization of the model used in Stable Diffusion.
 
-## Stable Diffusion - Examples
+## Stable Diffusion - Zero-shot
+
+![Stable Diffusion zero-shot generation from [@rombach2022highresolution]](figures/ldm_zero_shot_result.png){height=75%}
+
+## Stable Diffusion - Upscaling
+
+![Stable Diffusion upscaling from [@rombach2022highresolution]](figures/ldm_bsr_results.png){height=75%}
+
+## Stable Diffusion - Segmentation mask synthesis
+
+![Stable Diffusion segmentation mask synthesis from [@rombach2022highresolution]](figures/ldm_synthesis_result.png){height=75%}
+
+## Stable Diffusion - Layout synthesis
+
+![Stable Diffusion layout synthesis from [@rombach2022highresolution]](figures/ldm_layout_result.png){height=75%}
 
 # Extensions to Diffusion Models
 
@@ -504,7 +521,6 @@ This is a latent diffusion which implies the name LDM (Latent Diffusion Model) w
 Multi-stage networks are utilized to improve efficiency of diffusion and latent diffusion models. DALL-E 2 [@ramesh2022hierarchical] uses a multi-stage diffusion in the pixel space with a CLIP + caption-based text-conditional super-resolution model. The DALL-E 3 paper [@BetkerImprovingIG] also mentions that they use a three-stage diffusion model on different resolutions. Details are not disclosed.
 
 ![High resolution DALL-E 3 generation from [@BetkerImprovingIG]](figures/dalle3_results.png){height=27%}
-
 
 
 ## Multi-stage Networks
