@@ -51,7 +51,7 @@ Challenges include
   including unseen ones in unseen environments.
 - __reducing hardware requirements__.
 
-# Extended Vision-and-Language navigation with Episodic Transformer
+# Extended VL navigation with Episodic Transformer
 
 ## The Vision-and-Language Navigation Task
 
@@ -214,7 +214,7 @@ are also used for generating additional training data points:
 
 ![From @pashevich2021episodic.](./figures/et_lang_pretraining_ablation.png){height=50%}
 
-# Extending VLMs to function as general Vision-Language-Action models: RT-2
+# VLMs as general VLA models: RT-2
 
 ## Starting points
 
@@ -249,6 +249,10 @@ The collected action data contains.
   and opening of the gripper;
 + a discrete variable for __switching between three modes__: controlling the arm, the base,
   or terminating the episode.
+
+## Model architecture
+
+![RT-2 architecture from @brohan2023rt.](./figures/rt-2_arch.png){width=85%}
 
 ## Model architecture: PaLM-E
 
@@ -315,9 +319,68 @@ could be mapped -- using the PaLI-X encoding -- to the string
 \end{center}
 [the example is from @brohan2023rt].
 
-## TODO fine-tuning training details 
+## Robot-action fine-tuning cont.
 
-## TODO Results
+Key finding: Instead of naively fine-tuning the model on the robot data, it is
+better to __co-fine-tune__ it on the original VL data __and__ the robot data,
+because this leads to more generalizable policies as the model is exposed to
+abstract visual concepts and low-level robot actions simultaneously.
+
++ During co-fine-tuning the sampling weight on the robot dataset examples is gradually
+  increased in the minibatches.
++ The training objective is the standard next token prediction objective, which
+  corresponds to __behavior cloning__ (a type of imitation learning) in robotics.
+
+## Results
+
++ For robot-action prompts sampling is restricted to valid robot-action
+  tokens to avoid producing inexecutable output.
+
+The evaluation focused on:
+
+* performance on seen tasks, and __generalization__ to new objects, backgrounds
+  and environments;
+* observability of __emergent capabilities__;
+* the effects of model size and architecture on performance;
+* observability of __chain-of-thought reasoning__.
+
+## Results on onseen tasks
+
+The VLM-based RT-2 generalized better than models without VLM pretraining:
+
+![Figure from @brohan2023rt.](./figures/rt-2_generalization.png){width=100%}
+
+## Results: emergent capabilities
+
+Emergent capabilities were split into three categories:
+
++ __reasoning__: applying VLM reasoning to control tasks,
++ __symbol understanding__: VLM transfer of semantic knowledge that was not in
+  any robot data,
++ __human recognition__: human-centric understanding and recognition.
+
+## Results: emergent capabilities cont.
+
+![Emergent capability examples from @brohan2023rt.](./figures/rt-2_emergent.png){width=103%}
+
+## Results: emergent capabilities cont.
+
+![Emergent capability performance from @brohan2023rt.](./figures/rt-2_emergent_performance.png){width=75%}
+
+## Results: CoT reasoning
+
+The RT-2 model was fine-tuned on additional data including a "Plan" part after
+the instruction, e.g., 
+
+`Instruction: I’m hungry. Plan: pick rxbar chocolate. Action: 1 128 124 136 121
+158 111 255.`
+
+According to "qualitative observations", this fine-tuning made it possible for
+the model to follow more complex instructions.
+
+## Results: CoT reasoning cont.
+
+![CoT examples from @brohan2023rt.](./figures/rt-2_cot.png){width=100%}
 
 # References
 
