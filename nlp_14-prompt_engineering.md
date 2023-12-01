@@ -267,7 +267,8 @@ e.g., for classification  or NER tasks.
 ## Answer engineering cont.
 
 A trivial mapping example: a $v(\cdot)$ "verbalizer" function maps the
-downstream topic classication task's class labels to answer tokens.
+downstream topic classication task's class labels to answer tokens. (The input
+is a "cloze question" with a gap whose content the model predicts.)
 
 ![From @schick2020few](./figures/verbalizer.png)
 
