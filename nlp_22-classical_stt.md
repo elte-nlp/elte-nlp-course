@@ -93,7 +93,7 @@ __time-aligned written transcipts__.
 
 In the past, transcripts were __phonetic__, and aligned at the phone level, so
 annotators had to determine phone boundaries by listening and looking at
-spectrograms:
+wave forms:
 
 ![x](figures/speech_transcript.jpg)\
 
