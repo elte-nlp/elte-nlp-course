@@ -1,0 +1,23 @@
+name: Advanced Usage
+
+on: workflow_call
+
+jobs:
+  convert_via_pandoc:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+  
+      - name: create file list
+        id: files_list
+        run: |
+          mkdir lecture_pdf  # create output dir
+          # this will also include README.md
+          echo "files=$(find lecture_source -type f -name '*.md' -print)" > $GITHUB_OUTPUT
+          
+      - uses: docker://pandoc/latex:2.9
+        with:
+          entrypoint: for document in ${{ steps.files_list.outputs.files }}; do pandoc -o ../lecture_pdf/${document/.md/.pdf} --citeproc --bibliography="${document/.md/.bib}" --slide-level 2 $document
+      - uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: Automatic PDF conversion

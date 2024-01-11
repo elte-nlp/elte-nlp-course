@@ -1,5 +1,4 @@
 *
-!.github/workflows/*.yml
 !*.tex
 !*.eps
 !*.bib
@@ -11,4 +10,6 @@
 !lecture_source/
 !.gitignore
 !.latexmkrc
+!.github
+!.github/**
 _region_.tex
