@@ -15,7 +15,7 @@ jobs:
           # this will also include README.md
           cd lecture_source; echo "files=$(printf '%s ' *.md)" > $GITHUB_OUTPUT; cd ../
           
-      - uses: docker://pandoc/latex:edge-ubuntu
+      - uses: docker://pandoc/latex:3.1.1-ubuntu
         with:
           entrypoint: /bin/bash
           args: -lc "cd lecture_source; for document in ${{steps.files_list.outputs.files}}; do /usr/local/bin/pandoc -t beamer -o ../lecture_pdf/${document/.md/.pdf} --citeproc --bibliography=${document/.md/.bib} --slide-level 2 $document; done"
