@@ -18,7 +18,7 @@ jobs:
       - uses: docker://pandoc/latex:edge-ubuntu
         with:
           entrypoint: /bin/bash
-          args: pwd && for document in ${steps.files_list.outputs.files}; do echo $document; done
+          args: -lc pwd && for document in ${steps.files_list.outputs.files}; do echo $document; done
       - uses: actions/upload-artifact@v4
         with:
           name: test
