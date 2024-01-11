@@ -18,7 +18,7 @@ jobs:
       - uses: docker://pandoc/latex:edge-ubuntu
         with:
           entrypoint: /bin/bash
-          args: -lc "for document in ${steps.files_list.outputs.files}; do /usr/local/bin/pandoc -o ../lecture_pdf/${document/.md/.pdf} --citeproc --bibliography=nlp_course.bib --slide-level 2 $document; done"
+          args: -lc "for document in ${{steps.files_list.outputs.files}}; do /usr/local/bin/pandoc -o ../lecture_pdf/${document/.md/.pdf} --citeproc --bibliography=nlp_course.bib --slide-level 2 $document; done"
       - uses: actions/upload-artifact@v4
         with:
           name: test
