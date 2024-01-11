@@ -13,7 +13,7 @@ jobs:
         run: |
           mkdir lecture_pdf  # create output dir
           # this will also include README.md
-          echo "files=$(printf '"%s" ' lecture_source/*.md)" > $GITHUB_OUTPUT
+          echo "files=$(printf '%s ' lecture_source/*.md)" > $GITHUB_OUTPUT
           
       - uses: docker://pandoc/latex:edge-ubuntu
         with:
