@@ -1,6 +1,6 @@
 name: Advanced Usage
 
-on: workflow_call
+on: workflow_dispatch
 
 jobs:
   convert_via_pandoc:
