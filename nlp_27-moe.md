@@ -24,7 +24,7 @@ link-citations: true
 
 Ensemble machine learning methods are a set of methods that work with multiple estimators and combine their results to produce the final output. Common methods include bagging, boosting, stacking, etc. The idea behind these methods is that the combination of multiple estimators is more accurate than a single estimator. @dietterich2000ensemble details multiple classical ensemble algorithms.
 
-Popular ensemble methods include Random Forests, Gradient Boosting, 
+Popular ensemble methods include methods such as Random Forests and Gradient Boosting. 
 
 ## Ensemble methods
 
