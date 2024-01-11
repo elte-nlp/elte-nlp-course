@@ -1,4 +1,5 @@
 *
+!.github/workflows/*.yml
 !*.tex
 !*.eps
 !*.bib
