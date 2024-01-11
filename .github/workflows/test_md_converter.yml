@@ -17,7 +17,7 @@ jobs:
           
       - uses: docker://pandoc/latex:2.9
         with:
-          entrypoint: for document in ${{ steps.files_list.outputs.files }}; do pandoc -o ../lecture_pdf/${document/.md/.pdf} --citeproc --bibliography="${document/.md/.bib}" --slide-level 2 $document
+          entrypoint: for document in $steps.files_list.outputs.files; do pandoc -o ../lecture_pdf/${document/.md/.pdf} --citeproc --bibliography="${document/.md/.bib}" --slide-level 2 $document
       - uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: Automatic PDF conversion
