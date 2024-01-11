@@ -18,7 +18,7 @@ jobs:
       - uses: docker://pandoc/latex:3.1.1-ubuntu
         with:
           entrypoint: /bin/bash
-          args: -lc "apt-get update && apt install texlive-latex-recommended -y && apt-get install -y aptitude && aptitude install latex-beamer -y; cd lecture_source; for document in ${{steps.files_list.outputs.files}}; do /usr/local/bin/pandoc -t beamer -o ../lecture_pdf/${document/.md/.pdf} --citeproc --bibliography=${document/.md/.bib} --slide-level 2 $document; done"
+          args: -lc "apt-get update && apt install texlive-latex-recommended -y && apt-get install -y aptitude && aptitude update && aptitude install latex-beamer -y; cd lecture_source; for document in ${{steps.files_list.outputs.files}}; do /usr/local/bin/pandoc -t beamer -o ../lecture_pdf/${document/.md/.pdf} --citeproc --bibliography=${document/.md/.bib} --slide-level 2 $document; done"
       - uses: actions/upload-artifact@v4
         with:
           name: test
