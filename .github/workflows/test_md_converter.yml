@@ -15,9 +15,9 @@ jobs:
           # this will also include README.md
           echo "files=$(printf '"%s" ' lecture_source/*.md)" > $GITHUB_OUTPUT
           
-      - uses: docker://pandoc/latex:2.9
+      - uses: docker://pandoc/latex:edge-ubuntu
         with:
-          entrypoint: for document in ${steps.files_list.outputs.files}; do pandoc -o ../lecture_pdf/${document/.md/.pdf} --citeproc --bibliography="${document/.md/.bib}" --slide-level 2 $document; done
+          entrypoint: for document in ${steps.files_list.outputs.files}; do /usr/local/bin/pandoc -o ../lecture_pdf/${document/.md/.pdf} --citeproc --bibliography="${document/.md/.bib}" --slide-level 2 $document; done
       - uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: Automatic PDF conversion
