@@ -93,7 +93,7 @@ __time-aligned written transcipts__.
 
 In the past, transcripts were __phonetic__, and aligned at the phone level, so
 annotators had to determine phone boundaries by listening and looking at
-spectrograms:
+wave forms:
 
 ![x](figures/speech_transcript.jpg)\
 
@@ -319,9 +319,18 @@ turn can provide word sequence models for higher-level training:
 
 ![From @laureys2001assessing.](figures/word_sequence_model.png){width=80%}
 
-## TODO Acoustic model training cont.
+## Acoustic model training cont.
 
-TODO Describe a seeding hierarchy
+Modern HMM-based systems like [Kaldi ASR](https://kaldi-asr.org/) do not train
+directly their most complex model on the training dataset but train a sequence
+of models:
+
++ First a __monophone acoustic model__ is trained, and this model is aligned with
+  the audio.
++ The trained monophone model is used to start training a __triphone__ model.
++ The steps of further training and alignment are repeated with additional
+  training algorithms for higher quality models (e.g., using delta features
+  etc.).
 
 ## Adding a language model
 
@@ -336,16 +345,6 @@ L}(\mathbf w \vert \mathbf s). $$
 In theory, the full Viterbi algorithm could be used, but its quadratic time
 complexity in terms of the number of states makes this unfeasable as the combined
 HMMs for continuous, large vocabulary speech recognition are really large.
-
-## TODO Decoding
-
-Maybe add an LM + AM joint model figure from here: https://jonathan-hui.medium.com/speech-recognition-asr-model-training-90ed50d93615
-
-
-# TODO Hybrid models
-
-- sthing from here: https://web.stanford.edu/class/cs224s/lectures/224s.22.lec9.pdf
-- describe Bayesian reversion for the (scaled) emission probabilities
 
 # References
 

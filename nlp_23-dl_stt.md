@@ -166,14 +166,67 @@ and the number of $\mathbf y$-alignable sequences can also be very large, so it
 is important to calculate $\sum_{\mathbf x_y}P(\mathbf x_y | \mathbf X)$
 efficiently.
 
-Fortunately, there is a fast dynamic programming algorithm (which is, not
-accidentally, also called the __forward-backward algorithm__) which can
-calculate the sum in $\mathcal O(T)$ time.
+Fortunately, similarly to the Viterbi algorithm for HMMs, there is a fast
+dynamic programming algorithm which can calculate the sum in $\mathcal O(T)$
+time.
 
-
+There are also linear time complexity algorithms for decoding, i.e., calculating
+the most probable final output sequence $\underset{\mathbf
+y}{\operatorname{argmax}} ~ P(\mathbf y | \mathbf X).$
 
 # Whisper
 
+## Whisper (OpenAI, 2022)
+
+Whisper [@radford2023robust] is a transformer encoder-decoder-based model
+trained to perform a variety of speech processing tasks including
+
++ multilingual speech recognition,
++ speech translation (any to English),
++ spoken language identification,
++ voice activity detection.
+
+Innovation is not so much architectural but scaling up the model and training on
+a large amount of heterogeneous, weakly supervised data for a large set of
+speech tasks.
+
+## Whisper cont.
+
+![Whisper architecture from @openai2022whisper.](figures/whisper_arch.png){width=80%}
+
+## Whisper cont.
+
+Noteworthy details:
+
++ The preprocessed audio consists of 80-channel Log-Mel spectrograms representations
+  of 25-millisecond windows strided 10 milliseconds.
++ "Audio tokenization" for the transformer encoder consists of two 3 wide 2D
+  convolutional filters, the second using a stride of 2.
++ The task to be executed by the model is indicated by task specifier special tokens. 
+
+## Whisper: task-specific representation
+
+![Whisper task-specific representation from
+@radford2023robust. Task output generation starts from the `START OF TRANSCRIPT` special token. Earlier input contains the task specification prompt.](figures/whisper_task.png){width=104%}
+
+## Whisper: training 
+
++ The model is trained on 680000 hours of (weakly) labeled data including 117000
+  hours for non-English languages and 125000 hours of speech translation to
+  English.
++ The dataset is filtered to contain only human-generated data.
++ Model sizes ranged from 39M to 1550M parameters.
++ The decoders input contained previous segment transcripts for randomly
+  selected datapoints.
+
+## Whisper: results
+
+Whisper's ASR performance was competitive with SOTA commercial ASR systems and
+outperformed all open source ones. It was also very close to that of
+human professionals.
+
+![Whisper's comparative performance on 25 recordings from the Kincaid46 dataset 
+[@radford2023robust].](figures/whisper_performance.png){width=70%}
 
 
 # References
