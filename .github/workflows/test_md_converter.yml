@@ -1,9 +1,6 @@
 name: Advanced Usage
 
-on: 
-  push:
-    branches:
-      - action_test
+on: workflow_call
 
 jobs:
   convert_via_pandoc:
