@@ -1,10 +1,10 @@
 name: Advanced Usage
 
-on: workflow_call
+on: workflow_dispatch
 
 jobs:
   convert_via_pandoc:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
   
