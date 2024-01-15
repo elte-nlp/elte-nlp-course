@@ -19,7 +19,8 @@ jobs:
         with:
           entrypoint: /bin/bash
           args: -lc "tlmgr install extsizes animate ocgx2 media9 zref; cd lecture_source; for document in ${{steps.files_list.outputs.files}}; do /usr/local/bin/pandoc -t beamer -o ../lecture_pdf/${document/.md/.pdf} --citeproc --bibliography=${document/.md/.bib} --slide-level 2 $document; done"
-      - uses: actions/upload-artifact@v4
+      - uses: Jodebu/upload-to-drive@master
         with:
-          name: test
-          path: lecture_pdf/
+          target: lecture_pdf
+          credentials: secrets.GDRIVE_UPLOAD
+          folder: 1WolGOwd0v4VDLPQr6NEnbnaRg18LSIhB
