@@ -1,9 +1,13 @@
-name: Advanced Usage
+name: Pandoc conversion & gdrive upload
 
-on: workflow_dispatch
+on: 
+  push:
+    branches:
+      - action_test
 
 jobs:
   convert_via_pandoc:
+    if: 'contains(github.event.head_commit.message, "<|CONV|>")'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
