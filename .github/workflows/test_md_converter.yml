@@ -22,7 +22,7 @@ jobs:
       - uses: docker://pandoc/latex:3.1.1-ubuntu
         with:
           entrypoint: /bin/bash
-          args: -lc "tlmgr install extsizes animate ocgx2 media9 zref; cd lecture_source; for document in ${{steps.files_list.outputs.files}}; do /usr/local/bin/pandoc -t beamer -o ../lecture_pdf/${document/.md/.pdf} --citeproc --bibliography=${document/.md/.bib} --slide-level 2 $document; done"
+          args: -lc "for i in $(cat pkglist); do tlmgr install $i; done; cd lecture_source; for document in ${{steps.files_list.outputs.files}}; do /usr/local/bin/pandoc -t beamer -o ../lecture_pdf/${document/.md/.pdf} --citeproc --bibliography=${document/.md/.bib} --slide-level 2 $document; done"
       - uses: adityak74/google-drive-upload-git-action@main
         with:
           filename: lecture_pdf/*
