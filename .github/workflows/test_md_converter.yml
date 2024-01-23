@@ -22,5 +22,5 @@ jobs:
       - uses: Jodebu/upload-to-drive@master
         with:
           target: lecture_pdf
-          credentials: secrets.GDRIVE_UPLOAD
+          credentials: ${{secrets.GDRIVE_UPLOAD}}
           folder: 1WolGOwd0v4VDLPQr6NEnbnaRg18LSIhB
