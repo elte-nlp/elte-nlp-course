@@ -3,7 +3,7 @@ name: Pandoc conversion & gdrive upload
 on: 
   push:
     branches:
-      - action_test
+      - 12_credits
 
 jobs:
   convert_via_pandoc:
@@ -28,4 +28,4 @@ jobs:
           filename: lecture_pdf/*
           credentials: ${{secrets.GDRIVE_UPLOAD}}
           overwrite: "true"
-          folderId: 1WolGOwd0v4VDLPQr6NEnbnaRg18LSIhB
+          folderId: 1S_WgFtfvz-Tw1a7TMupgg0s2GoO_0ZHv
