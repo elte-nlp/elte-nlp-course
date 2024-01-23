@@ -24,4 +24,4 @@ jobs:
           filename: lecture_pdf/*
           credentials: ${{secrets.GDRIVE_UPLOAD}}
           overwrite: "true"
-          folder: 1WolGOwd0v4VDLPQr6NEnbnaRg18LSIhB
+          folderId: 1WolGOwd0v4VDLPQr6NEnbnaRg18LSIhB
