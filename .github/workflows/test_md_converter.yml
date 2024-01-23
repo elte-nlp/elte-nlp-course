@@ -21,7 +21,7 @@ jobs:
           args: -lc "tlmgr install extsizes animate ocgx2 media9 zref; cd lecture_source; for document in ${{steps.files_list.outputs.files}}; do /usr/local/bin/pandoc -t beamer -o ../lecture_pdf/${document/.md/.pdf} --citeproc --bibliography=${document/.md/.bib} --slide-level 2 $document; done"
       - uses: adityak74/google-drive-upload-git-action@main
         with:
-          target: lecture_pdf/*
+          filename: lecture_pdf/*
           credentials: ${{secrets.GDRIVE_UPLOAD}}
           overwrite: "true"
           folder: 1WolGOwd0v4VDLPQr6NEnbnaRg18LSIhB
