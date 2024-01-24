@@ -287,7 +287,7 @@ lexical analyzer implementing the given rules, e.g., by generating the C
 source code of the analyzer.
 
 
-## Case study: spaCy's rule-based tokenizer I
+## SpaCy's rule-based tokenizer I
 
 1.  The input text is split on white space.[^2]
 2.  Then, the tokenizer processes the text from left to right. On each
@@ -500,7 +500,7 @@ generating the input for deep end-to-end models from raw text.
 # References
 ## References
 
-\small
+\footnotesize
 
 [^1]: See, e.g., <https://bit.ly/2ZHlKWG> for a proof.
 
