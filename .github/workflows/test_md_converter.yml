@@ -3,7 +3,7 @@ name: Pandoc conversion & gdrive upload
 on: 
   push:
     branches:
-      - 12_credits
+      - main
 
 jobs:
   convert_via_pandoc:
