@@ -500,11 +500,9 @@ generating the input for deep end-to-end models from raw text.
 # References
 ## References
 
-\scriptsize
+\small
 
-[^1]:
-
-See, e.g., <https://bit.ly/2ZHlKWG> for a proof.
+[^1]: See, e.g., <https://bit.ly/2ZHlKWG> for a proof.
 
 [^2]: The algorithm description is from the [spaCy
     documentation.](https://spacy.io/usage/linguistic-features#tokenization)
