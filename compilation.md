@@ -26,4 +26,4 @@ sudo apt install texlive-pstricks texlive-science texlive-humanities
 
 ## Automatic conversion in Git Repository
 
-A Github Action pipeline is configured to load pandoc conversion of all .md files in lecture_source. It also automatically uploads the PDFs to Google Drive. The pipeline is triggered by pushing to the 12_credits branch and including `<|CONV|>` in the commit message.
+A Github Action pipeline is configured to load pandoc conversion of all .md files in lecture_source. It also automatically uploads the PDFs to Google Drive. The pipeline is triggered by pushing to the main branch and including `<|CONV|>` in the commit message.
