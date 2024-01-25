@@ -232,7 +232,7 @@ rules (\\& refers back to the full match, \\$n$ to the $n$-th group):
 -  \"'ll\" $\Rightarrow$ \" 'll\" (separate clitic 'll)
 
 
-## Regex cascade-based tokenization II.
+## Regex cascade-based tokenization II
 
 The main problem for the approach is the proper handling of exceptions: e.g.,
 word ending periods should be split, *except for abbreviations*.
@@ -267,7 +267,7 @@ of classified tokens from it:
 \end{center}
 ```
 
-## Lexer-based solutions II.
+## Lexer-based solutions II
 
 Most lexers are actually lexical analyser
 generators. Their input is a list of token classes (types), regular
@@ -334,7 +334,7 @@ two strings by the minimal number of edit operations required to
 transform them into each other.
 
 
-## Edit distance II.
+## Edit distance II
 
 Given
 
