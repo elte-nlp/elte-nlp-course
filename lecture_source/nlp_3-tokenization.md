@@ -506,7 +506,3 @@ generating the input for deep end-to-end models from raw text.
 
 [^2]: The algorithm description is from the [spaCy
     documentation.](https://spacy.io/usage/linguistic-features#tokenization)
-
-[^3]: See [Kudo: Subword
-    Regularization](https://arxiv.org/pdf/1804.10959.pdf) and [Provilkov
-    et al.: BPE-Dropout](https://arxiv.org/pdf/1910.13267.pdf).
