@@ -22,8 +22,8 @@ output:
 ### Acknowledgement {.alert}
 
 The following slides are based on and very closely follow the online freely
-available Chapter 15 of @jurafsky2023speech, and also follow @mctear2022conversational at
-certain points.
+available Chapter 15 of @jurafsky2023speech, and also follow
+@mctear2022conversational at certain points.
 
 # Introduction
 
@@ -197,7 +197,7 @@ Early frame-based TODs had the the following components:
 
 ![Questions associated with the slots of a frame in the NLG component of a
 traditional frame-based dialog system [from
-@jurafsky2019speech].](figures/frame.png)
+@jurafsky2023speech].](figures/frame.png)
 
 ## Early frame-based architectures: NLU
 
@@ -248,7 +248,7 @@ Identifying the __domain__, __intent__ and __slot values/entities__ in a user
 utterance can be implemented by classifiers and sequence tagging models:
 
 ![Identifying destination and time slot values using a pretrained encoder and
-IOB tagging [from @jurafsky2019speech].](figures/slot_detection.png){width=85%}
+IOB tagging [from @jurafsky2023speech].](figures/slot_detection.png){width=85%}
 
 ## Dialog state tracking
 
@@ -333,7 +333,7 @@ The generation of the utterances or their templates can be implemented as a
 rule-based system or as an ML model; recent implementations typically use
 __sequence-to-sequence models__:
 
-![From @jurafsky2019speech.](figures/seq2seq_nlg.png){width=98%}
+![From @jurafsky2023speech.](figures/seq2seq_nlg.png){width=98%}
 
 ## Simplified architectures and models
 
