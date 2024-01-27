@@ -15,7 +15,6 @@ header-includes:
   - \usepackage{tikz}
   - \usetikzlibrary{matrix}
   - \usepackage{algpseudocode}
-  - \usepackage{algorithm}
   - \DeclareMathOperator*{\argmax}{argmax}
   - \DeclareMathOperator*{\argmin}{argmin}
   - \DeclareMathOperator{\sign}{sign}
