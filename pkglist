@@ -6,5 +6,4 @@ zref
 tikz
 tikz-qtree
 epstopdf
-algpseudocode
-algorithm
+texlive-science
