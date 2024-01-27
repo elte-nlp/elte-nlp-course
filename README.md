@@ -9,8 +9,8 @@ Reference in BibTeX format:
 @misc{
   elte_nlp_course,
   title={Natural Language Processing and Foundation Models (Lecture Slides)},
-  url={https://github.com/elte-nlp/elte-nlp-course}
-  author={Simonyi, András and Gyöngyössy, Natabara and Nemeskey, Dávid Márk},
+  url={https://github.com/elte-nlp/elte-nlp-course},
+  author={Simonyi, Andr\'{a}s and Gy\"{o}ngy\"{o}ssy, Natabara and Nemeskey, D\'{a}vid Márk},
   note={Accessed: <<REPLACE_WITH_DATE>>}
 } 
 ```
