@@ -413,6 +413,6 @@ open-domain systems.)
 # References
 
 ## References {.allowframebreaks}
-\footnotesize-
+\footnotesize
 
 
