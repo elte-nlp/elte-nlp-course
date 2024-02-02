@@ -1,6 +1,6 @@
 ---
 title: "Natural Language Processing"
-subtitle: "Lecture 13: LLM alignments"
+subtitle: "Lecture 15: LLM alignments"
 author: András Simonyi
 institute: "Eötvös University, Department of Artificial Intelligence"
 date: 2023
@@ -17,7 +17,7 @@ aspectratio: 1610
 output: 
   beamer_presentation:
     slide_level: 2
-bibliography: nlp_13-llm_alignments.bib
+bibliography: nlp_15-llm_alignments.bib
 ---
 
 # AI alignment in general

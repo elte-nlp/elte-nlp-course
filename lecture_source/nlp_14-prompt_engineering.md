@@ -1,6 +1,6 @@
 ---
 title: "Natural Language Processing"
-subtitle: "Lecture 13: Prompt engineering"
+subtitle: "Lecture 14: Prompt engineering"
 author: András Simonyi
 institute: "Eötvös University, Department of Artificial Intelligence"
 date: 2023

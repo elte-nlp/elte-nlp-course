@@ -1,6 +1,6 @@
 ---
 title: "Natural Language Processing"
-subtitle: "Lecture 20: Datasets, Benchmarks and Bootstrapping"
+subtitle: "Lecture 18: Datasets, Benchmarks and Bootstrapping"
 author: "Dávid Márk Nemeskey & Natabara Gyöngyössy"
 institute: "Eötvös University, Dept. of Digital Humanities & Dept. of AI"
 date: 2023

@@ -1,6 +1,6 @@
 ---
 title: "Natural Language Processing"
-subtitle: "Lecture 15: LLM Zoo"
+subtitle: "Lecture 17: LLM Zoo"
 author: "Dávid Márk Nemeskey"
 institute: "Eötvös University, Department of Digital Humanities"
 date: 2023

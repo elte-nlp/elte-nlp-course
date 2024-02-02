@@ -1,6 +1,6 @@
 ---
 title: "Natural Language Processing"
-subtitle: "Lecture 28: Vision-Language-Action models"
+subtitle: "Lecture 25: Vision-Language-Action models"
 author: "András Simonyi"
 institute: "Eötvös Loránd University, Department of Artificial Intelligence"
 date: 2023
