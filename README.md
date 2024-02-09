@@ -17,4 +17,4 @@ Reference in BibTeX format:
 
 **Aknowledgements:**
 
-We are grateful to our students who provided detailed (and mostly anonymous) feedback on any previous revisions of our materials!
+We are grateful to our students who provided detailed (and mostly anonymous) feedback on any previous revision of our materials!
