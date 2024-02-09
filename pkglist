@@ -6,5 +6,6 @@ zref
 tikz
 tikz-qtree
 tikz-dependency
+environ
 epstopdf
 algorithmicx
