@@ -5,5 +5,7 @@ media9
 zref
 tikz
 tikz-qtree
+tikz-dependency
+environ
 epstopdf
 algorithmicx

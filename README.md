@@ -14,3 +14,7 @@ Reference in BibTeX format:
   note={Accessed: <<REPLACE_WITH_DATE>>}
 } 
 ```
+
+**Aknowledgements:**
+
+We are grateful to our students who provided detailed (and mostly anonymous) feedback on any previous revision of our materials!
