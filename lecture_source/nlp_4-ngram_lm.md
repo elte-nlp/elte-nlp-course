@@ -205,7 +205,9 @@ determined by the previous last $k$ tokens in the sequence.
 
 Using this approximation, the probability of a
 $\langle w_1,\dots,w_n \rangle$ sequence can be calculated as
+\small
 $$P(w_1) \prod_{i=2}^k P(w_{i} ~\vert~ w_{1},\dots,w_{i-1})  \prod_{i=k+1}^n P(w_{i} ~\vert~ w_{i-k},\dots,w_{i-1}),$$
+\normalsize
 and the big advantage is that the
 $$P(w_{i} ~\vert~ w_{i-k},\dots,w_{i-1}) \approx
 \frac{C(\langle w_{i-k},\dots,w_{i}\rangle)}{C(\langle w_{i-k},\dots,w_{i-1} \rangle)}$$
@@ -316,7 +318,10 @@ coming from the unigram frequencies:
 $$P(w_2 ~\vert ~w_1) \approx \lambda_1\frac{C(\langle w_1, w_2 \rangle)}{C(w_1)} + (1 - \lambda_1)\frac{C(w_2)}{\sum_{w\in V}C(w)}$$
 Recursive solution for arbitrary $k$:
 
+\small
 $$P(w_{k+1} \vert~ w_1.. w_k) \approx \lambda_k\frac{c(\langle w_1 .. w_{k+1} \rangle)}{c(\langle w_1 .. w_k\rangle)} + (1-\lambda_k)P(w_{k+1} ~\vert~ w_2 .. w_{k})$$
 
+
+\normalsize
 $\lambda_k$ is empirically set on the basis of the corpus, typically
 using Expectation Maximization.
