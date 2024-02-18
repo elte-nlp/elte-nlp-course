@@ -434,7 +434,7 @@ terms of the shortest path length between A and B, we can use a simple
 Starting with A, every node 
 
 + receives messages from its predecessors about their min-sum distance from A,
-+ based on this messages, calculates its own min-sum distance and incoming edge, and
++ based on these messages, calculates its own min-sum distance and incoming edge, and
 + sends its min-sum distance to all of its successors.
 
 Eventually, the messages reach B, which is able to calculate the A-B min-sum
@@ -461,10 +461,10 @@ distance, and the min-sum path between A and B can also be reconstructed.
 
 ## Motivation: The Min-Sum algorithm cont.
 
-The core idea of the algorithm can be adapted to solve our starting problem,
-because it can be used to maximize a product along a path between nodes without
-any significant change ("max-product alg."), and the transition/emission
-probabilities of a HMM have the required directed acyclic graph structure:
+The Min-Sum algorithm can be adapted to solve our problem, because it can be
+used to maximize a product along a path between nodes without any significant
+change ("max-product alg."), and the transition/emission probabilities of a HMM
+have the required directed acyclic graph structure:
 
 ![Transition paths in a HMM model
 [@great_learning2022pos_hmm].](figures/min-sum-4.png){width="70%"}
