@@ -237,14 +237,16 @@ domain of classical learning algorithms is to use one of the well known
 *discriminative methods* with BOW vectors:
 
 -   a perceptron variant,
+-   logistic regression, 
+-   SVM, or
+-   a decision tree-based ensemble method such as random forest of gradient
+    boosted trees.
 
--   logistic regression, or
-
--   SVM.
-
-These models do not assume conditional independence and therefore have
-no problem with using refined (e.g. $N$-gram based) BOW representations
-as input.
+These models do not assume conditional independence and have no problem with
+using refined (e.g. $N$-gram based) BOW representations as input.^[Somewhat
+counterintuitively, using overlapping $N$-grams in Naive Bayes text classifiers
+can actually be *beneficial* to performance in certain applications, e.g.
+character N-grams are frequently used in NB-models for language identification.]
 
 # Sequence tagging
 
@@ -416,11 +418,62 @@ $$\mathop{\mathrm{argmax}}_{\mathbf{y}\in Y^n} P(\mathbf{x}, \mathbf{y} ~|~ \Pi,
 An exhaustive search is unfeasible because there are $|Y|^n$ alternative
 tag sequences.
 
+## Motivation: The Min-Sum algorithm^[The discussion follows that of @mackay2003information [section 16.3].]
+
+How can we find the lowest-cost path between A and B on the basis of a diagram
+like the following?
+
+![Figure from @mackay2003information [245].](figures/min-sum-1.png){width="50%"}
+
+## Motivation: The Min-Sum algorithm cont.
+
+Instead of the brute force solution, whose time complexity can be exponential in
+terms of the shortest path length between A and B, we can use a simple
+*__message passing__* approach. 
+
+Starting with A, every node 
+
++ receives messages from its predecessors about their min-sum distance from A,
++ based on this messages, calculates its own min-sum distance and incoming edge, and
++ sends its min-sum distance to all of its successors.
+
+Eventually, the messages reach B, which is able to calculate the A-B min-sum
+distance, and the min-sum path between A and B can also be reconstructed.
+
+## Motivation: The Min-Sum algorithm cont.
+
+::: columns
+
+:::: {.column width=50%}
+
+![image](figures/min-sum-2.png){width="80%"}\
+
+::::
+
+:::: {.column width=50%}
+
+![Min-Sum algorithm message passing steps [from @mackay2003information p.
+246].](figures/min-sum-3.png){width="80%"}
+
+::::
+
+:::
+
+## Motivation: The Min-Sum algorithm cont.
+
+The core idea of the algorithm can be adapted to solve our starting problem,
+because it can be used to maximize a product along a path between nodes without
+any significant change ("max-product alg."), and the transition/emission
+probabilities of a HMM have the required directed acyclic graph structure:
+
+![Transition paths in a HMM model
+[@great_learning2022pos_hmm].](figures/min-sum-4.png){width="70%"}
+
+
 ## The Viterbi algorithm cont. 
 
-Fortunately, the HMM conditional
-independence assumptions have the following consequence: If we know, for
-all $y_i\in Y$, the values
+More formally, the HMM conditional independence assumptions have the following
+consequence: If we know, for all $y_i\in Y$, the values
 
 $$\mathbf{y}^{n-1}_i = \mathop{\mathrm{argmax}}_{\mathbf{y}\in
     Y^{n-1}~\wedge~\mathbf{y}[n-1] = y_i} P(\mathbf{x}[1:n-1], \mathbf{y} ~|~
@@ -429,9 +482,9 @@ $$\mathbf{y}^{n-1}_i = \mathop{\mathrm{argmax}}_{\mathbf{y}\in
 (i.e. the most probable $n-1$-long tag sequences ending in $y_i$), then the most
 probable $\mathbf{y}$ can be computed by comparing only $|Y|^2$ continuations:
 
-\begin{equation}
+$$
 \mathbf{y} = \mathop{\mathrm{argmax}}_{\mathbf{y}\in \{\langle \mathbf{y}_i^{n-1},~y \rangle ~|~ i \in 1\dots |Y|~\wedge~ y \in Y\}} P(\mathbf{x}, \mathbf{y} ~|~ \Pi, A, B).
-\end{equation}
+$$
 
 ## The Viterbi algorithm cont. 
 
@@ -454,8 +507,8 @@ $$\mathbf{y}_i^t \leftarrow  \argmax_{\mathbf{y}\in \{\langle \mathbf{y}_k^{t-1}
 
 ## The Viterbi algorithm cont. 
 
-The algorithm maintains a $|Y| \times \mathrm{length}(\mathbf{x})$ table. In the
-*forward pass*, it
+The algorithm is typically implemented by gradually filling in a $|Y| \times
+\mathrm{length}(\mathbf{x})$ table. In the *forward pass*, it
 
 1.  computes the probabilities of the $y_i^t$s and
 2.  maintains backreferences to the most probable $\mathbf{y}^{t-1}$
@@ -480,12 +533,10 @@ $\mathcal{O}(\mathrm{length}(\mathbf{x})|Y|)$ space.
 
 Calculating the probabilities to be compared directly requires
 multiplying numbers very close to zero, so it is customary to work with
-log probabilities instead.
+sums of log probabilities instead.
 
-\small
-Note: the Viterbi algorithm is also known as the
-*[min-sum](http://www.inference.org.uk/itprnn/book.pdf)* algorithm. See
-@mackay2003information [p. 245].
+\small Note: As we have seen, Viterbi algorithm is also known as (an application
+of) the *__min-sum__* or *__max-product__* algorithm.
 
 # Discriminative sequence tagging methods
 ## Discriminative methods 
