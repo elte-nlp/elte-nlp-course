@@ -239,13 +239,13 @@ domain of classical learning algorithms is to use one of the well known
 -   a perceptron variant,
 -   logistic regression, 
 -   SVM, or
--   a decision tree-based ensemble method such as random forest of gradient
+-   a decision tree-based ensemble method such as random forest or gradient
     boosted trees.
 
 These models do not assume conditional independence and have no problem with
 using refined (e.g. $N$-gram based) BOW representations as input.^[Somewhat
 counterintuitively, using overlapping $N$-grams in Naive Bayes text classifiers
-can actually be *beneficial* to performance in certain applications, e.g.
+can actually be *beneficial* to performance in certain applications, e.g.,
 character N-grams are frequently used in NB-models for language identification.]
 
 # Sequence tagging
