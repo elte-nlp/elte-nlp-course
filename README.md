@@ -1,4 +1,4 @@
-Lecture slides for ELTE Eötvös Loránd University's Natural Language Processing and Language-based Foundation Models (*IPM-23fmiNLPFMEG*) course.
+Lecture slides for Eötvös Loránd University's Natural Language Processing and Language-based Foundation Models (*IPM-23fmiNLPFMEG*) course.
 
 The latest PDF versions of the slides can be found in [this Google Drive folder.](https://drive.google.com/drive/folders/1S_WgFtfvz-Tw1a7TMupgg0s2GoO_0ZHv)
 
@@ -15,6 +15,6 @@ Reference in BibTeX format:
 } 
 ```
 
-**Aknowledgements:**
+**Acknowledgements**
 
 We are grateful to our students who provided detailed (and mostly anonymous) feedback on any previous revision of our materials!
