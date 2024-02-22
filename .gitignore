@@ -2,8 +2,15 @@
 !*.tex
 !*.eps
 !*.bib
-!*.pdf
+!*.md
+!*.png
+!*.jpg
+!*.jpeg
 !figures/
+!lecture_source/
 !.gitignore
 !.latexmkrc
+!.github
+!.github/**
 _region_.tex
+!pkglist
