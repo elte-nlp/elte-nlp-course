@@ -457,13 +457,18 @@ Two contrasting ways of scoring parse trees:
 
 A simple but surprisingly well performing approach is to
 
--   score all the possible edges individually (this requires scoring
-    $n(n-1)l$ directed edges if there are $n$ tokens and $l$ labels),
-    and then
+-   create a fully connected, weighted, directed graph from all possible
+    dependency edges ($n(n-1)l$ edges if there are $n$ tokens and $l$ labels),
+-   score edges individually and then
 -   find the (correctly directed) tree with the largest sum total score.
 
 The assumption is simply that $$S(g) = \sum_{e\in g} S(e).$$ This way of
 scoring a graph is called the __*edge-*__ or __*arc-factored*__ approach.
+
+## Illustration
+
+![Initial rooted, directed graph for _Book that flight_ from @jurafsky2019speech.](\
+./figures/graph_parsing.png){width=75%}
 
 
 ## Finding the tree with the maximal score 
@@ -520,7 +525,7 @@ possible edge labels is
 
 __*Non-projectivity*__: as we have seen, non-projectivity is a serious
 problem for the most wide-spread transition systems which needs special
-treatment. Graph-based approaches don not suffer from this problem.
+treatment. Graph-based approaches do not suffer from this problem.
 
 __*Performance*__: Transition-based systems tend to have problems with
 long-distance dependencies, graph-based models do not have this
