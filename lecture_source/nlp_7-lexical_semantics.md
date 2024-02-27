@@ -148,12 +148,18 @@ resources, since they contain information about *entities* and
 *concepts*, which can be linked to words in a vocabulary. Important
 examples include
 
+\small
 -   *Wikis*, most importantly the English Wikipedia, here various types
     of links and references between the entries provide relational
     information;
 
 -   *formal ontologies*: these describe relationships between concepts
     in a formal logical language.
+
+\normalsize
+Note: lexicographers differentiate between lexical, conceptual and
+encyclopedic knowledge; the latter is not considered part of a word's semantics
+[@kiefer1988linguistic].
 
 ## Word sense disambiguation
 
@@ -221,7 +227,7 @@ meanings.
 
 The most direct way of getting word vectors that
 reflect the words' distribution in a corpus is to consider
-*co-ocurrence* matrixes. If there are $D$ documents in the corpus and
+*co-occurrence* matrixes. If there are $D$ documents in the corpus and
 $V$ is the corpus vocabulary then
 
 -   __term-document__ matrices are $|V|\times D$ dimensional matrices in

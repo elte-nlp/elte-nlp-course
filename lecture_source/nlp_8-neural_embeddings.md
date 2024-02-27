@@ -262,7 +262,7 @@ $$\frac{C(w_i, w_j)C(\mathrm{\langle target~word, context~word\rangle~pairs~in~c
 
 ## Pointwise Mutual Information cont.
 
-Word pairs with the three highest and lowest PMI score in a large
+Bigrams with the three highest and lowest PMI score in a large
 Wikipedia fragment:[^2]
 
   word 1     word 2            PMI
