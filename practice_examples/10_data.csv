@@ -1,0 +1,29 @@
+text,label
+Yes!,Yes
+Of course!,Yes
+I agree.,Yes
+For sure!,Yes
+No,No
+I don't want!,No
+Definitely not!,No
+Please no!,No
+I would like to buy some fruits!,BuyFruit
+Do you sell fruits or vegetables?,BuyFruit
+I would like to have fresh grapes ,BuyFruit
+Do you have some apples?,BuyFruit
+Give me some cereal!,BuyCereal
+"Can you sell me cereal, please?",BuyCereal
+Do you have cerial products?,BuyCereal
+Give me medium size rice cereal,BuyCereal
+Can I pick it up at your store?,Pickup
+I want to pick up at store,Pickup
+I want to take the order myself,Pickup
+"Pick at at store, ok?",Pickup
+Please deliver it to me!,Delivery
+Please deliver it to my address ,Delivery
+I choose delivery service ,Delivery
+Deliver my order please,Delivery
+Some mixed juice sounds nice!,Juice
+Juice is perfect for me,Juice
+"I'm thirsty, I want something to drink",Juice
+Please press the fruits and deliver the juice only!,Juice
