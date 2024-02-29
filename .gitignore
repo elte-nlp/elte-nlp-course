@@ -12,5 +12,6 @@
 !.latexmkrc
 !.github
 !.github/**
+!practice_examples
 _region_.tex
 !pkglist

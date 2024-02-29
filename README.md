@@ -2,6 +2,7 @@ Lecture slides for Eötvös Loránd University's Natural Language Processing and
 
 The latest PDF versions of the slides can be found in [this Google Drive folder.](https://drive.google.com/drive/folders/1S_WgFtfvz-Tw1a7TMupgg0s2GoO_0ZHv)
 
+(WIP) Practice material for the course can be found in the [practice_examples](practice_examples) folder.
 
 The course material is licensed under [CC-BY-4.0](https://creativecommons.org/licenses/by/4.0/), feel free to use it!   
 Reference in BibTeX format:
