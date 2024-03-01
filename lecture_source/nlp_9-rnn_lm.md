@@ -261,7 +261,7 @@ Modern RNN-based architectures frequently stack multiple RNN cells on
 top of each other as layers, analogously to multi-layer feedforward
 networks:
 
-![Stacked unidirectional (left) and bidirectional (right ) LSTM
+![Stacked unidirectional (left) and residual (right) LSTM
 layers.](figures/lstm_layers.eps){width="1.\\textwidth"}
 
 ## Performance
