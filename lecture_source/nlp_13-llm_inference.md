@@ -97,6 +97,7 @@ Using GPUs for inference the limiting factor aside the memory capacity is memory
 ## Flash decoding vs Caching-only
 
 GIFs about the difference between from [@flashdec]:
+
 - [Caching and iterative decoding](https://crfm.stanford.edu/static/img/posts/2023-10-13-flashdecoding/parallelization.gif)
 - [Flashdecoding](https://crfm.stanford.edu/static/img/posts/2023-10-13-flashdecoding/parallelization_kv.gif)
 
@@ -121,7 +122,7 @@ Given a centralized inference server, we usually expect a larger number of multi
 - **Prefill**: The user prompt is processed, K and V are calculated and cached. This could be done in a single pass, and it might be a much longer sequence than the generated output. This also includes generating the first output token.
 - **Decoding**: This is the iterative process of generating the next token and calculating the next K and V. This cannot be parallelized, but the K and V can be reused from the cache. We only need to calculate a single Q for each pass.
 
-## Overview of the process used in Flashdecoding++
+## Flashdecoding++
 
 ![Decoder inference from prefill and decode phases need a substantially different calculation method. [@hong2024flashdecoding]](./figures/flashdecpp.png){ height=70% }
 
@@ -178,7 +179,7 @@ DeepSpeed-FastGen [@holmes2024deepspeedfastgen] also measures the optimal GPU th
 
 ## GPU utilization
 
-![GPU utilization curves for different context lengths [@holmes2024deepspeedfastgen]](./figures/splitfuse_saturation.png){ height=75% }
+![GPU utilization curves for different context lengths, over ~400 tokens there is no advantage in throughput [@holmes2024deepspeedfastgen]](./figures/splitfuse_saturation.png){ height=75% }
 
 ## Mixing prefill and decoding
 
@@ -199,7 +200,7 @@ GPUs are allocated to prefill or decode tasks based on the current load and the 
 
 ## Assisted inference
 
-Assisted inference or speculative inference is a method where our large autoregressive model is guided by a smaller "draft" or "assistant" model. The idea is to run the assistant model autoregressively and generate a sequence of a few tokens and then run the original model for a single step. This way tha original model evaluates the assistant's whole "speculation" in a single pass (we check the output of each newly added token not just the last one). [@xia2023speculative,@leviathan2023fast,@chen2023accelerating,gante2023assisted]
+Assisted inference or speculative inference is a method where our large autoregressive model is guided by a smaller "draft" or "assistant" model. The idea is to run the assistant model autoregressively and generate a sequence of a few tokens and then run the original model for a single step. This way the original model evaluates the assistant's whole "speculation" in a single pass (we check the output of each newly added token not just the last one). [@xia2023speculative,@leviathan2023fast,@chen2023accelerating,gante2023assisted]
 
 
 ## Assisted inference
@@ -211,7 +212,7 @@ Possible outcomes are:
 
 ## Assisted inference
 
-![Validating the assistant's output. Black is validated, green is accepted, red is rejected with blue as a correction. [@leviathan2023fast]](./figures/speculative_decoding.png) { width=100% }
+![Validating the assistant's output. Black is validated, green is accepted, red is rejected with blue as a correction. [@leviathan2023fast]](./figures/speculative_decoding.png){ width=100% }
 
 Further video resource from @gante2023assisted: [LINK](https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/blog/assisted-generation/gif_4_1080p.mov)
 
@@ -267,7 +268,7 @@ Small expert language models and expert + anti-expert pairs could also be used t
 
 ## Expert guidance
 
-![Expert guidance using a small expert and anti-expert model. The difference of the two models' logits is used as the guidance signal [@liu2021dexperts]](./figures/expert_guide.png){ height=75% }
+![Expert guidance using a small expert and anti-expert model. The expert logit difference is used as the guidance signal [@liu2021dexperts]](./figures/expert_guide.png){ height=75% }
 
 ## Inference-time model adaptation
 
