@@ -169,12 +169,11 @@ $\mathbf{I}$.
 ## Attention layer types
 
 Depending on where the layer attends to
-(where $\mathbf{X}$ comes from) we can distinguish self- and outward
-attention layers.
+(where $\mathbf{X}$ comes from) we can distinguish self- and cross-attention layers.
 
--   In *self-attention* layers, the queries generated from the input are
+-   In __*self-attention*__ layers, the queries generated from the input are
     used to query the input iself: $\mathbf{X}=\mathbf{I}$.
--   In an *outward* attention layer, an external vector sequence is
+-   In a __*cross-attention*__ layer, an external vector sequence is
     queried, e.g., in encoder-decoder transformer architectures a
     sequence created by an encoder.
 
@@ -189,15 +188,14 @@ To be able to attend to multiple aspects of the
 input, the attention layers in transformers contain several parallel
 attention "heads" with different $W_K, W_V, W_Q$ triplets:
 
-![Figure from [@alammar2018illustrated]](figures/transformer_attention_heads_qkv.eps){height=50%}
-
+![Figure from @alammar2018illustrated.](figures/transformer_attention_heads_qkv.eps){height=57%}
 
 ## Multi-head attention
 
 The head outputs are combined into a layer
 output:
 
-![Figure adapted from [@alammar2018illustrated]](figures/mhead2.eps){height=50%}
+![Figure adapted from @alammar2018illustrated.](figures/mhead2.eps){height=70%}
 
 
 ## Multi-head attention
@@ -212,7 +210,7 @@ modules* consisting of attention and simple piecewise feedforward
 layers. The simplest variant contains only a single self-attention
 layer:
 
-![Figure adapted from [@alammar2018illustrated]](figures/transformer_resideual_layer_norm_2.eps){height=50%}
+![Figure adapted from @alammar2018illustrated.](figures/transformer_resideual_layer_norm_2.eps){height=50%}
 
 
 ## Encoder
@@ -228,7 +226,7 @@ The encoded sequence (context) is the output of the last encoder layer. Each MHA
 
 :::: column
 
-![Transformer Encoder @vaswani2017attention](figures/transformer_encoder.png){height=70%}
+![Transformer Encoder from @vaswani2017attention.](figures/transformer_encoder.png){height=70%}
 
 ::::
 
@@ -247,7 +245,7 @@ The decoder consists of $N$ identical layers with MHA, cross-attention, and FFN 
 
 :::: column
 
-![Transformer Decoder @vaswani2017attention](figures/transformer_dec.png){height=70%}
+![Transformer Decoder from @vaswani2017attention.](figures/transformer_dec.png){height=70%}
 
 ::::
 
@@ -258,14 +256,13 @@ The decoder consists of $N$ identical layers with MHA, cross-attention, and FFN 
 
 Transformers were invented for symbolic sequences (e.g. text), thus an embedding layer is used to convert the input tokens to a vector representation. This embedding is then added to a positional encoding vector, which is used to convey positional information to the model.
 
-![Transformer input embeddings from @vaswani2017attention](figures/transformer_posenc.png){height=30%}
-
-
+![Transformer input embeddings from @vaswani2017attention.](figures/transformer_posenc.png){height=30%}
+	
 ## Embeddings and positional encoding
 
 ![Sinusoid positional encoding](figures/posenc1.png){height=35%}
 
-![Dot-product of positional encodings [@wang2020position]](figures/posenc2.png){height=30%}
+![Dot-product of positional encodings [@wang2020position].](figures/posenc2.png){height=30%}
 
 
 ## Seq2seq Transformer
@@ -274,7 +271,7 @@ Transformers were invented for symbolic sequences (e.g. text), thus an embedding
 
 :::: column
 
-![From [@vaswani2017attention]](figures/transformer_full.eps){height=75%}
+![From @vaswani2017attention.](figures/transformer_full.eps){height=75%}
 
 ::::
 
@@ -311,7 +308,7 @@ Masks are used to prevent the model from attending to certain elements. There ar
 
 :::: column
 
-![Causal masking in GPT-2 from [web](https://github.com/sshleifer/blog_v2/blob/master/_notebooks/2020-03-12-bart.ipynb)](figures/diagram_bartpost_gpt2.jpg){height=70%}
+![Causal masking in GPT-2 from [web](https://github.com/sshleifer/blog_v2/blob/master/_notebooks/2020-03-12-bart.ipynb).](figures/diagram_bartpost_gpt2.jpg){height=70%}
 
 ::::
 
@@ -401,7 +398,7 @@ The architecture starts with producing context-independent embeddings using char
 
 ## ELMo (Allen Institute for AI, 2018)
 
-![Figure from [@peters2018deep]](figures/elmo.eps){height=50%}
+![Figure from @peters2018deep.](figures/elmo.eps){height=50%}
 
 At first approximation, the context dependent embeddings are all the $2n +1$ intermediate representations produced by the model ($2n$ contextual LSTM-based and one static character-based).
 
@@ -443,7 +440,7 @@ Similarly to ELMo, the main goal of GPT is to provide a useful pretrained "featu
 
 ## GPT (Generative Pre-Training, OpenAI, 2018)
 
-![Figure from [@radford2018improving]](figures/gpt.eps){height=60%}
+![Figure from @radford2018improving.](figures/gpt.eps){height=90%}
 
 
 ## BERT (Google, 2018)
@@ -459,15 +456,13 @@ The next highly influential model was Google's BERT (Bidirectional Encoder Repre
 
 The objective is to guess randomly masked tokens:
 
-![Figure from [@horev2018bert]](figures/bert1.eps){height=65%}
-
-
+![Figure from @horev2018bert.](figures/bert1.eps){height=65%}
 
 ## BERT: next sentence prediction
 
 The second objective was deciding whether two sentences followed each other in the training corpus or were randomly sampled:
 
-![Figure from [@devlin2018bert]](figures/bert2.eps){height=50%}
+![Figure from @devlin2018bert.](figures/bert2.eps){height=50%}
 
 ## Fine-tuning contextual embeddings
 
@@ -502,14 +497,14 @@ Another way of improving efficiency has been reducing the scope of attention in 
 
 The Big Bird contextual embedding model [@zaheer2020big] combines all these linear attention types to increase the number of input tokens significantly without significant change in memory requirements:
 
-![Figure from [@zaheer2020big].](figures/bigbird.eps){height=50%}
+![Figure from @zaheer2020big.](figures/bigbird.eps){height=50%}
 
 ## Few- one- and zero-shot learning
 
 An interesting direction is to try to use the model directly, without added layers and gradient updates on downstream tasks. Some recent models, most importantly, GPT-3 [@brown2020language] can perform surprisingly well on various downstream tasks that are explained in the input. There are three learning settings:
 
--   *zero-shot*: The input only contains a short description of the supervised task, and a concrete input instance prompt , e.g. "Translate English to French: cheese =$>$ ".
--   *one-* and *few-shot*: In addition to the short task description, the input also contains one or a few training examples before the prompt.
+-   __*zero-shot*__: The input only contains a short description of the supervised task, and a concrete input instance prompt , e.g. "Translate English to French: cheese =$>$ ".
+-   __*one-*__ and __*few-shot*__: In addition to the short task description, the input also contains one or a few training examples before the prompt.
 
 # References {.allowframebreaks} 
 \footnotesize
