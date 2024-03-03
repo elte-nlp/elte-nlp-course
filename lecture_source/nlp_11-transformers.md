@@ -257,7 +257,11 @@ The decoder consists of $N$ identical layers with MHA, cross-attention, and FFN 
 Transformers were invented for symbolic sequences (e.g. text), thus an embedding layer is used to convert the input tokens to a vector representation. This embedding is then added to a positional encoding vector, which is used to convey positional information to the model.
 
 ![Transformer input embeddings from @vaswani2017attention.](figures/transformer_posenc.png){height=30%}
-	
+
+## Embeddings and positional encoding
+
+![Sinusoid positional encoding [from @erdem2021].](figures/positional.png){height=84%}
+
 ## Embeddings and positional encoding
 
 ![Sinusoid positional encoding](figures/posenc1.png){height=35%}
