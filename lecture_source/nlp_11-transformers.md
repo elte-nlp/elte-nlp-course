@@ -219,8 +219,9 @@ layer:
 
 :::: column
 
-The encoder consists of $N$ identical layers with MHA and FFN modules, plus residuals.
-The encoded sequence (context) is the output of the last encoder layer. Each MHA is bidirectional.
+The encoder consists of $N$ identical layers with self-attention and
+element-wise FFN modules, plus residuals. The encoded sequence (context) is the
+output of the last encoder layer. Each self-attention is bidirectional.
 
 ::::
 
@@ -239,7 +240,10 @@ The encoded sequence (context) is the output of the last encoder layer. Each MHA
 
 :::: column
 
-The decoder consists of $N$ identical layers with MHA, cross-attention, and FFN modules, plus residuals. The cross-attention takes the encoded sequence as the key and value, while the query comes from the decoder. Each MHA is unidirectional, cross-attention is bidirectional.
+The decoder consists of $N$ identical layers with self-attention,
+cross-attention, and FFN modules, plus residuals. The cross-attention takes the
+encoded sequence as the key and value, while the query comes from the decoder.
+Each self-attention is unidirectional, cross-attention is bidirectional.
 
 ::::
 
