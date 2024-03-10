@@ -499,6 +499,43 @@ various types of __adversarial prompting__:
 * __prompt leaking__ injects content that makes the LLM leak
   details of their prompts that may contain sensitive information.
 
+# Epilogue: Metaprompted LLMs as prompt optimizers
+## LLMs as optimizers
+
+@yang2023large  use (meta)prompted LLMs as general optimizers:
+
+> \dots the LLM generates new solutions to the
+objective function, then the new solutions and their scores are added into the
+meta-prompt for the next optimization step. [@yang2023large] 
+
+![From @yang2023large.](figures/llm_metaopt.png){width=65%}
+
+## LLMs as optimizers: application to prompting 
+
+![First half of an optimizer metaprompt instantiation for solving grade school math problems
+[@yang2023large].](figures/metaprompt_1.png){width=100%}
+
+## LLMs as optimizers: application to prompting I
+
+![Second half of an optimizer metaprompt instantiation for solving grade school
+math problems [@yang2023large].](figures/metaprompt_2.png){width=100%}
+
+## LLMs as optimizers: application to prompting II
+
+@battle2024unreasonable found that the metaprompting optimizer approach
+overperforms well-known manual prompt engineering methods, such as "positive
+thinking" and "chain of thoought" on the GSM8K math problems dataset:
+![From @battle2024unreasonable.](figures/metaprompt_3.png){width=90%}\
+
+## Unexpected best prompts
+
+Also, the best prompts are often surprising and excentric:
+
+![The best prompt for Llama2-70B, as optimised by the same model, on the the
+[GSM8K](https://github.com/openai/grade-school-math) grade school math questions
+dataset subset used in
+@battle2024unreasonable.](figures/excentric_prompt.png){width=100%}
+
 # References
 
 ## References {.allowframebreaks}
