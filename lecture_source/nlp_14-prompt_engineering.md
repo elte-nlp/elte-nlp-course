@@ -134,10 +134,11 @@ The tokens are found by an algorithm related to coordinate-descent:
 2.  For each $i \in 1 \dots L$ token position:
     * compute the $\mathbf{g}$ gradient of the log-likelihood of the training
       data for the token embedding in the position,
-    * select the top $k$ words with the closest embeddings to $\mathbf{g}$
-      [@shin2020autoprompt uses dot-product as a metric],
-    * of these, select the one with the largest log-likelihood and replace the
-      current token in position $i$ with it.
+    * for each vocabulary entry, use the gradient to approximate the change in
+	  the log-likelihood using that word in the position would bring, and select
+	  the top $k$ words,
+    * of these, select the one with the largest real log-likelihood and replace
+      the current token in position $i$ with it.
 
 ###  
 This obviously assumes that the gradients are accessible, although
