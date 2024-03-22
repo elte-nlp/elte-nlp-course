@@ -325,6 +325,29 @@ __reinforcement learning__.
   distributions predicted by the policy and by the instruct language model used
   for its initialization.
 
+## Direct Preference Optimization (DPO)
+
+RLHF requires the training of a separate reward model and a human feedback loop,
+both costly.
+
+__Direct Preference Optimization__ [@rafailov2024direct]
+transforms the RL optimization problem into a supervised (ML) learning task.
+
+![DPO eliminates the need for the costly reward model](figures/dpo.png){width=100%}
+
+## Direct Preference Optimization (DPO) cont.
+
+1. Reparameterizes the RL optimization problem in terms of the __policy__
+   instead of the reward model $RM$;
+2. Formulates a maximum likelihood objective for the policy $\pi_\theta$;
+3. Optimizes the policy via supervised learning on the original user judgements.
+
+DPO...
+
+1. performs similarly to PPO, sometimes even better;
+2. requires 5-8$\times$ less compute and half as much memory as PPO;
+3. is less sensitive to sampling temperature.
+
 ---
 TODO: Effects of instruction tuning
 ---
