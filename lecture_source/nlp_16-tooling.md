@@ -241,7 +241,7 @@ Semantic vectors are used to retrieve documents. These documents are usually spl
 
 :::: column
 
-![Example architecture of a GPT-style embedding model.](figures/text_embedder_gpt.png){height=70%}
+![Example architecture of a GPT-style embedding model.](figures/text_embedder_gpt.png){height=72%}
 
 ::::
 
