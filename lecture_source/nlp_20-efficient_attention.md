@@ -1,6 +1,6 @@
 ---
 title: "Natural Language Processing"
-subtitle: "Lecture 19: Efficient Attention"
+subtitle: "Lecture 20: Efficient Attention"
 author: "Dávid Márk Nemeskey"
 institute: "Eötvös University, Department of Digital Humanities"
 date: 2023

@@ -1,6 +1,6 @@
 ---
 title: "Natural Language Processing"
-subtitle: "Lecture 24: Mixture of Experts Models"
+subtitle: "Lecture 19: Mixture of Experts Models"
 author: "Natabara Máté Gyöngyössy"
 institute: "Eötvös University, Department of Artificial Intelligence"
 date: 2023

@@ -1,6 +1,6 @@
 ---
 title: "Natural Language Processing"
-subtitle: "Lecture 21: Contrastive Representation Learning"
+subtitle: "Lecture 22: Contrastive Representation Learning"
 author: "Natabara Máté Gyöngyössy"
 institute: "Eötvös University, Department of Artificial Intelligence"
 date: 2023
