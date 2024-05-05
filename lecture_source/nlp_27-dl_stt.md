@@ -34,7 +34,7 @@ to complex DL-based ones, e.g. LSTMs.
 
 ## HMM-ANN hybrid models cont.
 
-![HMM-AMM architecture from @kipyatkova2016dnn.](figures/hybrid.jpg){height=70%}
+![HMM-ANN architecture from @kipyatkova2016dnn.](figures/hybrid.jpg){height=70%}
 
 ## HMM-ANN hybrid models cont.
 
@@ -200,7 +200,7 @@ Noteworthy details:
 
 + The preprocessed audio consists of 80-channel Log-Mel spectrograms representations
   of 25-millisecond windows strided 10 milliseconds.
-+ "Audio tokenization" for the transformer encoder consists of two 3 wide 2D
++ "Audio tokenization" for the transformer encoder consists of two 3 wide 1D
   convolutional filters, the second using a stride of 2.
 + The task to be executed by the model is indicated by task specifier special tokens. 
 
