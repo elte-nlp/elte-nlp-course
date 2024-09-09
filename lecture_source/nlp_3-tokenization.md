@@ -445,28 +445,29 @@ As the number of merges increases, more and more symbols are full words.
 
 ## Greedy BPE subword tokenization 
 
-Processing a corpus with BPE results in a 'vocabulary' of all characters
-together with the results of all merges. New pretokenized input is then subword
-tokenized by greedily matching the words against this vocabulary/dictionary from
-left to right:
+Processing a corpus with BPE results in 
 
-![From @jurafsky2019speech.](figures/max_match.eps){width="1.\\textwidth"}
+- a __'vocabulary'__ of all characters together with the results of all merges,
+- and a __list of merges__ in the order they were performed.
+
+New pretokenized input is then subword tokenized by performing all applicable
+merges in the merge list following their ordering.
 
 ## WordPiece 
 
-WordPiece is another subword tokenization method that is only slightly different
+WordPiece is a subword tokenization method that is only slightly different
 from BPE. The differences are:
 
--   WordPiece works with word-start symbols instead of word-end symbols
-    which is traditional for BPE;
--   merges are performed depending on which resulting merged symbol
-    could be used for a statistical language model with the lowest
-    perplexity (maximal likelihood) on the training corpus. (These
-    concepts will be explained in detail in a later lecture.)
+-   The merged AB pairs are the ones with the highest value of 
+    $\frac{freq(AB)}{freq(A) \times freq(B)}$
+	where $freq(\cdot)$ is the frequency of a type in the
+	training corpus.
+-   Tokenization with the resulting vocabulary uses the __MaxMatch__ algorithm:
 
+![From @jurafsky2019speech.](figures/max_match.eps){width="1.\\textwidth"}
+    
 
-
-## Subword sampling
+## Subword sampling |
 
 The default subword tokenization strategy of BPE and
 WordPiece deterministically produces the greedily matching decomposition
@@ -483,16 +484,31 @@ of words, even if there are informative alternative segmentations:
 \end{center}
 ```
 To solve this problem, solutions were developed to *probabilistically
-sample* from the possible alternative decompositions: *Subword
-regularization* for WordPiece [@kudo2018subword] and *BPE dropout* [@provilkov2019bpe].
+sample* from the possible alternative decompositions.
+
+## Subword sampling ||
+
+- __BPE dropout__  [@provilkov2019bpe] randomly drops some of the BPE
+merge rules during tokenization, while
+- the __Unigram language model__ method [@kudo2018subword] is based on a novel,
+probabilistic subword tokenization approach, which starts with a heuristically
+estimated superset of the optimal vocabulary, and recursively removes the
+entries that are the least useful for building a simple (unigram) probabilistic
+language model of the training corpus.
+
+## Subword sampling |||
+
+In contrast to BPE, the probabilistic nature of the recursive Unigram language
+model vocabulary construction steps makes it possible to assign well motivated
+probabilities to alternative segmentations, and to sample from them.
 
 ## SentencePiece 
 
 In their original form, BPE and WordPiece require (crude) pretokenization as a
 preprocessing step. The [SentencePiece](https://github.com/google/sentencepiece)
 tokenizer, in contrast, treats every character, even spaces in the same way, and
-applies BPE or WordPiece on raw sentences or even paragraphs eliminating the
-need for pretokenization.
+applies BPE or the Unigram language model method to raw sentences or even
+paragraphs eliminating the need for pretokenization.
 
 As a result, SentencePiece is one of the most popular solutions for
 generating the input for deep end-to-end models from raw text.
