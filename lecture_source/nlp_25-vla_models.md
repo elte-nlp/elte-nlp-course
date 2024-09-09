@@ -40,7 +40,7 @@ include
 - Currently, the dominant architectural approach is using __encoder-decoder__
   architectures to map visual observations and linguistic input to appropriate
   robot actions.
-- The architectural bacbone is typically a transformer (encoder, decoder or
+- The architectural backbone is typically a transformer (encoder, decoder or
   both).
 
 Challenges include
@@ -138,7 +138,7 @@ $$
     episode.
 
 The contrast a bit more formally [from @shridhar2020alfred, $\hat a_i$ is
-predicted action, $x_{1:L}$ the instruction, $v_i$ amd $h_i$ are visual
+predicted action, $x_{1:L}$ the instruction, $v_i$ and $h_i$ are visual
 observation and history representations]: $$\hat{a}_t, h_t =
 \mathrm{RNN}(x_{1:L}, v_t, \hat{a}_{t-1}, h_{t-1})$$ $$\hat{a}_t =
 \mathrm{Transformer}(x_{1:L}, v_{1:t}, \hat{a}_{1:t-1})$$
@@ -166,7 +166,7 @@ A multimodal transformer encoder fuses the unimodal embeddings
     actions is represented by **positional and temporal
     embeddings**;
 -   employs "causal attention" to prevent visual and action
-    embeddings to attend to previous time steps;
+    embeddings to attend to subsequent time steps;
 -   the output layer is an FC predicting the next action $\hat a_t$;
 -   target object bitmasks are predicted using a pretrained instance
     segmentation model based on the predicted target object class.
@@ -229,7 +229,7 @@ are also used for generating additional training data points:
 
 ## Robot instruction following dataset
 
-The used RT-1 dataset [@brohan2022rt] contains 130K examples about 13 __human
+The RT-1 dataset [@brohan2022rt] contains 130K examples about 13 __human
 teleoperated__ robots following more than 700 different instructions in office
 kitchen like environments.
 
@@ -295,7 +295,7 @@ experimented with.
 
 ## Robot-action fine-tuning
 
-The adapted VLMs have to to output robot actions, so the possible actions need
+The adapted VLMs have to output robot actions, so the possible actions need
 to be mapped to token sequences. To achieve this,
 
 + the continuous action values are __discretized__ using 256 bins,
