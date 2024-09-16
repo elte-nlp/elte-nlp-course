@@ -506,9 +506,9 @@ probabilities to alternative segmentations, and to sample from them.
 
 In their original form, BPE and WordPiece require (crude) pretokenization as a
 preprocessing step. The [SentencePiece](https://github.com/google/sentencepiece)
-tokenizer, in contrast, treats every character, even spaces in the same way, and
-applies BPE or the Unigram language model method to raw sentences or even
-paragraphs eliminating the need for pretokenization.
+tokenizer library, in contrast, is able to treat every character, even spaces in
+the same way, and can apply BPE or the Unigram language model method to raw
+sentences or even paragraphs eliminating the need for pretokenization.
 
 As a result, SentencePiece is one of the most popular solutions for
 generating the input for deep end-to-end models from raw text.

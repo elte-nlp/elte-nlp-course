@@ -692,7 +692,7 @@ $$P(\mathbf{Y}~|~\mathbf{X}) = \frac{1}{Z(\mathbf{X})}\prod_{m=1}^{n-1}
 Somewhat similarly to MEMMs, the
 $\phi_m(\cdot)$ __*potential functions*__ are modeled linearly using a
 feature function and a corresponding weight vector. They are basically
-the nominators of the softmax:
+the numerators of the softmax:
 $$\phi_m(y_m, y_{m+1},\mathbf{x})={\exp (\mathbf{w} \cdot
       \mathbf{f}(y_m,y_{m+1}, \mathbf{x}, m))}.$$ 
 	  
