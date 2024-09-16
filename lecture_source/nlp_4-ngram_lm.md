@@ -127,7 +127,7 @@ include
 
 -   beam search, and
 
--   stochaistic beam search.
+-   stochastic beam search.
 
 ## Text generation cont.
 
@@ -173,7 +173,7 @@ manipulations we can see that the result is
 $$-\frac{1}{n} \left(\log P_{\mathcal M}(w_1) + \sum_{i=2}^n\log P_{\mathcal M}(w_i ~\vert~ w_1,\dots, w_{i-1})\right),$$
 which is the average cross-entropy and negative log-likelihood per word.
 A simple consequence: by minimizing average cross-entropy or maximizing
-average log-likelihood one also minimizes the model's perplexitiy on the
+average log-likelihood one also minimizes the model's perplexity on the
 training data.
 
 # N-gram based modeling
