@@ -31,7 +31,7 @@ We have already seen a few denizens of the Zoo...
 \end{center}
 ```
 
-But there are many more! In this lecture, we take a look at some of the most
+But there are many more! In this lecture, we are taking a look at some of the most
 important language models.
 
 \footnotesize
@@ -72,8 +72,8 @@ _more_ data.
 
 - data size: 16GB $\rightarrow$ 160GB
 - batch size: 256 $\rightarrow$ 8K
-- training steps: 100K (relative $\rightarrow$ 500K
-- dynamic masking: the `[MASK]` tokens change each run
+- training steps: 100K (relative) $\rightarrow$ 500K
+- dynamic masking: the position of the `[MASK]` tokens change each run
 
 These changes yielded a $3-4\%$ improvement on various tasks (meaning e.g. $60\%$
 error reduction on SQuaD).
@@ -132,6 +132,18 @@ and train about 1.7x faster. Yet larger models (xxlarge) outperform
 BERT Large[^1].
 
 [^1]: If they converge, that is...
+
+## New techniques
+
+DeBERTa [@he2021deberta] improves on regular BERT with technical innovations:
+
+1. The **disentangled attention** mechanism assigns two vectors to each token:
+    - content
+    - position
+1. *Relative positional encoding*
+1. *Absolute positions* are incorporated just before the softmax layer.
+
+It outperforms the human baseline in SuperGLUE (90.3 vs 89.8).
 
 # Full stack models
 
@@ -233,6 +245,19 @@ Two approaches to safety:
 - RLHF;
 - rule-based reward models (RBRMs).
 
+## Other model families
+
+GPT is not the only LLM model "family". There are competitors, both open- and
+closed source.
+
+1. Closed
+    - [Claude](https://claude.ai/) (at version 3)
+    - Google's [Gemini](https://gemini.google.com/)
+1. Open
+    - Meta's Llama (at version [3.2](https://ai.meta.com/blog/llama-3-2-connect-2024-vision-edge-mobile-devices/))
+    - [Mistral](https://docs.mistral.ai/) (at version 0.3) 
+    - Alibaba's [Qwen](https://huggingface.co/Qwen) (at version 2.5)
+
 ## Other models 
 
 Decoder-only autoregressive models have become the de facto LLM standard and
@@ -311,7 +336,7 @@ to achieve comparable or even superior results. This is possible because
 
 **Chinchilla** [@hoffmann2022an]
 
-- 70B parameters, trained on 1.5T;
+- 70B parameters, trained on 1.5T tokens;
 - Uses the same number of FLOPs and same training set as Gopher;
 - Outperforms both GPT-3 and Gopher.
 
@@ -491,13 +516,15 @@ trains the LM that operates on their output.
 
 ## Open Source Models
 
-Most of the models discussed above are closed source; often, the training data
-consists of proprietary corpora as well. There have been attempts to create
-free and open source LLMs:
+Many of the models discussed above are closed source; often, the training data
+consists of proprietary corpora as well. However, now there are several
+open source LLMs available on the Hugging Face Hub:
 
-- LLaMa was trained on open data, although only LLaMa 2 is free to use;
 - BLOOM is fully open source, both the data and the model. However, its
-  development is finished and it is not updated further.
+  development is finished and it is not updated further;
+- LLaMa was trained on open data, and LLaMa 2 and above are free to use;
+- Mistral is another alternative with instruction-finetuned and MoE models
+  available to download.
 
 ## LAION
 
