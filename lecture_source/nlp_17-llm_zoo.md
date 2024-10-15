@@ -522,7 +522,8 @@ open source LLMs available on the Hugging Face Hub:
 
 - BLOOM is fully open source, both the data and the model. However, its
   development is finished and it is not updated further;
-- LLaMa was trained on open data, and LLaMa 2 and above are free to use;
+- LLaMa was trained on open data, and LLaMa 2 and above are free to use. Llama
+  3.x provides models from 1B up to 405B.
 - Mistral is another alternative with instruction-finetuned and MoE models
   available to download.
 
