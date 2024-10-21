@@ -332,7 +332,7 @@ Low entropy sequences (where the model's output is highly predictable) are probl
 
 First of all there is a high chance that a human would also generate the same sequence (such as following up \emph{Barack} with \emph{Obama}). Watermarking such sequences is counterproductive.
 
-Second, hard watermarking usually distrupts such sequences, as the high entropy tokens could fall into the red list.
+Second, hard watermarking usually distrupts such sequences, as the high probability tokens could fall into the red list.
 
 ## Soft watermarking
 
@@ -348,7 +348,7 @@ Detecting a soft watermark is more difficult than detecting a hard one. The z-te
 
 $$z = (G-\gamma T)/\sqrt{T\gamma(1-\gamma)}$$
 
-The false positive rate is still low, however the detection rate erodes for high entropy sequences.
+The false positive rate is still low, however the detection rate erodes for low entropy sequences.
 
 The worst-case perplexity increase for maximally deviated distributions at a given token's generation is $(1+(e^\delta-1)\gamma)P_{\text{original}}$ (which is approximately $4$ for $\delta=2$ and $\gamma=0.5$).
 
@@ -358,7 +358,7 @@ The watermark is weak when the logit distribution has a spike concentrated on a 
 
 In case of average entropy sequences the watermark is still detectable $98.4\%$ of the time in $T=200$ tokens with $\gamma=0.5$ and $\delta=2$.
 
-The detection erodes for high entropy sequences. This is the case for repeated specific text and memorized sequences, where the model essentially reproduces the exact same text it has seen before.
+The detection erodes for low entropy sequences. This is the case for repeated specific text and memorized sequences, where the model essentially reproduces the exact same text it has seen before.
 
 Repetitive text can be accounted for by including only the first occurence of the n-gram in the z-test, or by using more previous tokens to calculate the hash function (thus the red list will not be the same for all shorter n-grams).
 
