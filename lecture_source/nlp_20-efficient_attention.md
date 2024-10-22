@@ -278,7 +278,7 @@ memory access.
 
 Optimizations:
 
-- $\mathbf{S}$ and $\mathbf{P}$ are not computed block-by-block using _tiling_;
+- $\mathbf{S}$ and $\mathbf{P}$ are computed block-by-block using _tiling_;
 - they are never materialized on the HBM, but recomputed for the backward pass;
 - all operations for a single block are performed at the same time in a single
   _kernel_.
