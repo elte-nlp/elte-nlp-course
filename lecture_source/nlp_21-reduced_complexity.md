@@ -1,9 +1,9 @@
 ---
 title: "Natural Language Processing"
 subtitle: "Lecture 21: Reduced Complexity Models and Pretraining"
-author: "Dávid Márk Nemeskey"
+author: "Dávid Márk Nemeskey, Natabara Gyöngyössy"
 institute: "Eötvös University, Department of Digital Humanities"
-date: 2023
+date: 2024
 theme: Marburg
 colortheme: orchid
 fontsize: 12pt
@@ -169,6 +169,56 @@ Observations:
 models;
 - The difference is much bigger for smaller sizes, where quantization is not so
   important.
+
+## Data Efficient Quantization
+
+The GPTQ algorithm definitely needs a significant amount of quality data to optimize quantized weights as it aims to match activations between the quantized and the original model. Modern approaches to quantization utilize different assumptions/metrics that allow for more data-efficient quantization.
+
+- NormalFloat 4-bit ("bitsnbytes" or "bnb" style)[@qlora] quantization assumes a certain distribution of weights to design optimal quantization levels. It does not require any data to quantize weights.
+- Activation-aware Weight Quantization (AWQ) [@awq] uses activation magnitudes only to selectively quantize weights thus making it more robust to shifts or lack of data.
+
+## Basic Quantization
+
+Standard quantization maps the original representation range to a smaller range rounding to a fixed (smaller) number of quantized levels
+
+$$\mathbf{X}^{\text{Int8}} = \text{round}(c^{\text{FP32}} \cdot \mathbf{X}^{\text{FP32}})$$
+
+Where $c^{FP32} = \frac{127}{\text{absmax}(\mathbf{X}^{\text{FP32}})}$ is an optimal maximum value-based quantization constant. 
+
+To prevent outliers weights from affecting the max values we can select a quantization constant based on the *quantiles* of the weight distribution, and also select *blocks* of the weight matrix we quantize separately [@blockwise].
+
+## "BitsnBytes" or QLoRA-style Quantization
+
+@qlora combines both blockwise and quantile-based. 
+
+As most of DL model weights are trained with normalization they mostly follow a normal distribution. Scaling these weights is easy as only a $\sigma$ parameter is needed if we assume a mean of 0.
+
+This will result in a scaled normal distribution where the data format of Normal Float comes in handy. Here instead of arithmetic rounding, we define quantization levels that equalize the probability masses among themselves.
+
+To further reduce memory consumption: quantization constants (in this case $\sigma$ values) of the blocks are quantized again (double quantization). 
+
+## NF4 Possible values
+
+![Quantization levels (possible values a weight can take) over a normal distribution.](figures/nf4_values.png){width=100%}
+
+## Activation-Aware Weight Quantization (AWQ)
+
+AWQ [@awq] is a data-efficient method, with the main novelty of keeping a set of salient weights in the original precision (fp16) and scaling weights before quantization proportionally to their importance (while dividing input channels by this scaling factor) $Q(w) = 1/c \cdot \text{round}(c\cdot w \cdot s)$, while inputs are scaled inversely passing $x/s$ to the layers. Here we use blockwise linear absolute max scaling ($c$) and a channel-wise scaling factor ($s$) which is determined by the activation magnitudes over a small dataset.
+
+Activation magnitude is calculated as: $A_d = \sum_{i=1}^{N} |x_{i,d}|$ where $N$ is the number of samples in the dataset and $d$ is the channel index. Weights of channel $\hat{d} = \text{argmax}_d (A_d)$ are kept as fp16 and quantized for the rest.
+
+## AWQ Benchmark results
+
+The scaling factor $s$ is determined for each channel as $s_d = A_d^{\alpha}$ where $\alpha$ is a tunable parameter found by grid search. Using $\alpha=0$ means no scaling, while at most linear scaling $\alpha=1$ is usually considered. Upscaled weights are spread out more before quantization which leads to smaller quantization errors for the given channel while possibly increasing the error for other channels. AWQ does not use gradient-based optimization but uses a small dataset for $A_d$ and $\alpha$ calculation in the forward pass.
+
+![AWQ benchmark results for simple rounding (RTN), random, weight magnitude and activation magnitude-based quantization setups. From [@awq]](figures/awq_results.png){width=100%}
+
+## Efficient quantized inference
+
+CPUs and GPUs are not always prepared for mixed precision operations (so each operation might need to momentarily dequantize weights before using them on full precision inputs.)
+Thus, specialized kernels or representations are needed for storing and processing quantized models, to avoid memory or computation overhead. MARLIN kernels are preferred currently [@marlin].
+
+For memory-efficient weight storage, platform specific-packed data types should be used (e.g.: storing 8x 4-bit weights in a 32-bit variable [@weightpacking]).
 
 # Efficient Adaptation
 
