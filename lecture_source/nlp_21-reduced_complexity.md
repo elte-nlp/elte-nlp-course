@@ -2,7 +2,7 @@
 title: "Natural Language Processing"
 subtitle: "Lecture 21: Reduced Complexity Models and Pretraining"
 author: "Dávid Márk Nemeskey, Natabara Gyöngyössy"
-institute: "Eötvös University, Department of Digital Humanities"
+institute: "Eötvös University, Department of Digital Humanities, Department of Artificial Intelligence"
 date: 2024
 theme: Marburg
 colortheme: orchid
