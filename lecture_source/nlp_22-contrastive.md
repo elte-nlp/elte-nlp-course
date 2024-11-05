@@ -468,7 +468,7 @@ Contrastive Captioner models can be used with further fine-tuning or in a zero-s
 
 CoCa-s are not limited to the visual-language modalities.
 
-[CoCa use cases from [@yu2022coca](figures/coca_usecases.png){width=90%}
+[CoCa use cases from [@yu2022coca]](figures/coca_usecases.png){width=90%}
 
 
 # Summary
