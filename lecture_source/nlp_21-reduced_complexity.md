@@ -345,7 +345,7 @@ finds that
 - the intrinsic dimension is the _minimal description length_ of a downstream
   task w.r.t. the pre-trained model;
 - viewed as such, the intrinsic dimension is related to compression and so it
-  also correlates with the the generatlization capability of the model;
+  also correlates with the the generalization capability of the model;
 - larger models allow for _smaller_ intrinsic dimensions:
 
 \normalsize
@@ -363,7 +363,7 @@ finds that
 
 **p^\*^-tuning** is a family of methods for _lightweight
 fine-tuning_. It was inspired by prompting. Here the trainable components are
-task-specific free-parameter ``token'' inserted before the actual
+task-specific free-parameter ``tokens'' inserted before the actual
 input (also called _soft prompt_).
 
 ```{=latex}
