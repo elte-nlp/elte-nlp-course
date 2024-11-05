@@ -467,6 +467,7 @@ Image-only datasets could also be used in the reconstruction task if the vocabul
 Contrastive Captioner models can be used with further fine-tuning or in a zero-shot manner as any combination of its building blocks.
 
 CoCa-s are not limited to the visual-language modalities.
+
 [CoCa use cases from [@yu2022coca](figures/coca_usecases.png){width=90%}
 
 
