@@ -58,7 +58,24 @@ For tokenization or token counting you should use the HTTP endpoints or after ge
 
 ### HTTP Requests
 
-You can also use HTTP requests to interact with the endpoint. In this case the API key should be passed as a Bearer token.
+You can also use HTTP requests to interact with the endpoint. In this case the API key should be passed as a Bearer token:
+
+```python
+import requests
+
+headers = {
+    "Content-Type": "application/json",
+    "Authorization": "Bearer <API_KEY>"
+}
+
+data = {
+    'inputs': 'What is the purpose of life?',
+    'parameters': {
+        'max_new_tokens': 20,
+    },
+}
+response = requests.post('http://127.0.0.1:8080/generate', headers=headers, json=data)
+```
 
 Some functionalities are not available via the OpenAI package (nor the official Huggingface Hub Client), such as listing the available model information, or performing tokenizations, health checks, etc. Check the API documentation for more details.
 
