@@ -38,7 +38,7 @@ Representative examples include
     expressed by the document. Label set examples:
 
     -   $\{$positive, negative$\}$,
-    -   $\{$positive, negative, ambigous$\}$,
+    -   $\{$positive, negative, ambiguous$\}$,
     -   $\{$admiration, amusement, annoyance, approval, ..., sadness,
         surprise$\}$.^[The example is based on the 27 emotions of the GoEmotions
     dataset [@demszky2020goemotions].]

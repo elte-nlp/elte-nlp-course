@@ -236,13 +236,13 @@ In the second form,
 * $-\mathbb E_{\mathbf z \sim q_\Phi(\mathbf z | \mathbf x)}(\log p_\Theta(\mathbf x | \mathbf
   z))$ can be interpreted as the expected __reconstruction error__.
   
-## Variational autoencoder: reconstuction error
+## Variational autoencoder: reconstruction error
 
 The reconstruction error interpretation of the 
 $$-\mathbb E_{\mathbf z \sim q_\Phi(\mathbf z | \mathbf x)}\log p_\Theta(\mathbf x | \mathbf
   z)$$
 part of the VAE loss requires rewriting 
-$$- \log p_\Theta(\mathbf x | \mathbf z) = -\log \pi_d(d_\Theta(\mathbf z))$$
+$$- \log p_\Theta(\mathbf x | \mathbf z) = -\log \pi_d(\mathbf x | d_\Theta(\mathbf z))$$
 as some kind of distance between $\mathbf x$ and the mode of the
 $p_\Theta(\mathbf x | \mathbf z)$ distribution, but this can be done very easily
 in most cases. 
@@ -252,7 +252,7 @@ Gaussian with $d_\Theta(\mathbf z)$ mean then
 $$p_\Theta(\mathbf x | \mathbf z)= (2\pi)^{-m/2}\exp(-\Vert d_\Theta(\mathbf
 z) - \mathbf x\Vert^2/2).$$
 
-## Variational autoencoder: reconstuction error
+## Variational autoencoder: reconstruction error
 
 Hence $$ - \log p_\Theta(\mathbf x | \mathbf z)= \Vert d_\Theta(\mathbf z) -
 \mathbf x\Vert^2/2 - \log ((2\pi)^{-m/2}), $$ that is, the negative log
