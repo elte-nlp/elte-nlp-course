@@ -8,6 +8,7 @@ theme: Marburg
 colortheme: orchid
 fontsize: 14pt
 linkcolor: blue
+aspectratio: 1610
 header-includes: |
   \let\emphasized\emph
   \let\strong\textbf
@@ -36,7 +37,7 @@ An underlying structure of the data is utilized (e.g. sequentiality in language 
 
 ## Main objective
 
-![From [@dawid2023introduction]](figures/ssl_meme.png){height=50%}
+![From [@dawid2023introduction]](figures/ssl_meme.png){height=65%}
 
 Why not reinforcement learning?   
 *Trial-and-error is ineffective.*
@@ -80,7 +81,7 @@ Here $\beta$ is a positive constant, and $\acute{y} \in Y$.
 
 EBMs are useful for creating joint multimodal representations.
 
-![Joint embedding architecture](figures/joint_embed.png){ height=50% }
+![Joint embedding architecture](figures/joint_embed.png){ height=55% }
 
 ## Multimodal EBM architectures II.
 
@@ -88,7 +89,7 @@ Latent variables could be used for generative processes (e.g. diffusion).
 $z$ is an independent "explanatory" variable of variation.
 Inference is possible with joint minimization with respect to $y$ and $z$.
 
-![Latent-variable generative architecture](figures/latent_embed.png){ width=70% }
+![Latent-variable generative architecture](figures/latent_embed.png){ width=60% }
 
 
 ## Methods of learning in EBMs
@@ -172,7 +173,7 @@ $\mathcal{L}_{InfoNCE} = - S(q, k^+) + log\sum_{i=0}^{M+1}e^{S(q, k[i])}$
 Training a model $f$ with an InfoNCE-like loss function inverts (decodes) the unknown generative process of data generation $g$.
 Thus the latent distribution behind our data is reconstructed and made accessible.
 
-![From [@zimmermann2022contrastive]](figures/latent_reconstruct.png)
+![From [@zimmermann2022contrastive]](figures/latent_reconstruct.png){height=50%}
 
 ## Examples of sampling
 Data generation processes could include a wide range of self-supervised processes, such as:
@@ -201,7 +202,7 @@ $\mathcal{L}^{sup}_{out} = \sum\limits_{q \in J}\frac{-1}{|P(q)|}log\sum\limits_
 
 where $J$ is the set of batch elements, $q$ is the selected query element, $I$ is the set of batch elements excluding $q$, $P(q)$ is the set of elements with the same label as $q$.
 
-![From [@khosla2020supervised]](figures/supcl.png){height=35%}
+![From [@khosla2020supervised]](figures/supcl.png){height=40%}
 
 ## Invariant, Equivariant traits
 
@@ -241,7 +242,7 @@ Negative pairs minimize similarity (maximize energy according to EBM modeling).
 
 ## BERT Next Sentence Prediction
 
-![[From: Alammar, J (2018). The Illustrated Transformer](http://jalammar.github.io/illustrated-bert/)](figures/bert_nsp.png){height=70%}
+![[From: Alammar, J (2018). The Illustrated Transformer](http://jalammar.github.io/illustrated-bert/)](figures/bert_nsp.png){height=80%}
 
 ## Text-embedding models
 
@@ -282,13 +283,13 @@ Text embedding ($E_T$) Transformer LM $[n \times d_T]$
 
 Linear projections ($W_I$, $W_T$) $[d_I \times d_E]$, $[d_T \times d_E]$
 
-$t$ temperature parameter for classification
+$t$ temperature parameter for classification (similar to softmax temperature)
 
-$L$ labels of similarity (usually one-hot) $[n,]$
+$L$ labels of similarity usually a unit matrix $[n \times n]$
 
 $CE_{col | row}$ cross-entropy loss by columns (text) or rows (image) of the first argument.
 
-$S_{scaled} = ||E_I \cdot W_I ||_{L2} \cdot ||E_T \cdot W_T||_{L2}^T \cdot exp(t)$ $[n \times n]$
+$S_{scaled} = \frac{E_I \cdot W_I}{||E_I \cdot W_I||_{L2}} \cdot \left(\frac{E_T \cdot W_T}{||E_T \cdot W_T||_{L2}}\right)^T \cdot exp(t)$ $[n \times n]$
 
 $loss = 0.5 CE_{col}(S_{scaled}, L) + 0.5 CE_{row}(S_{scaled}, L)$
 
@@ -329,7 +330,7 @@ Other use-cases include:
 CLIP demonstrated that additional generalization capabilities can originate from incorporating multiple modalities in one representation space.
 ImageBind [@girdhar2023imagebind] takes it one step further and joins $7$ modalities in one embedding space.
 
-![Modalities and data sources of ImageBind [@girdhar2023imagebind]](figures/imagebind_sources.png){height=40%}
+![Modalities and data sources of ImageBind [@girdhar2023imagebind]](figures/imagebind_sources.png){height=50%}
 
 ## Emergent Alignment
 ::: columns
@@ -355,6 +356,7 @@ Encoders are now initialized from pre-trained models (e.g.: CLIP)
 Multimodal contrastive embeddings outperform supervised modality converters in the absence of naturally present multimodal signals (e.g.: text-to-audio).
 
 ImageBind use-case examples include:
+
 - Cross-modal retrieval
 - Embedding-space arithmetics
 - Cross-modal decoder re-utilization
@@ -465,10 +467,9 @@ Image-only datasets could also be used in the reconstruction task if the vocabul
 ## CoCa Inference
 
 Contrastive Captioner models can be used with further fine-tuning or in a zero-shot manner as any combination of its building blocks.
-
 CoCa-s are not limited to the visual-language modalities.
 
-[CoCa use cases from [@yu2022coca]](figures/coca_usecases.png){width=90%}
+![CoCa use cases from [@yu2022coca]](figures/coca_applications.png){height=60%}
 
 
 # Summary
@@ -482,4 +483,4 @@ These methods are useful for retrieval and zero-shot classification tasks. Decod
 
 
 # References {.allowframebreaks} 
-\footnotesize 
+\footnotesize
