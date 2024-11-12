@@ -3,7 +3,7 @@ title: "Natural Language Processing"
 subtitle: "Lecture 24: Conditional Text-to-Image Models"
 author: "Natabara Máté Gyöngyössy"
 institute: "Eötvös University, Department of Artificial Intelligence"
-date: 2023
+date: 2024
 theme: Marburg
 colortheme: orchid
 fontsize: 14pt
@@ -203,7 +203,7 @@ The first DALL-E model [@ramesh2021zeroshot] is a transformer-based autoregressi
 
 The training consists of $2$ stages:
 
-First the ResNet-style VAE with a bottleneck block in the middle is trained with ELBO loss. The latent features are quantized using argmax. The goal is image reconstruction here.
+First the ResNet-style VAE with a bottleneck block in the middle is trained with ELBO loss. The latent features are quantized using argmax (greedy-sampling). The goal is image reconstruction here.
 This stage learns a $~8k$ visual codebook (as dVAE utilizes argmax to quantize), that is later used in the autoregressive model.
 
 ## DALL-E dVAE Reconstruction
@@ -321,11 +321,11 @@ DDPM works with small step sizes accumulating around $500-1000$ steps of generat
 
 ## DDPM Latent Interpolation
 
-![Latent interpolation from [@ho2020denoising]. The latent interpolation is a valid point in the image manifold opposed to the pixel-space interpolation](figures/ddpm_interpol.png){height=50%}
+![Latent interpolation from [@ho2020denoising]. The latent interpolation is a valid point in the image manifold opposed to the pixel-space interpolation.](figures/ddpm_interpol.png){height=50%}
 
 ## DDPM Latent Interpolation
 
-![The results depend on the step at which the images are interpolated. "Deeper" mixing results in high fidelity, but the original information is lost [@ho2020denoising]](figures/ddpm_interpol_result.png){height=70%}
+![The results depend on the step at which the images are interpolated. "Deeper" mixing results in high fidelity, but the original information is lost [@ho2020denoising].](figures/ddpm_interpol_result.png){height=70%}
 
 ## DDIM: Denoising Diffusion Implicit Models
 
@@ -386,7 +386,7 @@ $x_{t-1} = \sqrt{\alpha_{t-1}}f_\theta(x_t)+\sqrt{1-\bar\alpha_{t-1}-\sigma_t^2}
 Where the first term is the scaled predicted $x_0$ input (which includes the $\epsilon_\theta^t$ error term as well), the second term is the "direction" that points to $x_t$ and the third random term is the independent noise difference between $x_{t-1}$ and $x_t$.
 
 ## DDIM reverse process
-If we select $\sigma_t = \sqrt{(1-\bar\alpha_{t-1})/(1-\bar\alpha_t)}\sqrt{1-\bar\alpha_t/\bar\alpha_{t-1}}$ for all $t$ the forward process is Markovian and the reverse process is DDPM. 
+If we select $\sigma_t = \sqrt{(1-\bar\alpha_{t-1})/(1-\bar\alpha_t)}\sqrt{1-\bar\alpha_t/\bar\alpha_{t-1}}$ for all $t$ the forward process becomes Markovian and the reverse process becomes DDPM. 
 
 If $\sigma_t = 0$, then the forward process becomes deterministic given a known $x_0$ and $x_{t-1}$. The reverse process then will not contain the independent noise term, thus a fixed procedure could be used for prediction.
 
@@ -514,13 +514,37 @@ This is a latent diffusion which implies the name LDM (Latent Diffusion Model) w
 
 ![Stable Diffusion layout synthesis from [@rombach2022highresolution]](figures/ldm_layout_result.png){height=75%}
 
+## DiT
+
+In some recent models [@openai2024videogeneration; @esser2024scalingrectifiedflowtransformers] the UNet is replaced by a special Diffusion Transformer (DiT) [@peebles2023scalablediffusionmodelstransformers] architecture that uses a ViT-like backbone complemented by conditioning input to predict the error image (and in some cases even the $\Sigma$ covariances that are used in complex diffusion use cases). 
+
+This way the output of the DiT is two predicted "images" (as in the case of a UNet) of the error and the covariance, which are assembled from output tokens with a linear layer and the inverse of the patching process.
+
+The authors observe a better scaling of the model compared to Convolutional UNets.
+
+## DiT Conditioning
+
+@peebles2023scalablediffusionmodelstransformers also explore the best way to inject conditioning. They find that adaptive layer normalization [@perez2017filmvisualreasoninggeneral] is the best solution with zero scaling initialization (so that only the residuals are active at the beginning).
+This means that the conditioning signal is mapped to the latent size by an MLP that emits input scale, output scale, and shift values that we apply on the data stream of the transformer.
+
+The authors also denote that this is superior to in-context conditioning, cross-attention, and even adaptive layer normalization with non-zero scaling initialization.
+
+## DiT Architecture
+
+![DiT architecture [@peebles2023scalablediffusionmodelstransformers]](figures/dit.png){height=80%}
+
 # Extensions to Diffusion Models
 
 ## Multi-stage Networks
 
 Multi-stage networks are utilized to improve efficiency of diffusion and latent diffusion models. DALL-E 2 [@ramesh2022hierarchical] uses a multi-stage diffusion in the pixel space with a CLIP + caption-based text-conditional super-resolution model. The DALL-E 3 paper [@BetkerImprovingIG] also mentions that they use a three-stage diffusion model on different resolutions. Details are not disclosed.
 
-![High resolution DALL-E 3 generation from [@BetkerImprovingIG]](figures/dalle3_results.png){height=27%}
+Latest developments also introduce refiners [@podell2023sdxlimprovinglatentdiffusion], that are trained to improve the details and consistency (overal quality) of the generated images. These refiners are trained on high-quality images and are used after the original latents are generated.
+
+
+## Multi-stage generation results
+
+![High resolution DALL-E 3 generation from [@BetkerImprovingIG]](figures/dalle3_results.png){height=70%}
 
 
 ## Multi-stage Networks
