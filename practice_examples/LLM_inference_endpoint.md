@@ -33,7 +33,7 @@ import openai
 openai.api_key = "<API_KEY>" # STEP1 set the API key
 openai.api_base = "http://mobydick.elte-dh.hu:12321/v1" # STEP2 use the /v1 endpoint
 
-response = openai.chat.completion.create(
+response = openai.chat.completions.create(
     model="tgi", # STEP3 set the model to "tgi"
     messages=[
         {"role": "system", "content": "You are a helpful assistant."},
