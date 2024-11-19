@@ -54,7 +54,7 @@ For the most up to date information, please refer to the official TGI tutorial: 
 
 Visual inputs are not supported, and the context window is limited to ~20k tokens (as a sum of prompt and response). There is no maximal response length. 
 
-Please check TGI documentation for parameter details (there are known issues with top_p, etc...)
+Please check TGI documentation for parameter details (there are known issues with top_p, etc...), also the default for the max generated tokens tends to be a low number (1-200), which you have to override in your requests!
 
 Tooling is currently in limited support (automatic selection works fine, but forced selection might not work as expected), and there is no json output support yet. 
 
