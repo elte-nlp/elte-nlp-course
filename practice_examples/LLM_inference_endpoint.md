@@ -28,7 +28,7 @@ The endpoint is mostly compatible with the core OpenAI functionality with slight
 To use the endpoint set the following parameters:
 
 ```python
-import openai
+from openai import OpenAI
 
 # Set the API key and the base URL (with the /v1 endpoint)
 client = OpenAI(
