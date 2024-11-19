@@ -30,16 +30,22 @@ To use the endpoint set the following parameters:
 ```python
 import openai
 
-openai.api_key = "<API_KEY>" # STEP1 set the API key
-openai.api_base = "http://mobydick.elte-dh.hu:12321/v1" # STEP2 use the /v1 endpoint
-
-response = openai.chat.completions.create(
-    model="tgi", # STEP3 set the model to "tgi"
-    messages=[
-        {"role": "system", "content": "You are a helpful assistant."},
-        {"role": "user", "content": "What is the purpose of life?"},
-    ],
+# Set the API key and the base URL (with the /v1 endpoint)
+client = OpenAI(
+    base_url="http://mobydick.elte-dh.hu:12321/v1",
+    api_key="<API_KEY>"
 )
+
+chat_completion = client.chat.completions.create(
+    model="tgi",
+    messages=[
+        {"role": "system", "content": "You are a helpful assistant." },
+        {"role": "user", "content": "What is the purpose of life"}
+    ],
+    stream=False
+)
+
+print(chat_completion)
 ```
 
 For the most up to date information, please refer to the official TGI tutorial: [https://huggingface.co/docs/text-generation-inference/basic_tutorials/consuming_tgi#openai-client](https://huggingface.co/docs/text-generation-inference/basic_tutorials/consuming_tgi#openai-client)
