@@ -80,7 +80,7 @@ data = {
         'max_new_tokens': 20,
     },
 }
-response = requests.post('http://127.0.0.1:8080/generate', headers=headers, json=data)
+response = requests.post('http://mobydick.elte-dh.hu:12321/generate', headers=headers, json=data)
 ```
 
 Some functionalities are not available via the OpenAI package (nor the official Huggingface Hub Client), such as listing the available model information, or performing tokenizations, health checks, etc. Check the API documentation for more details.
