@@ -274,7 +274,7 @@ We have to optimize (the authors negate and minimize) the variational lower boun
 
 $L_T = \mathbb{E}_q(D_{KL}(q(x_T|x_0)||p_\theta(x_T)))$ this ensures that the first reverse step is close to the final forward step.
 
-$L_{t-1} = \mathbb{E}_q(D_{KL}(q(x_{t-1}|x_t,x_0)||p_\theta(x_{t-1}|x_t)))$
+$L_{1 \ldots t-1} = \mathbb{E}_q(D_{KL}(q(x_{t-1}|x_t,x_0)||p_\theta(x_{t-1}|x_t)))$
 Here $q(x_{t-1}|x_t,x_0)$ is the posterior (after Bayes) distribution which is the optimal reverse distribution for each step.
 
 $L_0 = \mathbb{E}_q(-logp_\theta(x_0|x_1))$ data log-likelihood conditioned on the end of the latent-chain.
@@ -284,9 +284,9 @@ $L_0 = \mathbb{E}_q(-logp_\theta(x_0|x_1))$ data log-likelihood conditioned on t
 
 For more details on the training goal derivation see [@ho2020denoising] Appendix A.
 
-If we fix the standard deviation of both processes and tie them together at each step (using $\sigma_tI$ in each Gaussian) the $L_{t-1}$ terms fall back to the distance of the two means.
+If we fix the standard deviation of both processes and tie them together at each step (using $\beta_tI$ in each Gaussian) the $L_{t-1}$ terms fall back to the distance of the two means.
 
-$L_{t-1} = \mathbb{E}_q\left(\frac{1}{2\sigma_t^2}||\tilde\mu(x_t,x_0)-\mu_\theta(x_t, t)||^2\right) + C$
+$L_{1 \ldots t-1} = \mathbb{E}_q\left(\frac{1}{2\sigma_t^2}||\tilde\mu(x_t,x_0)-\mu_\theta(x_t, t)||^2\right) + C$
 
 Here $\tilde\mu(x_t,x_0)$ is the mean of the forward posterior distribution (reversed by Bayes) and $\mu_\theta(x_t, t)$ is the mean of the learnable reverse distribution. $C$ is a constant.
 
@@ -312,6 +312,20 @@ $L_{simp}(\theta) = \mathbb{E}_{t, x_0, \epsilon} ||\epsilon - \epsilon_\theta(x
 ## DDPM Training and Inference
 
 ![DDPM training and inference from [@ho2020denoising]. Gradient is calculated based on the image and the timestep. Inference is calculated via the predicted noise term and an independently sampled noise term.](figures/ddpm_train.png){height=70%}
+
+## DDPM Summary I.
+
+1. The forward process is a Markovian process that adds noise to the image.
+2. We can compute any arbitrary depth of the forward process directly $q(x_t|x_0)$.
+3. By taking the Bayesian posterior of the forward process we have labels for the reverse process $q(x_{t-1}|x_t,x_0)$.
+4. During inference $x_0$ is unknown, so we need an approximator for the reverse posterior which does not depend on $x_0$. This is $p_\theta(x_{t-1}|x_t)$.
+5. The optimization goal is to minimize the KL-divergence between the (during training known) posterior and the approximated posterior $D_{KL}(q(x_{t-1}|x_t,x_0)||p_\theta(x_{t-1}|x_t))$.
+
+## DDPM Summary II.
+
+6. We fix the variances, thus only the means have to be approximated by $\mu_\theta$.
+7. Using the reparametrization trick we can factor the uncertainty to a standard Gaussian noise term $\epsilon$ that we use during the $x_0 \rightarrow x_t$ transformation.
+8. This way the only non-deterministic part of $\mu_\theta$ is $\epsilon_\theta$ which we have to predict. So the training goal becomes $||\epsilon - \epsilon_\theta(x_t, t) ||^2$. Where $\epsilon$ is the noise term that is added to the image during the forward process (available during training).
 
 ## DDPM Properties
 
@@ -400,7 +414,6 @@ $\sigma_t = \eta \sqrt{(1-\bar\alpha_{t-1})/(1-\bar\alpha_t)}\sqrt{1-\bar\alpha_
 
 Since we can now use a fixed reverse process (with the exception that we have to predict $x_0$ from $x_t$) we can directly sample from the reverse process at any set of $x_t$-s including skipping steps, or subsampling steps. @song2022denoising even considers continuous time-based sampling.
 
-
 ## DDIM accelerated generation
 
 Accelerated generation holds for a $\tau_i \in [0, T]$ set of steps as long as $q_\sigma(x_{\tau_i}|x_{\tau_{i-1}},x_0)$ is known, as the reverse process could then approximate $q_\sigma(x_{\tau_{i-1}}|x_{\tau_i},x_0)$ by predicting $\epsilon_\theta^{\tau_i}$ which is utilized in $f_\theta(x_{\tau_i})$ as well.
@@ -418,6 +431,19 @@ This way the sampling is not tied to the training (forward) step number and abou
 By reformulating DDIM as an ODE solver (ordinary differential equation) @song2022denoising conclude that it is equivalent to the Euler method of ODE solving. Other, expanded ODE solvers could also be used such as DPM++ propozed by @lu2023dpmsolver. Late 2023 these are the most popular diffusion samplers. There has been some research in the domain of higher-order ODE solvers, but no wide-spread use could be observed yet.
 
 @karras2022elucidating also proposes new ways of noise scheduling beyond the linear $\beta$-s used by DDPM and DDIM.
+
+## DDIM Summary I.
+
+1. DDIM uses a non-Markovian process for diffusion using the idea of jumping to $T$, then gradually reversing to $t$. $q_\sigma(x_{1:T}|x_0) = q_\sigma(x_T|x_0)\prod\limits_{t=2}^Tq_\sigma(x_{t-1}|x_{t},x_0)$
+2. The reverse process can then directly use $q_\sigma(x_{t-1}|x_t,x_0)$. Here $x_0$ is only known during training, so during inference we have to use our predictor to approximate it instead of approximating the full posterior as in DDPM.
+3. We define $f_\theta(x_t)$ to approximate $x_0$ from $x_t$ and use the same representation trick to turn the problem into a noise $\epsilon$ prediction problem.
+
+## DDIM Summary II.
+
+4. It is shown that the DDIM and DDPM training goals are equivalent, only the mathematical construct that envelopes the error prediction is different.
+5. The DDIM inference procedure implements the intuition of $x_t \rightarrow f_\theta(x_t) \rightarrow x_0 \rightarrow x_{t-1}$. Note that $t-1$ prediction does not explicitly depends on $t$, so instead of $t-1$ we could jump to any previous step.
+6. However, the $f_\theta(x_t)$ prediction is not perfect, so the reverse process should also take multiple steps of refinement for consistent quality.
+7. Modern implementations handle timesteps as continuous variables, thus they use ODE solvers to direct the reverse process.
 
 ## Guided Diffusion - Classifier
 
@@ -454,7 +480,7 @@ Here $f$ is the image encoder and $g$ is the text encoder. Importantly this CLIP
 
 ## Latent Diffusion
 
-Latent diffusion refers to the method, where diffusion is performed in the latent space of a VAE or GAN. DALL-E 2 [@ramesh2022hierarchical] and Stable Diffusion [rombach2022highresolution] offer two popular examples to this method.
+Latent diffusion refers to the method, where diffusion is performed in the latent space of a VAE or GAN. DALL-E 2 [@ramesh2022hierarchical] and Stable Diffusion [@rombach2022highresolution] offer two popular examples to this method.
 
 While DALL-E 2 uses a CLIP-like model as the VAE with a Transformer-based diffusion prior, Stable Diffusion utilizes a VQ-GAN generator and a U-Net style prior. 
 
