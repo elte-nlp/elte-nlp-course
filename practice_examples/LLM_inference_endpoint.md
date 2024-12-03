@@ -13,7 +13,7 @@ We currently host a single open model endpoint that could be used to student pro
 | API Endpoint URL    | `http://mobydick.elte-dh.hu:12321`        |
 | Endpoint API definition   | [http://mobydick.elte-dh.hu:12321/docs](http://mobydick.elte-dh.hu:12321/docs)       |
 | Authentication  | API Key (contact the lecturers)              |
-| Model Version (might be out of date)   | `LLama3.1-70B 4bit AWQ quantized`                                               |
+| Model Version (might be out of date)   | [hugging-quants/Meta-Llama-3.1-70B-Instruct-AWQ-INT4](https://huggingface.co/hugging-quants/Meta-Llama-3.1-70B-Instruct-AWQ-INT4)                                              |
 | TGI Server documentation   | [https://huggingface.co/docs/text-generation-inference/index](https://huggingface.co/docs/text-generation-inference/index) |
 | Test GUI    | [http://mobydick.elte-dh.hu:3000](http://mobydick.elte-dh.hu:3000)      |
 | Test GUI login  | Ask the lecturers for the login credentials. |
