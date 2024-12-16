@@ -52,7 +52,7 @@ For the most up to date information, please refer to the official TGI tutorial: 
 
 #### Limitations
 
-Visual inputs are not supported, and the context window is limited to ~20k tokens (as a sum of prompt and response). There is no maximal response length. 
+Visual inputs are not supported, and the context window is limited to ~100k tokens (as a sum of prompt and response). There is no maximal response length. 
 
 Please check TGI documentation for parameter details (there are known issues with top_p, etc...), also the default for the max generated tokens tends to be a low number (1-200), which you have to override in your requests!
 
