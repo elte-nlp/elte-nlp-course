@@ -275,7 +275,7 @@ Instead of scoring full dialog states, it is also possible to score individual
 
 ## Dialog state tracking and NLU
 
-* As in the previuos two examples, modern dialog state trackers frequently use
+* As in the previous two examples, modern dialog state trackers frequently use
   user utterances as input directly, not requiring an independent NLU component
   in the dialog architecture.
 * Dialog systems based on ML-based NLU and dialog state tracker modules are
