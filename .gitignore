@@ -6,6 +6,7 @@
 !*.png
 !*.jpg
 !*.jpeg
+!nlp_club.html
 !figures/
 !lecture_source/
 !etc/
