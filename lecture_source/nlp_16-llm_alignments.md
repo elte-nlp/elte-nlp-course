@@ -1,6 +1,6 @@
 ---
 title: "Natural Language Processing"
-subtitle: "Lecture 15: LLM alignments"
+subtitle: "Lecture 16: LLM alignments"
 author: András Simonyi
 institute: "Eötvös University, Department of Artificial Intelligence"
 date: 2023

@@ -1,6 +1,6 @@
 ---
 title: "Natural Language Processing"
-subtitle: "Lecture 26: Classical Speech-to-Text"
+subtitle: "Lecture 27: Classical Speech-to-Text"
 author: András Simonyi
 institute: "Eötvös University, Department of Artificial Intelligence"
 date: 2023

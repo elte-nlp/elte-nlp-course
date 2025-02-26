@@ -1,6 +1,6 @@
 ---
 title: "Natural Language Processing"
-subtitle: "Transformers"
+subtitle: "Lecture 12: Transformers"
 author: "András Simonyi, Natabara Máté Gyöngyössy"
 institute: "ELTE Eötvös Loránd University, Department of Artificial Intelligence"
 date: 2024

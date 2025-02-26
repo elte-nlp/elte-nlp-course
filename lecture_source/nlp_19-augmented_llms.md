@@ -1,6 +1,6 @@
 ---
 title: "Natural Language Processing"
-subtitle: "Lecture 16: LLM Tooling"
+subtitle: "Lecture 19: Augmented LLMs"
 author: "Natabara Máté Gyöngyössy"
 institute: "Eötvös University, Department of Artificial Intelligence"
 date: 2023

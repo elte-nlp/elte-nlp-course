@@ -1,6 +1,6 @@
 ---
 title: "Natural Language Processing"
-subtitle: "Lecture 21: Reduced Complexity Models and Pretraining"
+subtitle: "Lecture 22: Reduced Complexity Models and Pretraining"
 author: "Dávid Márk Nemeskey, Natabara Gyöngyössy"
 institute: "Eötvös University, Department of Digital Humanities, Department of Artificial Intelligence"
 date: 2024
