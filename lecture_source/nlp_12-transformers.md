@@ -270,7 +270,7 @@ Transformers were invented for symbolic sequences (e.g. text), thus an embedding
 
 ![Sinusoid positional encoding](figures/posenc1.png){height=35%}
 
-![Dot-product of positional encodings [@wang2020position].](figures/posenc2.png){height=30%}
+![Cosine similarity of positional encodings [@wang2020position].](figures/posenc2.png){height=30%}
 
 
 ## Seq2seq Transformer
