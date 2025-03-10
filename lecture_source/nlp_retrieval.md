@@ -1,7 +1,7 @@
 ---
 title: "Natural Language Processing"
 subtitle: "Lecture 07: Embeddings and Retrieval systems"
-author: András Simonyi, Zsolt Csibi
+author: Zsolt Csibi
 institute: "Eötvös University, Department of Artificial Intelligence"
 date: 2025
 theme: Marburg
@@ -29,13 +29,120 @@ output:
 - [Stanford IR and Web Search course slides](https://web.stanford.edu/class/cs276/)
 - [Sebastian Hoefstatter's IR course slides](https://github.com/sebastian-hofstaetter/teaching)
 
+# Classical methods recap
+
+- term-based approach
+- Calculating __inverted index__, requires heavy preprocessing
+- Using __Bag-of-Words__ for calculating document vectors (sparse vectors)
+- __Tf-Idf__ for getting the term weights in a document
+- Memorable method is __BM25__ still a strong baseline
+- Using Approximate Nearest neighbour (ANN) for searching relevant document in the embedding space
+- Fast retriveing through inverted index
+
+## Problem with classical methods
+
+What about words in the queries that are not in the documents? $\rightarrow$ __Vocabulary mismatch problem__
+
+__Example:__
+
+__Query:__ "How does physical activity affect joint health?"
+
+__Document containing:__ "Regular exercise improves mobility and prevents osteoarthritis in the knees."
+
+In this case BM25 could not connect the two phrase __"Physiscal activity"__ and __"Exercise"__ besides __semantically__ they are close to each other.
+
+## Solutions for that problem
+
+__We need them__
+
+```{=latex}
+\begin{center}
+\includegraphics[width=0.8\textwidth]{figures/transformers.png}
+\end{center}
+```
+
+## Solutions for that problem
+
+__Especially him__
+
+```{=latex}
+\begin{center}
+\includegraphics[width=0.8\textwidth]{figures/bert.png}
+\end{center}
+```
+
+
+# Transformer-based information retrieval
+
+- the rise __pretrained language models__ (@devlin2019bertpretrainingdeepbidirectional, @radford2018improving) appeared in the territory of information retrieval too
+- Especially __BERT-like__ models (in the beginning) with their __encoder-only__ architecture, they can capture semantical information
+- BERT models are used for 
+  - __Dense infromation retrieval__
+  - __Sparse information retrieval__
+
+## Dense information retrival
+
+- calculating a fixed-sized embedding vector for the document and the query separately
+- score will be the similarity between them (dot-product, cosine similarity)
+- relies heavily on __ANN__
+- Multiple different architectures, two most important:
+  - __Cross-encoder based solutions__
+  - __Bi-Encoder based Solutions__
+
+## Cross-Encoder based information retreival
+
+- The query and the document is __concatenated together__ and separated with a [SEP] token
+- The embedding in the end will be:
+  - The embedding of the __[CLS] token__ (@qiao2019understandingbehaviorsbertranking)
+  - __Averaging__ all token embeddings (@reimers2019sentencebertsentenceembeddingsusing)
+- can perform __self-attention between query and the document__
+- decrease dimension of the embedding vector to get score between the document and the query (usually single MLP head)
+- It has __good accuracy__ but __slow__ inference time
+
+## Cross-Encoder architecture
+
+![Image from @humeau2020polyencoderstransformerarchitecturespretraining](figures/cross_encoder.png){width=75%}
+
+## Bi-Encoder based information retrieval
+
+- __less performant__ but __faster__ than Cross-Encoder
+- the query and the document is encoded via a __different encoder__ (could be the same weights initially, but weights updated separately from each other)
+- the score will be the __dot product between the query and the document__ vector
+- both encoder separatley learn semantic representation of the queries and the documents
+- Embeddings for the query and the document is eeither [CLS] token embedding or averaging all embeddings
+- Document embeddings can be calculated __offline__
+
+## Bi-Encoder architecture
+
+![Image from @humeau2020polyencoderstransformerarchitecturespretraining](figures/bi_encoder.png){width=85%}
+
+## Combining Bi-Encoder and Cross-Encoder
+
+- using Cross-Encoder is a resource heavy operation
+- In contrast Bi-Encoder is musch faster due to the offline document embedding calculation
+- multiple approaches tried to combine the qualities of Cross-Encoder (__self-attention on query and the input__) and the advantage of Bi-Encoder (can calculate __document embeddings offline__)
+
+## Combining Bi-Encoder and Cross-Encoder cont.
+
+__PolyEncoder__
+
+- Similar to a Bi-Encoder, it uses __two separate transformers__ for context and candidates.
+- Contexts are converted into M vectors, instead of one, due to their larger size.
+- M context codes are learned to capture global features, attending to all context embeddings.
+- The candidate mebedding attends to these global feature vectors to compute the final comdined embedding.
+- The final score is the dot product between the combined context embedding and the candidate embedding
+
+## PolyEncoder Architecture
+
+![Image from @humeau2020polyencoderstransformerarchitecturespretraining](figures/poly_encoder.png){width=80%}
+
 # Transformer-based reranking (Mono reranking)
 
-- First influential approach is from @nogueira2020passagererankingbert, with applying pretrain and fine-tuning on the raning task:
+<!-- - First influential approach is from @nogueira2020passagererankingbert, with applying pretrain and fine-tuning on the raning task: -->
   - input is the concatenation of the query and the passage to be ranked (truncated to fit context window)
   - standard binary classification head produces the relevance probability ranking score
 
-![monoBERT model from @Paaß2023](figures/transformer_ranking.png){width=85%}
+<!-- ![monoBERT model from @Paaß2023](figures/transformer_ranking.png){width=85%} -->
 
 ## Advantages Disadvantages
 
@@ -52,7 +159,7 @@ __Cons__:
 
 ## Advantages Disadvantages cont.
 
-![BERT results from @nogueira2020passagererankingbert](figures/monobert_results.png){width=95%}
+<!-- ![BERT results from @nogueira2020passagererankingbert](figures/monobert_results.png){width=95%} -->
 
 ## Expando-Mono-Duo
 
