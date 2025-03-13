@@ -542,6 +542,26 @@ RAG usually consists of the following steps:
 - **Document aggregation**: *Stuff* all documents together or *Map* a transform (for example summarization).
 - **Answer-forming**: The query and the context are fed to the LM that produces an answer.
 
+## Two-step RAG system
+
+- user questions are not always similar to relevant knowledge
+- __different__ question-forming and answer forming step
+- from the user question making a general query (with different exapnding techniques) which is more similar to the relevant knowledge
+- potential methods for generating general query: __Hyde, stepback prompting, standalone general questions__
+
+Example:
+
+__User Query__: "What are the benefits of RAG?"
+
+__General Query__: "Explain the advantages of retrieval-augmented generation in improving LLM responses."
+
+
+## Two-step RAG system
+
+![Two-step RAG architecture](figures/2_step_rag.png){width=85%}
+
+## Metadata filtering
+
 ## Hypothetical document embedding
 
 Hypothetical document embedding [@gao2022precise] helps with generating better queries for embedding vector-based retrieval systems. The HyDE question-forming step is replaced with a generative step that produces a "fake" example answer to the question and uses that as a query in the database.
