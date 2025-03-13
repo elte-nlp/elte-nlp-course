@@ -71,14 +71,63 @@ __Especially him__
 \end{center}
 ```
 
+# Transformer-based reranking (Mono reranking)
 
-# Transformer-based information retrieval
+- First influential approach is from @nogueira2020passagererankingbert, with applying pretrain and fine-tuning on the ranking task:
+  - input is the concatenation of the query and the passage to be ranked (truncated to fit context window)
+  - standard binary classification head produces the relevance probability ranking score (often using the [CLS] token embedding for classification)
 
-- the rise __pretrained language models__ (@devlin2019bertpretrainingdeepbidirectional, @radford2018improving) appeared in the territory of information retrieval too
-- Especially __BERT-like__ models (in the beginning) with their __encoder-only__ architecture, they can capture semantical information
+![monoBERT model from @Paaß2023](figures/transformer_ranking.png){width=85%}
+
+## Advantages and Disadvantages
+
+__Pros__:
+
+- average performance is btter compared to classical and neural scoring methods 
+- BERT doubled the performance of BM25 (on MS-MARCO and TREC-CAR benchmarks)
+
+__Cons__:
+
+- models needs to be fine-tuned on IR datasets
+- Ranking D documents for Q requires D $\times$ Q inferences
+- The scores are diffcult to interpret
+
+## Advantages Disadvantages cont.
+
+![BERT results from @nogueira2020passagererankingbert](figures/monobert_results.png){width=95%}
+
+## Expando-Mono-Duo
+
+- originally made by @pradeep2021expandomonoduodesignpatterntext
+- improve monoLM (monoBERT) architecture by adding a __pairwise reranking__ stage
+- model gets __(query, document_1, document_2)__ triplets and ouputs the __probability__ of document_1 is more relevant than document_2
+- pairwise scores __aggregated__ to produce final ranking (multiple aggregation startegies, simplest is __summing__ or __multiplying__ each pairwise score of a document)
+- The complexity is __quadratic__ ("expensive"), can be used as the final stage of a multi-stage ranking system
+
+## Expando-Mono-Duo cont.
+
+In the original paper authors used it together with a keyword-based and MonoLM stages:
+
+- __Document Expansion__: enrich documents with additions reflects their content, implemented as a Seq-2-Seq model generates possible queries concatenated to the documents. inverted index built after this
+- __Do BM25 keyword retrieval__. It can be enchanced with "pseudo-relevance feedback"
+- __Do Mono reranking__
+- __Do a Duo pairwise reranking__
+
+Good results reaching more than __0.40MRR@10__ on the MS MARCO dataset
+
+## Expando-Mono-Duo cont.
+
+![Image from Expando-Mono-Duo paper of @pradeep2021expandomonoduodesignpatterntext](figures/exapndo_mono_duo.png){width=95%}
+
+# Encoder-Only transformers for first-stage IR
+
+- using BERT-based transformers as first-stage retrievals, not just as rerankers
+- __BERT-like__ models were dominant in the beginning with their __encoder-only__ architecture, but later decoder-only architectures surpassed them
 - BERT models are used for 
   - __Dense infromation retrieval__
   - __Sparse information retrieval__
+
+<!-- ![Image source: a slide from @sebastien](figures/first_stage_retrieve_setup.png){width=55%} -->
 
 ## Dense information retrival
 
@@ -136,129 +185,22 @@ __PolyEncoder__
 
 ![Image from @humeau2020polyencoderstransformerarchitecturespretraining](figures/poly_encoder.png){width=80%}
 
-# Transformer-based reranking (Mono reranking)
+## Combining Bi-Encoder and Cross-Encoder cont.
 
-<!-- - First influential approach is from @nogueira2020passagererankingbert, with applying pretrain and fine-tuning on the raning task: -->
-  - input is the concatenation of the query and the passage to be ranked (truncated to fit context window)
-  - standard binary classification head produces the relevance probability ranking score
+__ColBERT__
 
-<!-- ![monoBERT model from @Paaß2023](figures/transformer_ranking.png){width=85%} -->
+- uses separate encoder for query and document
+- combine embeddings with a technique called __Late interaction__
+- after the both the query and the document is embedded uses a __MaxSim__ operator, which is sum the __sum of maximum similarity__ (often dot-product) between query and document
+- the final score is the sum of all tokens
 
-## Advantages Disadvantages
+$$
+ s_{q,d} = \sum_{i\in [\left | E_{q}\right |]}^{}\max_{j\in[\left | E_{q}\right |]} E_{q_{i}} \cdot E_{d_{j}}^{T}
+$$
 
-__Pros__:
+## ColBERT architecture
 
-- results very gooood compared to classical and neural scoring methods
-- BERT doubled the performance of BM25
-
-__Cons__:
-
-- models needs to be fine-tuned on IR datasets
-- Ranking D documents for Q requires D $\times$ Q inferences
-- The scores are diffcult to interpret
-
-## Advantages Disadvantages cont.
-
-<!-- ![BERT results from @nogueira2020passagererankingbert](figures/monobert_results.png){width=95%} -->
-
-## Expando-Mono-Duo
-
-- originally made by @pradeep2021expandomonoduodesignpatterntext
-- improve monoLM architecture by doing __pairwise reranking__
-- model gets __(query, document_1, document_2)__ triplets and ouputs the __probability__ of document_1 is more relevant than document_2
-- pairwise scores __aggregated__ to produce final ranking (multiple aggregation startegies, simplest is __summing__ or __multiplying__ each pairwise score of a document)
-- The complexity is __quadratic__ ("expensive"), can be used as the final stage of a multi-satgae ranking system
-
-## Expando-Mono-Duo cont.
-
-In the original paper authors used it together with akeyword-based and MonoLM stages:
-
-- __Document Expansion__: enrich documents with additions reflects their content, implemented as a Seq-2-Seq model generates possible queries concatenated to the documents. inverted index built after this
-- __Do BM25 keyword retrieval__. It can be enchanced with "pseudo-relevance feedback"
-- __Do Mono reranking__
-- __Do a Duo pairwise reranking__
-
-Good results reaching more than __0.40MRR@10__ on the MS MARCO dataset
-
-## Expando-Mono-Duo cont.
-
-![Image from Expando-Mono-Duo paper of @pradeep2021expandomonoduodesignpatterntext](figures/exapndo_mono_duo.png){width=95%}
-
-# First-stage dense retrieval
-
-- in the multi-stage reranking using __neural methods__ for the first stage instead of the inverted index-based BM25
-- replacing inverted index with __nearest neighbor index__ and relying on __nearest neighbour search__
-- Challenges:
-  - how to generate good __quality embeddings__ for the IR task?
-  - What type of __similarity metric__ should be used?
-  - How to __build and query__ the index?
-
-![Image source: a slide from [Sebastian Hofstätter's "Crash Course IR – Fundamentals" presentation](https://github.com/sebastian-hofstaetter/teaching/blob/master/advanced-information-retrieval/lectures-2021/Lecture%2010%20-%20Dense%20Retrieval%20and%20Knowledge%20Distillation.pdf)](figures/first_stage_retrieve_setup.png){width=65%}
-
-
-## Document Embedding Computation
-
-- prodcuing document and query embeddings
-- For __BERT-style__ models uses __[CLS]__ Token embedding  as final embedding, but can be fine-tuned
-- for other Transformer architectures (encoder only, full-stack) __no [CLS] token__, other choices:
-  - using the mebedding of a single token ex. OpenAI uses the input-ending [EOS] token embedding (see @neelakantan2022textcodeembeddingscontrastive)
-  - __pooling__ the embeddings of different tokens (typically __average__ or __max pooling__)
-  - for decoder-only transformer models only the __last token__ has information about the whole document, use that embedding or a __positionally weighted pooling__
-- If the embeddings produced have a larger than desirable size then they can be __"downsized"__ by a single linear layer.
-
-## Document Embedding Computation cont.
-
-The __SentenceT5 project__ (see @ni2021sentencet5scalablesentenceencoders) experimented with __3 ways__ of computing sentence embeddings and found that average pooling the encoder embeddings worked best
-
-__Similarity Metrics__: most common is __cosine similarity__ and __Dot product__
-
-![Figure from the SentenceT5 paper cited above](figures/sentence_t5.png)
-
-## (Pre)Train Embedder model
-
-- embedder models typically pre-trained on __representation learning tasks__ specifically designed for this purpose
-- usually this pre-training happens __after a pre-training__ on another task frequently __language modelling__
-- Trained with __unsupercised learning__, the dominnat methods are:
-  - __Contrastive Learning__: The training task is to map "semantically similar" texts to close representations and randomly sampled pairs of texts to distant ones (see @neelakantan2022textcodeembeddingscontrastive). More on that in the C module
-  - __Knowledge Distillation__: Use a more expensive and powerful model, such as a MonoLM or DuoLM as a teacher and train the embedder to approximate their output. 
-
-
-## Zero-shot vs fine-tuned performance
-
-__Zero-shot dense retrieval__
-
-- results depend on the target domain but BM25 seems a strong baseline
-- not-always improved by zero-shot dense retrival model (see @thakur2021beirheterogenousbenchmarkzeroshot for more)
-- One possible reason is that the evaluation datasets themselves are biased towards BM25.
-- Best is the __BM25 First stage + Transformer-based reranker__ combination
-
-__Fine-tuned dense retireval__:
-
-- significantly better than BM25 baseline
-- not significantly better than the best __BM25 First stage + Transformer-based reranker__ combo
-
-<!-- ## Contrastive Learning
-
-- __Positive pairs__ are "neighboring texts on the Internet" while __negatives__ are randomly sampled. 
-- The training objective can be, e.g., minimizing nll with the cosine similarity as logit for the binary   classification between positive (nearby) and negative pairs.
-- The main challenge is sampling __hard negatives__, simple in-batch sampling strategies can be uninformative.
-
-![Figure from the paper of @neelakantan2022textcodeembeddingscontrastive](figures/contrastive.png){width=50%} -->
-
-## Late interaction model
-
-- compromise between the document-query based mebedding pair (default in first stage dense retrieval) and full interaction (like Mono reranking)
-- most notable is Colbert (see @khattab2020colbertefficienteffectivepassage)
-
-![Model architecture comparison from the Colbert paper](figures/colbert.png)
-
-## Calculating score between document and query
-
-- encoding both into a sequence of contectual token embedings
-- for each query embedding cosine similarity calculated with each document embedding and maximal similarity recorded as the query's token similarity score
-- final score is the sum of all token scores.
-
-![ColBert architecture from the paper](figures/colbert_architecture.png){width=50%}
+![Model architecture comparison from @khattab2020colbertefficienteffectivepassage](figures/colbert_architecture.png){width=85%}
 
 ## Advantages and disadvantages
 
@@ -279,50 +221,61 @@ Introduced by @santhanam2022colbertv2effectiveefficientretrieval, trying to addr
 - __sophisticated index compression__: only __residual__ contextual token representations are stored in a radically __quantized__ form (based on KNN clustering).
 - __fully score only promising documents__: prefilters documents by first doing individual NN searches for the individual query word embeddings and collecting the highest ranked documents, but this brings the system close to late stage reranking.
 
-# Enchanced Sparse representations
 
-## Enchanced Sparse representations
+## Sparse Information Retrieval with transformers
 
-Previous representations like BM25 work with BoW (Bag-of-Words) which are:
+- classic information retrieval is sparse, using frequency based terms (Bag-of-Words, Tf-Idf)
+  - these vectors are __static__
+  - __vocabulary mismatch problem__
+  - __over interpretable dimensions__ (the dimensions are terms
+in the dictionary)
+- can be easily used by traditional search engines (inverted index)
+- embedding vectors are vocabulary sized 
 
-- __static vectors__
-- __over interpretable dimensions__ (the dimensions are terms in the dictionary)
-
-Another important aspect of these vectors next to interpretability is they can be used easily by traditional search engines based on __sparsed vector indexes__.
+Trying use transformers in order make sparse retrieval better.
 
 ## DocT5Query
 
 - used by previously mentioned model __Expando-Mono-Duo__, where a Seq-2-Seq model is trained for generate queries for every document, which were appended to the indexing
+- solving the __vocabulary mismatch problem__ by adding relevant phrases to the document
 - this approaach (among others) called __DocT5Query__ (see @nogueira2019documentexpansionqueryprediction)
 
-![Image from the paper linked above.](figures/doct5.png){width=45%}
+## DocT5Query cont.
+![Image from the paper @nogueira2019documentexpansionqueryprediction](figures/doct5.png){width=75%}
 
 ## SPARTA (Sparse Transformer Matching)
 
 - introduced by @zhao2020spartaefficientopendomainquestion, trains a neural ranker working with full token-level interaction matrix 
 - query tokens represented by __static embeddings__, while document embeddings are __contextual__
+- replacing BoW based inverted index
 
-![Sparta architecture from the paper cited above](figures/sparta.png){width=65%}
+![Sparta architecture from the paper cited above](figures/sparta_architecture.png){width=95%}
 
 ## SPARTA (Sparse Transformer Matching) cont.
 
-For any document ("answer candidate"), the query token scores indicate semantic closeness to dictionary terms. These sparse scores, shaped by the 
-b bias and ReLU, serve as a __"synthetic BoW representation,"__ capturing the document's content more effectively than the original.
-
-\
-> For example, if the answer sentence is “Bill Gates founded Microsoft”,
-a SPARTA index will not only contain the tokens
-in the answer, but also include relevant terms, e.g.
-who, founder, entrepreneur and etc. (From the SPARTA paper.)
->
+<!-- For any document ("answer candidate"), the query token scores indicate semantic closeness to dictionary terms. These sparse scores, shaped by the  -->
+- b bias and ReLU, serve as a __"synthetic BoW representation,"__ capturing the document's content more effectively than the original.
+- __token-level contextual interaction__ between query and answer
+- because query terms are non-contextual, for every term in the vocabulary the rank feature can be calculated with every document candidate $\rightarrow$ __huge preprocessing__
+- Compared to classic inverted index, SPARTA learns which term should be inserted into the index
+- 
 
 Importantly, these "synthetic BoW" representations can be __calculated during indexing__ and __used in a traditional reverse index__.
 
 ## SPLADE (SParse Lexical AnD Expansion model)
 
-- most influential, transformer-based using sparse represenation, dominated IR leaderboards across sparse alternatives
-- it builds on is to use and fine-tune (!) the __masked language modeling head__ output of BERT-type pretrained transformer encoders as local importance scores for dictionary elements:
+- dominated IR leaderboards across sparse alternatives
+- uses __Masked Language Modelling Head__ of BERT to assign local importance scores to terms
+- it uses a custom transformation on top of the MLM head
+- Both the __output layer__ and the __training objective__ forces it to produce sparse distributions over the vocabulary
+- the importance $w_{ij}$ of the token j (vocabulary) for a token i (of the input sequence) with input embedding $h_i$
 
+$$
+w_{ij} = transform(h_i)^T E_j + b_j \quad j \in {1, \cdots , \left | V\right |}
+$$
+$$
+w_{j} = \sum_{i \in t}^{}log( 1 + RELU(w_{ij}))
+$$
 
 ## Expanded SPLADE 
 
@@ -331,6 +284,165 @@ Importantly, these "synthetic BoW" representations can be __calculated during in
   - __Subword-Based Dictionary:__ SPLADE relies on a transformer's tokenizer, reducing interpretability and index integration.
 - The paper @dudek2023learning solves these by modifying the SPLADE output heads to work with any independently specified dictionary, and the results show that this can be done __without performance degradation__.
 
+## COIL (COntextualized Inverted List)
+
+__Problem__:
+
+- BM25 lacks semantic understanding.
+- Neural retrievers (e.g., ColBERT) are computationally expensive.
+
+__Solution:__ COIL combines lexical matching with deep embeddings for efficient and semantic-aware retrieval.
+
+__How It Works:__
+
+- Stores contextualized token embeddings in inverted (calculate document mebddings offline)
+- Uses vector similarity for exact token matching.
+- Efficient like BM25, semantic-aware like deep models.
+
+## COIL (COntextualized Inverted List) cont.
+
+__Calculating score__
+
+\small
+
+$$s_{tok}(q, d) = \sum_{q_i\in q\cap d}^{} \max_{d_j = q_i}(v_i^{qT} \cdot v_j^d)$$
+
+\normalfont
+
+where $v_i^{qT}$ is the vector for token i from the query q, and $v_j^d$ is teh vector of token j from document d.
+Note that it only uses __mathing terms!!__
+
+
+![Image from @gao2021coilrevisitexactlexical](figures/coil.png){width=65%}
+
+## (Pre)Train Embedder model
+
+- embedder models typically pre-trained on __representation learning tasks__ specifically designed for this purpose
+- usually this pre-training happens __after a pre-training__ on another task frequently __language modelling__
+- Trained with __unsupercised learning__, the dominnat methods are:
+  - __Contrastive Learning__: The training task is to map "semantically similar" texts to close representations and randomly sampled pairs of texts to distant ones (see @neelakantan2022textcodeembeddingscontrastive). Training objective often minimizing the neagtive log-likelihood. More on that in the C module. 
+  - __Knowledge Distillation__: Use a more expensive and powerful model, such as a MonoLM or DuoLM as a teacher and train the embedder to approximate their output. 
+
+## Negative sample selection for Contrastive Learning
+
+- contrastive learning requires good negative samples
+- different negative sample selection techniques:
+  - __In-batch negatives__(@henderson2017efficientnaturallanguageresponse, @karpukhin2020densepassageretrievalopendomain): random selection, in a batch every query has one relevant document and B-1 negatives, with batch size B
+  - __Cross-batch negatives__(@qu2021rocketqaoptimizedtrainingapproach, @gao2021scalingdeepcontrastivelearning): Using text embeddings computed on other GPUs as negatives for a query. This means $a \cdot b - 1$ negatives where a is the number of GPUs
+- __hard negatives__: a document with high semantic similarity with the query but irrelevant
+
+## Hard Negative Mining for CL
+
+__Problem with negative samples__:
+
+- hard to find quality negative samples because they can be false bnegatives (unlabeled positives)
+- This is especially true for __Hard Negatives__
+
+__Mining Hard Negatives__:
+
+- __static hard negatives__: negative selector is fixed during the training, multiple studies selects hard negatives based on BM25 (@karpukhin2020densepassageretrievalopendomain)
+- __dynamic hard negatives__:  instead of using static hard negatives, the model picks hard negatives from the top results retrieved by the current state of the trained retriever. Leading to faster convergence(@qu2021rocketqaoptimizedtrainingapproach).
+
+## What is next?
+
+```{=latex}
+\begin{center}
+\includegraphics[width=0.5\textwidth]{figures/decoder_meme.jpg}
+\end{center}
+```
+
+# Decoder-Only transformers for first-stage IR
+
+## Question
+
+
+### Are decoder only models capable of producing meaningful semantic embeddings?
+
+## Producing embeddings with decoder-only models
+
+__Problems__
+
+- token embeddings represent __local semantics__ due to next token generation objective
+- the causal attention restircts the model to look forward in time
+
+__Solution__: The solution went trough on an evolution
+
+1. Prompt model take the representation of the last token in the last layer's hidden embedding
+2. Usage of "Echo Embeddings"
+3. New attention, new training objective and unsupervised contrastive learning
+
+## First tries
+
+- Using the __same approach__ as in the encoder-only models
+- As decoder-only models do not have [CLS] token, two potential case is done:
+  - use the __last token__'s representation (@jiang2023scalingsentenceembeddingslarge prompted the model to summarize the input text in __one word__, and take the last layer’s hidden embedding for the last token as the text’s representation)
+  - make a __position-weighted pooling__ to calculate final embedding (@muennighoff2022sgptgptsentenceembeddings)
+- in both approach they used contrastive learning objective
+
+## We are getting there soon
+
+- More interesting approach is to use the so-called __Echo Embeddings__
+- Suggested by @springer2024repetitionimproveslanguagemodel, used in other models as well (@doshi2024mistralspladellmsbetterlearned)
+- __Echo Embeddings__ means they duplicate the input and take the embeddings from the second set
+- So the first tokens also know about the end of the input
+
+## We are getting there soon
+
+![Image from @springer2024repetitionimproveslanguagemodel](figures/echo_embeddings.png){width=80%}
+
+## Modify decoder-only model a little bit
+
+- based on the work of @behnamghader2024llm2veclargelanguagemodels, they suggested some modifications:
+  - __bidirectional attention__ instead of causal: replace causal attention mask by __an all-ones matrix__
+  - use new objective called __Masked Next token Generation__: Combines next token prediction with masked Language Modelling. When predicting a masked token at position i, we compute the loss based on the logits obtained from the token representation at the previous position i - 1.
+  - use unsupervised contrastive learning with batch negatives
+
+
+## Modify decoder-only model a little bit
+
+![Image from @behnamghader2024llm2veclargelanguagemodels](figures/llm2vec.png){width=95%}
+
+<!-- Potentially put COIL in, not sure due length issues -->
+
+## Sparse embeddings with decoder-only models
+
+Some examples of Decoder-only sparse models:
+
+- __Mistral-SPLADE__ by @doshi2024mistralspladellmsbetterlearned, they use __Echo embeddings__ for and make the sparse embeddings the same way as BERT based SPLADE and build an index
+- @nie2024textworthtokenstext find out that LLMs can produce high-quality sparse representations via the decoding layer and
+simple __top-k masking__(not keeping all terms, masking (zero out) low-scoring terms and retain only the top-k most important terms based on weights.) (ex. @zhuang2024promptrepspromptinglargelanguage)
+
+
+## Sparse or Dense?
+
+```{=latex}
+\begin{center}
+\includegraphics[width=0.4\textwidth]{figures/retrieval_meme.jpg}
+\end{center}
+```
+
+## Sparse or Dense? cont
+
+__Dense Pros__:
+
+- better in semantic related tasks
+- in the beginning better on becnhmarks than sparse models
+- based on latent semantic embeddings
+
+__Dense Cons__:
+
+- relying on labeled data
+- worse on zero-shot(without relevance judgement data from the target domain) setting than sparse models
+- heavily dependent on the corpus scale
+
+## Sparse or Dense? cont.
+
+__Sparse models:__
+
+- Consume less memory than dense models
+- more capable of solving task which requires exact match (keyword or entity retrieval)
+- based on lexical matching
+- builds lexical matching based on term representations
 
 ## Hybrid Search
 
@@ -338,8 +450,6 @@ Importantly, these "synthetic BoW" representations can be __calculated during in
 - running both of them independently to obtain two top-K scored result lists,
 - standardizing the two score lists (e.g., min-max scaling them to [0, 1])
 - and computing the final scores as the (possibly weighted) average of the two scores for each documents.
-
-# Conclusion
 
 ## Which approach is optimal?
 
@@ -353,9 +463,8 @@ So which approach should one use? There are too many moving parts:
 
 ## Which approach is optimal? cont.
 
-- huge difference where dense retrieval methods can be __fine-tuned__ and __zero-shot situations__
 - if data available fine-tuning produce best results (but huge cost)
-- zero-shot is cimplicated:
+- zero-shot(without relevance judgement data from the target domain) is complicated:
 
 ![Figure from @kamalloo2023resourcesbrewingbeirreproducible](figures/zero-shot_results.png){width=65%}
 
@@ -371,6 +480,173 @@ __Conclusion__: In a __really zero-shot__ setting, one can do worse than using a
 
 - __good general IR-tuned (!!) dense representation__ based scoring (typically using dot-product or cosine), and 
 - a __SOTA sparse representation__ (usually SPLADE) based scoring.  
+
+# Reranking with rank fusion
+
+## Multi-stage retrieval
+
+__Multi-stage retrieval recap__
+
+- __First-stage model__ (embedding model/retriever) gives a set of __relevant documents__ from the large dataset
+- __Second stage model__ (reranker) used to __rerank__ the documents retrieved by the first-stage model
+
+![Figure from @sasazawa2023textretrievalmultistagereranking](figures/rerank.png){width=95%}
+
+## Rank fusion
+
+- using multiple rerankers and combine their scores
+
+__Reciprocal rank fusion__
+
+- introduced in the paper of @rrf_fusion
+- combines the ranks of multiple rerankers, gives more weight to hiher ranks
+- __RFF formula__ 
+
+$$
+ RRF(d) = \sum_{r \in R}^{}\frac{1}{k + r(d)}
+$$
+
+where _d_ is a document, _R_ is the set of rerankers, _k_ is a constant (they use 60 in the paper), r(d) is the score of _d_ using ranker _r_
+
+## Rank fusion cont.
+
+__Distribution-based Score Fusion__
+
+- introduced by @Michelangiolo, used in @kim2024autoragautomatedframeworkoptimization
+- can combine scores from diffeent rerankers using __different scales__
+- first algorithm which can combine __image and text scores__ as well
+- instead of regular normalization it uses __MinMax__ scaling
+- using weighted sum to aggregate scores
+
+## DBSF cont.
+
+__Formula__:
+
+$$
+ S \left (\bigcup_{i \in E}^{} \frac{x_i - (\mu_i - 3\sigma_i)}{(\mu_i + 3\sigma_i) - (\mu_i - 3\sigma_i)}\right )
+$$
+
+
+where _E_ is a set of _n_ embeddings and _x_ represents a search result obtained from one embedding, the new ranked scores are computed by merging all search scores into _U_ and scaling them using a min-max scaler, where the feature range is defined by three standard deviations from the mean. Finally, the function S(x) sorts the combined scores to produce the final ranking.
+
+## DBSF cont.
+
+![Figure from @Michelangiolo](figures/dbsf.png){width=75%}
+
+# Retrieval Augmented Generation
+
+RAG usually consists of the following steps:
+
+- **Question-forming**: Reformulating user query as a standalone query (accounting for history), list of keywords, etc.
+- **Retrieval**: Using an embedding and a vector storage system or search engines, etc. to retrieve useful passages.
+- **Document aggregation**: *Stuff* all documents together or *Map* a transform (for example summarization).
+- **Answer-forming**: The query and the context are fed to the LM that produces an answer.
+
+## Hypothetical document embedding
+
+Hypothetical document embedding [@gao2022precise] helps with generating better queries for embedding vector-based retrieval systems. The HyDE question-forming step is replaced with a generative step that produces a "fake" example answer to the question and uses that as a query in the database.
+
+![From [@gao2022precise]](figures/hyde.png){height=30%}
+
+## Entity memory
+
+Another possible, more complex use-case is when the LLM has the ability to modify a database as well. In this database a list of entities and related knowledge is stored. The model is iteratively prompted to update this database, then it can retrieve from the entity information the database stores.
+
+![Entity memory-based processing](figures/entity_memory.png){height=30%}
+
+## RAG pre-trained models
+
+Transferring information decoded to text is actually inefficient.
+
+Retrieval augmented pre-training is possible for models, where either pre-embedded vectors are appended to the encoded input, or the information is provided via cross-attention-like mechanisms.
+
+## REALM
+
+Retrieaval Augmented Language Model Pretraining [@guu2020retrieval] uses a neural retriever composed of BERT-like embedding models. These models are part of the trained network. The retriever concatenates the retrieved document embeddings with the query, during MLM training.
+
+## REALM
+
+![REALM pretraining [@guu2020retrieval]](figures/realm.png){height=80%}
+
+## RETRO
+
+Retrieval-Enhanced Transformer [@borgeaud2022improving] introduces a technique where the relevant context information is processed by cross-attention.
+The retrieval is performed by frozen BERT embeddings. The retrieved chunks are then modified based-on the input information using cross attention in the encoder as well.
+
+In the decoder cross-attention then incorporates the modified retrieved information into the input.
+
+## RETRO
+
+![RETRO architecture from [@borgeaud2022improving]](figures/retro_arch.png){height=70%}
+
+## RETRO Chunks
+
+The input is sliced up into chunks, which retrieve information separately. Previous chunks (and related information) are processed causally.
+
+The whole model is differentiable, gradients can flow through the network.
+
+During training the retrieved information is pre-computed.
+
+## RETRO Chunks
+
+![Chunked cross-attention from [@borgeaud2022improving]](figures/chunked_cross_attn.png){height=70%}
+
+# Tooling
+
+## API calls
+
+Text-based API-s are easy to call using the API's input and output definition. Most LLMs are fine-tuned to handle JSON or XML formats well.
+
+Some examples of such API-s include:
+
+- Search-engines
+- Web-scraping
+- Real-time data streams
+- Executables, commands (e.g.: calculator)
+- Code interpreters, simulators
+- Other LLM instances
+
+## AutoGPT - Self-monologue
+
+AutoGPT is capable of higher-order planning by applying multiple turns of generation in a Chain of Thought and Reflexion type prompting.
+AutoGPT applies $4+1$ steps of CoT-like process to control actions:
+
+- Thoughts: Interpretation of the user input with respect to the goals.
+- Reasoning: CoT about what to do for this input.
+- Plan: Planned actions to execute.
+- Criticism: Reflexion on action results.
+- *Action*: Actions with inputs generated by AutoGPT.
+
+## AutoGPT - Self-monologue
+
+During the planning and action phase additional expert LLMs, and external tools could be called.
+AutoGPT systems are usually prompted with a set of goals only, the rest is figured out by the model.   
+Example workflow (sending an email):
+
+\footnotesize
+**Thoughts**: Contact Natabara at natabara@inf.elte.hu, Send a polite email indicating that he should finalize the NLP slides.   
+**Reasoning**: The goals are clear. I need to send an email to Natabara at natabara@inf.elte.hu, politely asking him to finalize the NLP slides and indicating that I am an AI assistant.   
+**Plan** (+Criticism): Use the send_email action.   
+{ "action": "send_email", "action_input": \<JSON\>}   
+**Observation**: Mail sent.
+
+## Agent loop
+
+![AutoGPT agent loop, the agent observes the current state, reasons in a CoT manner, generates a candidate response and reflects on it to improve the action before executing it (possibly calling an external tool).](figures/agent_loop.png){height=70%}
+
+## AutoGPT - Self-monologue
+
+![A single step of AutoGPT [@yang2023autogpt]](figures/AutoGPT.png){height=70%}
+
+## Conversational specialist agents
+
+![Agents collaborate in a conversational manner. Each agent is specialized to use a given tool, while the controller schedules and routes the conversation between them iteratively. ](figures/specialist_agents.png){height=70%}
+
+## Tool-finetuned models
+
+Fine-tuning a model for tool selection is hard. Bootstrapping could be a solution, where a graph of API calls is constructed using a multitude of LLM calls. These successive calls are then ranked by success rate, and the best few passing solutions are selected to be included in the dataset. Such fine-tuning can enhance the tool utilization of language models.
+
+![Dataset construction pipeline for tool-finetuned models [@qin2023toolllm]](figures/tool_llm.png){height=30%}
 
 # References
 
