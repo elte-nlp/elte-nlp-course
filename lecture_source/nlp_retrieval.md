@@ -560,13 +560,42 @@ __General Query__: "Explain the advantages of retrieval-augmented generation in 
 
 ![Two-step RAG architecture](figures/2_step_rag.png){width=85%}
 
-## Metadata filtering
-
 ## Hypothetical document embedding
 
 Hypothetical document embedding [@gao2022precise] helps with generating better queries for embedding vector-based retrieval systems. The HyDE question-forming step is replaced with a generative step that produces a "fake" example answer to the question and uses that as a query in the database.
 
 ![From [@gao2022precise]](figures/hyde.png){height=30%}
+
+## Step-back prompting
+
+- prompting technique which define a question from the original one with a higher level of abstraction, called __Step-back question__
+- usually a step-back question is __easier__, and provides the necessary informations to reason about the original question
+- __Steps__
+  - __Abstraction:__ prompt the LLM to ask a generic step-back question, unique for each task, about a higher-level principle
+  - __Reasoning:__ based on the facts of the higher-level principle, LLM can reason about the original question
+
+
+## Step-back prompting
+
+![Figure from @zheng2024stepbackevokingreasoning](figures/step_back.png){width=80%}
+
+## Standalone general question
+
+- reformulating user queries into self-contained, well-structured questions based on user history
+- __Self-Containment__ – The question should be understandable without requiring context from previous interactions.
+- __Generalization__ – It aims to broaden or clarify ambiguous or underspecified queries.
+- __Explicit Detail__ – The reformulated question should explicitly state the core information needs.
+
+## Metadata Filtering
+
+- __metadata__ = Extra fields in the vector database whicha contains additional information about the vector embeddings
+- __filtering out__ vector embeddings before doing the similarity search based on __metadata fields__
+- metadat could be: dates, times, genres, categories, names types, descriptions, etc.
+- works as a "WHERE" statement in an SQL query
+
+## Metadata Filtering
+
+![Figure from @Siegler](figures/metadata_filtering.png){width=55%}
 
 ## Entity memory
 
@@ -579,6 +608,7 @@ Another possible, more complex use-case is when the LLM has the ability to modif
 Transferring information decoded to text is actually inefficient.
 
 Retrieval augmented pre-training is possible for models, where either pre-embedded vectors are appended to the encoded input, or the information is provided via cross-attention-like mechanisms.
+
 
 ## REALM
 
@@ -610,6 +640,57 @@ During training the retrieved information is pre-computed.
 ## RETRO Chunks
 
 ![Chunked cross-attention from [@borgeaud2022improving]](figures/chunked_cross_attn.png){height=70%}
+
+
+## RAG metrics:
+
+![Figure from @Mohamed](figures/rag_metrics.png){width=85%}
+
+## Retriever evaluation 
+
+- Similarly, the basic retrieval evalution metrics are applicable here 
+- __Precision at k (P@k)__: Measures the fraction of relevant documents among the top k retrieved.
+- __Recall__: Assesses the proportion of relevant documents retrieved from the total relevant documents available.
+- __Mean Average Precision (MAP)__: Calculates the average precision across all queries, providing a single-figure measure of quality across recall levels.
+- __Normalized Discounted Cumulative Gain (nDCG)__: Evaluates the ranking quality by considering the position of relevant documents in the retrieval list.
+
+## Generation Component evalution:
+
+- using general machine text evalution metrics
+- __BLEU Score__: Evaluates the overlap between the generated text and reference text based on n-gram precision.
+- __ROUGE Score__: Measures the overlap of n-grams, particularly useful for assessing recall in generated summaries.
+- __BERTScore__: Utilizes BERT embeddings to compute semantic similarity between the generated and reference texts.
+- __Perplexity__: Indicates how well a probability model predicts a sample, reflecting the fluency of the generated text.
+
+## Generation Component evalution cont.
+
+- more coplex metrics, introduced by @es2023ragasautomatedevaluationretrieval
+- __Faithfulness__: an answer faithful to a context if the claims that are made in the answer can be inferred from the context.  first use an LLM to extract a set of statements, then calculate the final faithfulness score by: 
+\small
+
+$$
+F = \frac{\left | V\right |}{\left | S\right |} 
+$$
+where |V| number of statements supported by the LLM, |S| total number of statements
+
+
+## Generation Component evalution cont.
+- __Answer Relevance__: an answer is relevant if it directly addresses the question in an appropriate way. For the given
+answer, an LLM is prompted to generate potential questions, then calcculate relevance score the follwoing way:
+\small
+$$
+   AR = \frac{1}{n}\sum_{i=1}^{n}sim(q, q_i)
+$$
+
+\normalfont
+
+- __Context Relevance__: context is considered relevant to the extent that it exclusively contains information that is needed to answer the question. Extracts sentences from the context which potentially can help using LLM then calculate relevance of context:
+
+\small
+
+$$
+ CR = \frac{\text{number of extracted sentences}}{\text{total number of sentences in c(q)}}
+$$
 
 # Tooling
 
