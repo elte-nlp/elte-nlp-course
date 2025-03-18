@@ -155,7 +155,9 @@ Good results reaching more than __0.40MRR@10__ on the MS MARCO dataset
 ## Bi-Encoder based information retrieval
 
 - __less performant__ but __faster__ than Cross-Encoder
-- the query and the document is encoded via a __different encoder__ (could be the same weights initially, but weights updated separately from each other)
+- the query and the document is encoded via 
+  - __different encoder__ (could be the same weights initially, but weights updated separately from each other)
+  - __same encoder__, classical embedding approach (difference could be only in the prompts, ex: @muennighoff2023mtebmassivetextembedding)
 - the score will be the __dot product between the query and the document__ vector
 - both encoder separatley learn semantic representation of the queries and the documents
 - Embeddings for the query and the document is eeither [CLS] token embedding or averaging all embeddings
@@ -741,7 +743,7 @@ Example workflow (sending an email):
 
 ## Conversational specialist agents
 
-![Agents collaborate in a conversational manner. Each agent is specialized to use a given tool, while the controller schedules and routes the conversation between them iteratively. ](figures/specialist_agents.png){height=70%}
+![Agents collaborate in a conversational manner. Each agent is specialized to use a given tool, while the controller schedules and routes the conversation between them iteratively. ](figures/specialist_agents.png){height=65%}
 
 ## Tool-finetuned models
 
