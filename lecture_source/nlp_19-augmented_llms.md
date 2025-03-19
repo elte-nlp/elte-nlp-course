@@ -1,9 +1,11 @@
 ---
 title: "Natural Language Processing"
+
 subtitle: "Lecture 19: Transformer-based retrieval and Augmented LLMs"
 author: Natabara Máté Gyöngyössy, Zsolt Csibi
 institute: "Eötvös University, Department of Artificial Intelligence"
 date: 2025
+
 theme: Marburg
 colortheme: orchid
 fontsize: 14pt
@@ -535,6 +537,7 @@ where _E_ is a set of _n_ embeddings and _x_ represents a search result obtained
 
 ![Figure from @Michelangiolo](figures/dbsf.png){width=75%}
 
+
 ## Specialized embedding models
 
 Language model pretraining might not produce an embedding space with the required properties.
@@ -571,6 +574,7 @@ RAG usually consists of the following steps:
 - **Document aggregation**: *Stuff* all documents together or *Map* a transform (for example summarization).
 - **Answer-forming**: The query and the context are fed to the LM that produces an answer.
 
+
 ## Two-step RAG system
 
 - user questions are not always similar to relevant knowledge
@@ -594,6 +598,7 @@ __General Query__: "Explain the advantages of retrieval-augmented generation in 
 Hypothetical document embedding [@gao2022precise] helps with generating better queries for embedding vector-based retrieval systems. The HyDE question-forming step is replaced with a generative step that produces a "fake" example answer to the question and uses that as a query in the database.
 
 ![From [@gao2022precise]](figures/hyde.png){height=30%}
+
 
 ## Step-back prompting
 
@@ -638,7 +643,6 @@ Transferring information decoded to text is actually inefficient.
 
 Retrieval augmented pre-training is possible for models, where either pre-embedded vectors are appended to the encoded input, or the information is provided via cross-attention-like mechanisms.
 
-
 ## REALM
 
 Retrieaval Augmented Language Model Pretraining [@guu2020retrieval] uses a neural retriever composed of BERT-like embedding models. These models are part of the trained network. The retriever concatenates the retrieved document embeddings with the query, during MLM training.
@@ -669,7 +673,6 @@ During training the retrieved information is pre-computed.
 ## RETRO Chunks
 
 ![Chunked cross-attention from [@borgeaud2022improving]](figures/chunked_cross_attn.png){height=70%}
-
 
 ## RAG metrics:
 
@@ -772,14 +775,26 @@ Example workflow (sending an email):
 
 ![Agents collaborate in a conversational manner. Each agent is specialized to use a given tool, while the controller schedules and routes the conversation between them iteratively. ](figures/specialist_agents.png){height=65%}
 
+
 ## Tool-finetuned models
 
 Fine-tuning a model for tool selection is hard. Bootstrapping could be a solution, where a graph of API calls is constructed using a multitude of LLM calls. These successive calls are then ranked by success rate, and the best few passing solutions are selected to be included in the dataset. Such fine-tuning can enhance the tool utilization of language models.
 
 ![Dataset construction pipeline for tool-finetuned models [@qin2023toolllm]](figures/tool_llm.png){height=30%}
 
-# References
+# Summary 
 
-## References {.allowframebreaks}
+## Summary I.
+
+Augmented language models use external information sources to enhance their capabilities. One significant group of these sources are vectorized document databases. Embedding models are utilized to retrieve related information via approximate NN search algorithms.
+Other tools include web API-s, or even code interpreters. Models applying a self-monologue process are capable of fulfilling goals by planning and executing successive actions.
+
+## Summary II.
+
+During retrieval augmented generation the retrieved documents are concatenated or summarized, then fed to the model to generate answers in a second LLM step.
+
+Fine-tuning models to use retrieved information or external tools is possible and increases performance.
+
+# References {.allowframebreaks} 
 
 \footnotesize

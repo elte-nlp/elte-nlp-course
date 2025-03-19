@@ -1,6 +1,6 @@
 ---
 title: "Natural Language Processing"
-subtitle: "Lecture 24: Conditional Text-to-Image Models"
+subtitle: "Lecture 25: Conditional Text-to-Image Models"
 author: "Natabara Máté Gyöngyössy"
 institute: "Eötvös University, Department of Artificial Intelligence"
 date: 2024

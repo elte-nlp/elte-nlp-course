@@ -1,6 +1,6 @@
 ---
 title: "Natural Language Processing"
-subtitle: "Lecture 07: Information Retrieval"
+subtitle: "Lecture 11: Information Retrieval"
 author: András Simonyi, Zsolt Csibi
 institute: "Eötvös University, Department of Artificial Intelligence"
 date: 2025

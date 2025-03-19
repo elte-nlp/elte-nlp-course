@@ -1,6 +1,6 @@
 ---
 title: "Natural Language Processing"
-subtitle: "Lecture 13: LLM Inference"
+subtitle: "Lecture 14: LLM Inference"
 author: Natabara Gyöngyössy
 institute: "Eötvös University, Department of Artificial Intelligence"
 date: 2024

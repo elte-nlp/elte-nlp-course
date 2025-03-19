@@ -1,6 +1,6 @@
 ---
 title: "Natural Language Processing"
-subtitle: "Lecture 27: Deep learning-based speech-to-text"
+subtitle: "Lecture 28: Deep learning-based speech-to-text"
 author: András Simonyi
 institute: "Eötvös University, Department of Artificial Intelligence"
 date: 2023

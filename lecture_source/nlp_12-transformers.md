@@ -1,6 +1,6 @@
 ---
 title: "Natural Language Processing"
-subtitle: "Transformers"
+subtitle: "Lecture 12: Transformers"
 author: "András Simonyi, Natabara Máté Gyöngyössy"
 institute: "ELTE Eötvös Loránd University, Department of Artificial Intelligence"
 date: 2024
@@ -270,7 +270,7 @@ Transformers were invented for symbolic sequences (e.g. text), thus an embedding
 
 ![Sinusoid positional encoding](figures/posenc1.png){height=35%}
 
-![Dot-product of positional encodings [@wang2020position].](figures/posenc2.png){height=30%}
+![Cosine similarity of positional encodings [@wang2020position].](figures/posenc2.png){height=30%}
 
 
 ## Seq2seq Transformer
