@@ -654,7 +654,7 @@ Retrieaval Augmented Language Model Pretraining [@guu2020retrieval] uses a neura
 ## RETRO
 
 Retrieval-Enhanced Transformer [@borgeaud2022improving] introduces a technique where the relevant context information is processed by cross-attention.
-The retrieval is performed by frozen BERT embeddings. The retrieved chunks are then modified based-on the input information using cross attention in the encoder as well.
+The retrieval is performed by frozen BERT embeddings. The retrieved chunks are then modified based on the input information using cross attention in the encoder as well.
 
 In the decoder cross-attention then incorporates the modified retrieved information into the input.
 
