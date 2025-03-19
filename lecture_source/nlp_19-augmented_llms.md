@@ -1,7 +1,7 @@
 ---
 title: "Natural Language Processing"
-subtitle: "Lecture 07: Embeddings and Retrieval systems"
-author: Zsolt Csibi
+subtitle: "Lecture 19: Transformer-based retrieval and Augmented LLMs"
+author: Natabara Máté Gyöngyössy, Zsolt Csibi
 institute: "Eötvös University, Department of Artificial Intelligence"
 date: 2025
 theme: Marburg
@@ -534,6 +534,33 @@ where _E_ is a set of _n_ embeddings and _x_ represents a search result obtained
 ## DBSF cont.
 
 ![Figure from @Michelangiolo](figures/dbsf.png){width=75%}
+
+## Specialized embedding models
+
+Language model pretraining might not produce an embedding space with the required properties.
+
+Some additional goals could help condition it:
+
+- Supervised semantic similarity
+- Classification
+- Clustering
+- Supervised retrieval or reranking
+- Q&A mapping
+- Longer (sentence, paragraph) text representations 
+
+## Sentence embeddings
+
+Sentence-level supervised dataset examples include: sentence similarity datasets, sentiment analysis datasets, natural language inference datasets (premise and either an entailment, a contradiction, or a neutral pair), etc.
+
+![Using NLI datasets as similar-dissimilar (positive-negative) examples for sentence embedding improvement. [@gao2021simcse]](figures/supervised_sent_embed.png){height=35%}
+
+## Instruct-embeddings
+
+Instruction embeddings emerge as multi-task trained embeddings, where the executed task depends on the natural language instruction given to the model. Instruction training improves domain adaptability as well.
+
+## Instruct-embedings
+
+![InstructOR [@su2022one]](figures/instruct_embed.png){height=75%}
 
 # Retrieval Augmented Generation
 
