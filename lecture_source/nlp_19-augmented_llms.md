@@ -33,13 +33,13 @@ output:
 
 # Classical methods recap
 
-- term-based approach
+- Term-based approach
 - Calculating __inverted index__, requires heavy preprocessing
 - Using __Bag-of-Words__ for calculating document vectors (sparse vectors)
 - __Tf-Idf__ for getting the term weights in a document
 - Memorable method is __BM25__ still a strong baseline
-- Using Approximate Nearest neighbour (ANN) for searching relevant document in the embedding space
-- Fast retriveing through inverted index
+- Using Approximate Nearest Neighbor (ANN) for searching relevant documents in the embedding space
+- Fast retrieving through inverted index
 
 ## Problem with classical methods
 
@@ -51,7 +51,7 @@ __Query:__ "How does physical activity affect joint health?"
 
 __Document containing:__ "Regular exercise improves mobility and prevents osteoarthritis in the knees."
 
-In this case BM25 could not connect the two phrase __"Physiscal activity"__ and __"Exercise"__ besides __semantically__ they are close to each other.
+In this case BM25 could not connect the two phrase __"Physical activity"__ and __"Exercise"__ besides __semantically__ they are close to each other.
 
 ## Solutions for that problem
 
@@ -85,14 +85,14 @@ __Especially him__
 
 __Pros__:
 
-- average performance is btter compared to classical and neural scoring methods 
+- average performance is better compared to classical and neural scoring methods 
 - BERT doubled the performance of BM25 (on MS-MARCO and TREC-CAR benchmarks)
 
 __Cons__:
 
 - models needs to be fine-tuned on IR datasets
 - Ranking D documents for Q requires D $\times$ Q inferences
-- The scores are diffcult to interpret
+- The scores are difficult to interpret
 
 ## Advantages Disadvantages cont.
 
@@ -102,8 +102,8 @@ __Cons__:
 
 - originally made by @pradeep2021expandomonoduodesignpatterntext
 - improve monoLM (monoBERT) architecture by adding a __pairwise reranking__ stage
-- model gets __(query, document_1, document_2)__ triplets and ouputs the __probability__ of document_1 is more relevant than document_2
-- pairwise scores __aggregated__ to produce final ranking (multiple aggregation startegies, simplest is __summing__ or __multiplying__ each pairwise score of a document)
+- model gets __(query, document_1, document_2)__ triplets and outputs the __probability__ of document_1 is more relevant than document_2
+- pairwise scores __aggregated__ to produce final ranking (multiple aggregation strategies, simplest is __summing__ or __multiplying__ each pairwise score of a document)
 - The complexity is __quadratic__ ("expensive"), can be used as the final stage of a multi-stage ranking system
 
 ## Expando-Mono-Duo cont.
@@ -126,19 +126,37 @@ Good results reaching more than __0.40MRR@10__ on the MS MARCO dataset
 - using BERT-based transformers as first-stage retrievals, not just as rerankers
 - __BERT-like__ models were dominant in the beginning with their __encoder-only__ architecture, but later decoder-only architectures surpassed them
 - BERT models are used for 
-  - __Dense infromation retrieval__
+  - __Dense information retrieval__
   - __Sparse information retrieval__
 
 <!-- ![Image source: a slide from @sebastien](figures/first_stage_retrieve_setup.png){width=55%} -->
 
-## Dense information retrival
+## Dense information retrieval
 
-- calculating a fixed-sized embedding vector for the document and the query separately
-- score will be the similarity between them (dot-product, cosine similarity)
-- relies heavily on __ANN__
-- Multiple different architectures, two most important:
+- Dense (floating point) representation vectors for documents and queries
+- Retrieval is done by scoring either outside of the models (dot-product, cosine similarity) or inside the model (using a network that outputs a score directly)
+- First-stage retrieval is usually external and relies heavily on __ANN__
+- Reranking is usually done within the model
+- Dense retrieval is mainly semantic, considering the surface form less
+- Architectures include:
   - __Cross-encoder based solutions__
   - __Bi-Encoder based Solutions__
+  - Hybrid solutions (PolyEncoder, ColBERT)
+
+## Bi-Encoder based information retrieval
+
+- __less performant__ but __faster__ than Cross-Encoder
+- the query and the document is encoded via 
+  - __different encoder__ (could be the same weights initially, but weights updated separately from each other)
+  - __same encoder__, classical embedding approach (difference could be only in the prompts, ex: @muennighoff2023mtebmassivetextembedding)
+- the score will be the __dot product between the query and the document__ vector
+- both encoders separately learn semantic representation of the queries and the documents
+- Embeddings for the query and the document is either [CLS] token embedding or averaging all embeddings
+- Document embeddings can be calculated __offline__
+
+## Bi-Encoder architecture
+
+![Image from @humeau2020polyencoderstransformerarchitecturespretraining](figures/bi_encoder.png){width=85%}
 
 ## Cross-Encoder based information retreival
 
@@ -154,26 +172,11 @@ Good results reaching more than __0.40MRR@10__ on the MS MARCO dataset
 
 ![Image from @humeau2020polyencoderstransformerarchitecturespretraining](figures/cross_encoder.png){width=75%}
 
-## Bi-Encoder based information retrieval
-
-- __less performant__ but __faster__ than Cross-Encoder
-- the query and the document is encoded via 
-  - __different encoder__ (could be the same weights initially, but weights updated separately from each other)
-  - __same encoder__, classical embedding approach (difference could be only in the prompts, ex: @muennighoff2023mtebmassivetextembedding)
-- the score will be the __dot product between the query and the document__ vector
-- both encoder separatley learn semantic representation of the queries and the documents
-- Embeddings for the query and the document is eeither [CLS] token embedding or averaging all embeddings
-- Document embeddings can be calculated __offline__
-
-## Bi-Encoder architecture
-
-![Image from @humeau2020polyencoderstransformerarchitecturespretraining](figures/bi_encoder.png){width=85%}
-
 ## Combining Bi-Encoder and Cross-Encoder
 
 - using Cross-Encoder is a resource heavy operation
-- In contrast Bi-Encoder is musch faster due to the offline document embedding calculation
-- multiple approaches tried to combine the qualities of Cross-Encoder (__self-attention on query and the input__) and the advantage of Bi-Encoder (can calculate __document embeddings offline__)
+- In contrast Bi-Encoder is much faster due to the offline document embedding calculation
+- multiple approaches tried to combine the qualities of Cross-Encoder (__self-attention on query and the document__) and the advantage of Bi-Encoder (can calculate __document embeddings offline__)
 
 ## Combining Bi-Encoder and Cross-Encoder cont.
 
@@ -182,7 +185,7 @@ __PolyEncoder__
 - Similar to a Bi-Encoder, it uses __two separate transformers__ for context and candidates.
 - Contexts are converted into M vectors, instead of one, due to their larger size.
 - M context codes are learned to capture global features, attending to all context embeddings.
-- The candidate mebedding attends to these global feature vectors to compute the final comdined embedding.
+- The candidate embedding attends to these global feature vectors to compute the final combined embedding.
 - The final score is the dot product between the combined context embedding and the candidate embedding
 
 ## PolyEncoder Architecture
@@ -260,9 +263,8 @@ Trying use transformers in order make sparse retrieval better.
 <!-- For any document ("answer candidate"), the query token scores indicate semantic closeness to dictionary terms. These sparse scores, shaped by the  -->
 - b bias and ReLU, serve as a __"synthetic BoW representation,"__ capturing the document's content more effectively than the original.
 - __token-level contextual interaction__ between query and answer
-- because query terms are non-contextual, for every term in the vocabulary the rank feature can be calculated with every document candidate $\rightarrow$ __huge preprocessing__
+- because query terms are non-contextual, for every term in the vocabulary the rank feature can be calculated with every document candidate $\rightarrow$ __huge preprocessing__ effort is required
 - Compared to classic inverted index, SPARTA learns which term should be inserted into the index
-- 
 
 Importantly, these "synthetic BoW" representations can be __calculated during indexing__ and __used in a traditional reverse index__.
 
@@ -299,7 +301,7 @@ __Solution:__ COIL combines lexical matching with deep embeddings for efficient 
 
 __How It Works:__
 
-- Stores contextualized token embeddings in inverted (calculate document mebddings offline)
+- Stores contextualized token embeddings in inverted (calculate document embeddings offline)
 - Uses vector similarity for exact token matching.
 - Efficient like BM25, semantic-aware like deep models.
 
@@ -313,8 +315,8 @@ $$s_{tok}(q, d) = \sum_{q_i\in q\cap d}^{} \max_{d_j = q_i}(v_i^{qT} \cdot v_j^d
 
 \normalfont
 
-where $v_i^{qT}$ is the vector for token i from the query q, and $v_j^d$ is teh vector of token j from document d.
-Note that it only uses __mathing terms!!__
+where $v_i^{qT}$ is the vector for token i from the query q, and $v_j^d$ is the vector of token j from document d.
+Note that it only uses __matching terms!!__
 
 
 ![Image from @gao2021coilrevisitexactlexical](figures/coil.png){width=65%}
@@ -323,8 +325,8 @@ Note that it only uses __mathing terms!!__
 
 - embedder models typically pre-trained on __representation learning tasks__ specifically designed for this purpose
 - usually this pre-training happens __after a pre-training__ on another task frequently __language modelling__
-- Trained with __unsupercised learning__, the dominnat methods are:
-  - __Contrastive Learning__: The training task is to map "semantically similar" texts to close representations and randomly sampled pairs of texts to distant ones (see @neelakantan2022textcodeembeddingscontrastive). Training objective often minimizing the neagtive log-likelihood. More on that in the C module. 
+- Trained with __unsupervised learning__, the dominant methods are:
+  - __Contrastive Learning__: The training task is to map "semantically similar" texts to close representations and randomly sampled pairs of texts to distant ones (see @neelakantan2022textcodeembeddingscontrastive). Training objective often minimizing the negative log-likelihood. More on that in the C module. 
   - __Knowledge Distillation__: Use a more expensive and powerful model, such as a MonoLM or DuoLM as a teacher and train the embedder to approximate their output. 
 
 ## Negative sample selection for Contrastive Learning
@@ -414,7 +416,7 @@ Some examples of Decoder-only sparse models:
 
 - __Mistral-SPLADE__ by @doshi2024mistralspladellmsbetterlearned, they use __Echo embeddings__ for and make the sparse embeddings the same way as BERT based SPLADE and build an index
 - @nie2024textworthtokenstext find out that LLMs can produce high-quality sparse representations via the decoding layer and
-simple __top-k masking__(not keeping all terms, masking (zero out) low-scoring terms and retain only the top-k most important terms based on weights.) (ex. @zhuang2024promptrepspromptinglargelanguage)
+simple __top-k masking__ (not keeping all terms, masking (zero out) low-scoring terms and retain only the top-k most important terms based on weights.) (ex. @zhuang2024promptrepspromptinglargelanguage)
 
 
 ## Sparse or Dense?
@@ -503,7 +505,7 @@ __Multi-stage retrieval recap__
 __Reciprocal rank fusion__
 
 - introduced in the paper of @rrf_fusion
-- combines the ranks of multiple rerankers, gives more weight to hiher ranks
+- combines the ranks of multiple rerankers, gives more weight to higher ranks
 - __RFF formula__ 
 
 $$
@@ -517,7 +519,7 @@ where _d_ is a document, _R_ is the set of rerankers, _k_ is a constant (they us
 __Distribution-based Score Fusion__
 
 - introduced by @Michelangiolo, used in @kim2024autoragautomatedframeworkoptimization
-- can combine scores from diffeent rerankers using __different scales__
+- can combine scores from different rerankers using __different scales__
 - first algorithm which can combine __image and text scores__ as well
 - instead of regular normalization it uses __MinMax__ scaling
 - using weighted sum to aggregate scores
@@ -527,9 +529,8 @@ __Distribution-based Score Fusion__
 __Formula__:
 
 $$
- S \left (\bigcup_{i \in E}^{} \frac{x_i - (\mu_i - 3\sigma_i)}{(\mu_i + 3\sigma_i) - (\mu_i - 3\sigma_i)}\right )
+ S \left (\bigcup_{i \in E} \frac{x_i - (\mu_i - 3\sigma_i)}{(\mu_i + 3\sigma_i) - (\mu_i - 3\sigma_i)}\right )
 $$
-
 
 where _E_ is a set of _n_ embeddings and _x_ represents a search result obtained from one embedding, the new ranked scores are computed by merging all search scores into _U_ and scaling them using a min-max scaler, where the feature range is defined by three standard deviations from the mean. Finally, the function S(x) sorts the combined scores to produce the final ranking.
 
@@ -579,7 +580,7 @@ RAG usually consists of the following steps:
 
 - user questions are not always similar to relevant knowledge
 - __different__ question-forming and answer forming step
-- from the user question making a general query (with different exapnding techniques) which is more similar to the relevant knowledge
+- from the user question making a general query (with different expanding techniques) which is more similar to the relevant knowledge
 - potential methods for generating general query: __Hyde, stepback prompting, standalone general questions__
 
 Example:
@@ -602,8 +603,8 @@ Hypothetical document embedding [@gao2022precise] helps with generating better q
 
 ## Step-back prompting
 
-- prompting technique which define a question from the original one with a higher level of abstraction, called __Step-back question__
-- usually a step-back question is __easier__, and provides the necessary informations to reason about the original question
+- prompting technique which defines a question from the original one with a higher level of abstraction, called __Step-back question__
+- usually a step-back question is __easier__, and provides the necessary information to reason about the original question
 - __Steps__
   - __Abstraction:__ prompt the LLM to ask a generic step-back question, unique for each task, about a higher-level principle
   - __Reasoning:__ based on the facts of the higher-level principle, LLM can reason about the original question
@@ -622,9 +623,9 @@ Hypothetical document embedding [@gao2022precise] helps with generating better q
 
 ## Metadata Filtering
 
-- __metadata__ = Extra fields in the vector database whicha contains additional information about the vector embeddings
+- __metadata__ = Extra fields in the vector database which contains additional information about the vector embeddings
 - __filtering out__ vector embeddings before doing the similarity search based on __metadata fields__
-- metadat could be: dates, times, genres, categories, names types, descriptions, etc.
+- metadata could be: dates, times, genres, categories, names types, descriptions, etc.
 - works as a "WHERE" statement in an SQL query
 
 ## Metadata Filtering
@@ -686,17 +687,17 @@ During training the retrieved information is pre-computed.
 - __Mean Average Precision (MAP)__: Calculates the average precision across all queries, providing a single-figure measure of quality across recall levels.
 - __Normalized Discounted Cumulative Gain (nDCG)__: Evaluates the ranking quality by considering the position of relevant documents in the retrieval list.
 
-## Generation Component evalution:
+## Generation Component evaluation:
 
-- using general machine text evalution metrics
+- using general machine text evaluation metrics
 - __BLEU Score__: Evaluates the overlap between the generated text and reference text based on n-gram precision.
 - __ROUGE Score__: Measures the overlap of n-grams, particularly useful for assessing recall in generated summaries.
 - __BERTScore__: Utilizes BERT embeddings to compute semantic similarity between the generated and reference texts.
 - __Perplexity__: Indicates how well a probability model predicts a sample, reflecting the fluency of the generated text.
 
-## Generation Component evalution cont.
+## Generation Component evaluation cont.
 
-- more coplex metrics, introduced by @es2023ragasautomatedevaluationretrieval
+- more complex metrics, introduced by @es2023ragasautomatedevaluationretrieval
 - __Faithfulness__: an answer faithful to a context if the claims that are made in the answer can be inferred from the context.  first use an LLM to extract a set of statements, then calculate the final faithfulness score by: 
 \small
 
@@ -706,9 +707,9 @@ $$
 where |V| number of statements supported by the LLM, |S| total number of statements
 
 
-## Generation Component evalution cont.
+## Generation Component evaluation cont.
 - __Answer Relevance__: an answer is relevant if it directly addresses the question in an appropriate way. For the given
-answer, an LLM is prompted to generate potential questions, then calcculate relevance score the follwoing way:
+answer, an LLM is prompted to generate potential questions, then calculate relevance score the following way:
 \small
 $$
    AR = \frac{1}{n}\sum_{i=1}^{n}sim(q, q_i)
