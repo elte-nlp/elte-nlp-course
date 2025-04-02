@@ -13,8 +13,8 @@ We currently host a single open model endpoint that could be used to student pro
 | API Endpoint URL    | `http://mobydick.elte-dh.hu:12321`        |
 | Endpoint API definition   | [http://mobydick.elte-dh.hu:12321/docs](http://mobydick.elte-dh.hu:12321/docs)       |
 | Authentication  | API Key (contact the lecturers)              |
-| Model Version (might be out of date)   | [ibnzterrell/Meta-Llama-3.3-70B-Instruct-AWQ-INT4](https://huggingface.co/ibnzterrell/Meta-Llama-3.3-70B-Instruct-AWQ-INT4)                                          |
-| TGI Server documentation   | [https://huggingface.co/docs/text-generation-inference/index](https://huggingface.co/docs/text-generation-inference/index) |
+| Model Version (might be out of date)   | [casperhansen/llama-3.3-70b-instruct-awq](https://huggingface.co/casperhansen/llama-3.3-70b-instruct-awq)                                          |
+| vLLM Server documentation   | [https://docs.vllm.ai/en/latest/index.html](https://docs.vllm.ai/en/latest/index.html) |
 | Test GUI    | [http://mobydick.elte-dh.hu:3000](http://mobydick.elte-dh.hu:3000)      |
 | Test GUI login  | Ask the lecturers for the login credentials. |
 
@@ -37,7 +37,7 @@ client = OpenAI(
 )
 
 chat_completion = client.chat.completions.create(
-    model="tgi",
+    model="casperhansen/llama-3.3-70b-instruct-awq",
     messages=[
         {"role": "system", "content": "You are a helpful assistant." },
         {"role": "user", "content": "What is the purpose of life"}
@@ -48,42 +48,16 @@ chat_completion = client.chat.completions.create(
 print(chat_completion)
 ```
 
-For the most up to date information, please refer to the official TGI tutorial: [https://huggingface.co/docs/text-generation-inference/basic_tutorials/consuming_tgi#openai-client](https://huggingface.co/docs/text-generation-inference/basic_tutorials/consuming_tgi#openai-client)
+For the most up to date information, please refer to the official vLLM tutorials: [https://docs.vllm.ai/en/latest/serving/openai_compatible_server.html#supported-apis](https://docs.vllm.ai/en/latest/serving/openai_compatible_server.html#supported-apis)
 
 #### Limitations
 
-Visual inputs are not supported, and the context window is limited to ~100k tokens (as a sum of prompt and response). There is no maximal response length. 
+Visual inputs are not supported, and the context window is limited to ~90k tokens (as a sum of prompt and response). There is no maximal response length. 
 
-Please check TGI documentation for parameter details (there are known issues with top_p, etc...), also the default for the max generated tokens tends to be a low number (1-200), which you have to override in your requests!
-
-Tooling is currently in limited support (automatic selection works fine, but forced selection might not work as expected), and there is no json output support yet. 
-
-For enforcing output schema you can instantiate your own tokenizer and use huggingface's `generate` with an inference client, where you are able to provide guidance grammar to enforce the output schema. [Details](https://huggingface.co/docs/text-generation-inference/basic_tutorials/using_guidance#hugging-face-hub-python-library)
+Please check vLLM OpenAI Server documentation for parameter details (there are known issues with top_p, etc...), also the default for the max generated tokens tends to be a low number (1-200), which you have to override in your requests!
 
 For tokenization or token counting you should use the HTTP endpoints or after getting the model id (by HTTP endpoints again) you can instantiate your own tokenizer from Huggingface objects. Some models might be gated so you need a huggingface access token to download their tokenizer.
 
-### HTTP Requests
-
-You can also use HTTP requests to interact with the endpoint. In this case the API key should be passed as a Bearer token:
-
-```python
-import requests
-
-headers = {
-    "Content-Type": "application/json",
-    "Authorization": "Bearer <API_KEY>"
-}
-
-data = {
-    'inputs': 'What is the purpose of life?',
-    'parameters': {
-        'max_new_tokens': 20,
-    },
-}
-response = requests.post('http://mobydick.elte-dh.hu:12321/generate', headers=headers, json=data)
-```
-
-Some functionalities are not available via the OpenAI package (nor the official Huggingface Hub Client), such as listing the available model information, or performing tokenizations, health checks, etc. Check the API documentation for more details.
 
 ## Test GUI
 
