@@ -793,6 +793,76 @@ benchmarks. The changes were relatively minor:
 + refining prompts,
 + training on additional academic VQA datasets.
 
+
+# Any-to-any models
+
+## Any-to-any models
+
+Any-to-any modeling is a generalization of the original language modeling task to multiple input and output modalities. Naming conventions have not yet stabilized so we will use "large world models", "multimodal LLMs" or "any-to-any models" interchangeably.
+
+These models follow the same principles as the original language or vision models.
+
+Joint modeling of modalities supports generalization, few-shot learning and even task-specific performance. Modality sequences are either concatenated or interleaved in the input sequence.
+
+## World Modeling Example
+
+![Multimodal generation based on interleaved input sequences by @tang2023codi2](./figures/codi_ex.png){height=100%}
+
+## Our baseline, language models
+
+\centering
+![](./figures/gpuday_text_framework.png){height=80%}
+
+## Modality tokenizers (processors)
+
+As we have seen, quantized variational autoencoders are capable of generating a latent space that captures the essence of the input data as a sequence of discrete tokens. These tokens can be used as a basis for the input to a transformer model, where regular language modeling techniques can be applied.
+
+Separate encoders are also viable in case of non-output modalities. In general, contrastive alignment of the modality encoders and text representations is a widely used approach.
+
+## Revisiting VQ-VAE
+
+![Vector Quantized VAE architecture [@van2017neural]](figures/vq-vae.png){height=75%}
+
+## dVAE
+
+![Discrete VAE of DALL-E [@ramesh2021zeroshottexttoimagegeneration]. Image from [@dalle2_mlb]](figures/dvae.png){height=75%}
+
+## VQ-GAN
+
+![VQ-GAN architecture [@rombach2022high]](figures/stable_vqgan.png){height=75%}
+
+## World Model Recipe
+
+1. Train a tokenizer (Encoder-Decoder model)
+2. Train a transformer with Masked Modeling or Predict Next Token task in the latent space of the VAE.
+3. For multiple modalities train multiple VAEs and require the single transformer to indicate output modality.
+4. Use the corresponding encoder and decoder for each modality in the sequence.
+
+Remark1: Certain encoders or decoders are sometimes dropped.
+
+Remark2: There is a significant recent rise in diffusion-based decoders (and encoders) lately.
+
+## The Large World Model Template
+
+\centering
+![](./figures/multimodal_arch.png){height=90%}
+
+## Interleaved Input & Proper Decoding
+
+![By applying the corresponding encoders and decoders @tang2023codi2 train an any-to-any model.](./figures/codi.jpg){height=75%}
+
+## Possible non-trivial modalities
+
+On top of text, vision, audio we also have:
+
+- Robot control [@embodimentcollaboration2024open]
+- Action spaces & environment modeling [@bruce2024genie]
+- Modelling priors for image generation [@ramesh2022hierarchical]
+- Time Series [@das2024decoderonly]
+- Motion [@jiang2023motiongpt]
+- 2D-to-3D object generation [@xu2024instantmesh]
+
+
 # References
 
 ## References {.allowframebreaks} 
