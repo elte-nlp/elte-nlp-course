@@ -3,7 +3,7 @@ title: "Natural Language Processing"
 subtitle: "Lecture 24: Encoder-decoder style visual language models"
 author: "András Simonyi, Natabara Máté Gyöngyössy"
 institute: "Eötvös Loránd University, Department of Artificial Intelligence"
-date: 2023
+date: 2025
 theme: Marburg
 colortheme: orchid
 fontsize: 14pt
