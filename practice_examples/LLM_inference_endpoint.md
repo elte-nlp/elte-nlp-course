@@ -54,7 +54,7 @@ For the most up to date information, please refer to the official vLLM tutorials
 
 OpenAI's structured output schema works pretty well. Instruct the model to output a JSON and provide the following parameters to your call:
 
-```
+```python
 resp = client.chat.completions.create(
     model = "Qwen/Qwen3-32B-AWQ",
     messages = [
