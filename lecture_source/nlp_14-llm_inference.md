@@ -366,7 +366,7 @@ Repetitive text can be accounted for by including only the first occurence of th
 
 Infering the watermarking method from the detector's decision is possible by submitting $|V|^h$ tokens to the detector, where $h$ is the number of tokens used in the hash function. To counteract decyphering we can use a larger $h$, but that would also introduce difficulties to detection as flipping a single token could affect the following $h$ tokens and corrupt $0.5h$ tokens on average.
 
-Using more sophisticated methods that depends on the current token and one of the $h$ previous tokens is also a viable solution, where the error rate decreases to $1/h$.
+Using more sophisticated methods that depend on the current token and one of the $h$ previous tokens is also a viable solution, where the error rate decreases to $1/h$.
 
 Private watermarking is also possible with a cryptographic hash function that has a secret key such as AES or SHA3. This way the adversary cannot detect the watermarks without the knowledge of the key.
 
