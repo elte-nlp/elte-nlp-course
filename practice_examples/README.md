@@ -6,4 +6,4 @@ Each example comes with a video to explain the content. The videos are available
 
 Practice material extension is still in progress. The material will be updated and extended. In case of any questions feel free to open an issue in the repository.
 
-##### LLM Inference Endpoint information is available [here](LLM_inference_endpoint.md).
+#### LLM Inference Endpoint information is available [here](LLM_inference_endpoint.md).
