@@ -300,7 +300,7 @@ consist of several morphemes, e.g. *unbearables* = *un* + *bear* +
 Useful distinctions among morphemes:
 
 -   **Bound** vs **free**: free morphemes (e.g. *bear*) can stand alone as
-    independent words, bound morphemes (e.g. *-un*, *-s*) can only
+    independent words, bound morphemes (e.g. *un-*, *-s*) can only
     constitute words together with other morphemes.
 
 -   **Affixes** vs **roots**: roots are the main parts of the word with the

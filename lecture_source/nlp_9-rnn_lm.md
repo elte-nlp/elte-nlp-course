@@ -271,7 +271,7 @@ performed consistently better than other architectures, and they are
 pretty competitive even now.
 
 On 5 of the 9 language modeling datasets tracked by
-[NLP-progress](http://http://nlpprogress.com), models based on an
+[NLP-progress](http://nlpprogress.com), models based on an
 LSTM-variant, the so-called Mogrifier LSTM have the best performance,
 and LSTM-based models are very close to the (transformer produced)
 state-of-the-art on 3 of the 4 remaining datasets.
