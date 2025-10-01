@@ -92,7 +92,7 @@ Modern NLP relies on machine learning techniques to a huge extent, in fact, in
 recent years the linguistic applications of general ML methods have dominated
 the area.
 
--   Mostly supervised or semi-supervised methods are utilized, but the
+-   Mostly supervised or self-supervised methods are utilized, but the
     use of reinforcement learning is also increasing.
 
 -   Texts are sequences of discrete symbols, so ML models capable of
