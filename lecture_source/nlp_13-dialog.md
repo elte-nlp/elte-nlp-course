@@ -138,10 +138,10 @@ We infer speaker meaning by assuming that utterances are
         last turn.
     -   similarity can be totally pretrained, or trained/fine-tuned
         embedding based.
--   **Response by generation**: Train a genator model on the data set,
+-   **Response by generation**: Train a generator model on the data set,
     typical architectures:
     -   RNN or Transformer based encoder-decoder, or
-    -   a fine-tunded "Predict next", language-model, e.g., a GPT-like
+    -   a fine-tuned "Predict next", language-model, e.g., a GPT-like
         architecture. We will discuss that alternative in the next lecture.
 
 # Task-oriented dialog systems 
