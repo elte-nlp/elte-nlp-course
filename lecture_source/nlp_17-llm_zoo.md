@@ -146,6 +146,19 @@ DeBERTa [@he2021deberta] improves on regular BERT with technical innovations:
 
 It outperforms the human baseline in SuperGLUE (90.3 vs 89.8).
 
+## Modernization
+
+In the five years since DeBERTa, encoder-based models have been stagnating,
+while decoder-based LLMs have seen a lot of development:
+
+- larger context sizes;
+- more effective architectures and training procedures;
+- optimized hyperparameter choices;
+- much larger training corpora.
+
+ModernBERT [@Warner:2025] and NeoBERT [@Breton:2025] both aim to introduce these
+improvements into the encoder lineage.
+
 ## Embedding vs. Embedding
 
 The models thus far are all called "contextual embedding". We have seen that
