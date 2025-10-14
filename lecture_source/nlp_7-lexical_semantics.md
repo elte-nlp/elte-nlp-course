@@ -93,7 +93,7 @@ Dictionaries may contain information about __lexical
 relations__ between senses, especially about
 
 -   __synonymy__: whether two word senses are (close to) identical;
--   __antonimy__: whether two word senses are opposites of each other.
+-   __antonymy__: whether two word senses are opposites of each other.
 
 Other important lexical relations include __taxonomical relations__:
 
