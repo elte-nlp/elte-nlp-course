@@ -510,6 +510,53 @@ Both contain 200+ tasks and offer
 Reproducible testing enables competition such as the
 **[Open LLM Leaderboard](https://huggingface.co/spaces/HuggingFaceH4/open_llm_leaderboard)**.
 
+## Agentic Systems
+
+LLMs are increasingly being used in interactive, cooperative scenarios as
+parts of an **agentic system**. In such a system, human interaction is limited
+and LLMs ("agents") reason and act independently to achieve pre-defined goals.
+Importantly, the agents have access to _tools_ (usually API endpoints) they
+can use if the task requires it.
+
+Fine-tuning LLMs to function in such an environment requires specialized
+training datasets. At the minimum, the LLMs should learn how to reason with,
+and invoke, tools.
+
+## Training Agentic Systems
+
+Agentic systems are usually trained with reinforcement learning (RL). Both
+positive and negative samples are used with corresponding rewards. Evaluation
+can be _rule-based_, when the result can be verified by a tool (e.g. a compiler
+that checks if the generated code runs).
+
+Additional aspects of quality:
+
+- number of tokens used for reasoning;
+- language consistency. 
+
+Examples:
+
+- Agent-FLAN[@Chen:2024]: supervised training method with negative samples
+  against hallucination;
+- SWEET-RL [@zhou2025sweetrltrainingmultiturnllm]: RL algorithm that
+  incorporates training-time information in a critic model.
+
+
+## Agentic Benchmark Datasets
+
+- [GAIA Benchmark](https://huggingface.co/spaces/gaia-benchmark/leaderboard)
+  [@Gregoire:2024]: "real world" tasks that require multi-modal
+  reasoning, web browsing, etc.
+- [AgentBench](https://github.com/THUDM/AgentBench) [@liu2024agentbench]: 
+  includes 3 task types: code, game and web with tasks such as OS (command line)
+  and knowledge graph interaction, games, "web shopping".
+  - VisualAgentBench is the visual version with tasks such as playing Minecraft,
+    handling UI and visual design with CSS.
+- ColBench [@zhou2025sweetrltrainingmultiturnllm]: human--LLM collaborative
+  tasks, such as front-end design and back-end programming.
+
+A few agentic benchmarks are collected on [this page](https://www.evidentlyai.com/blog/ai-agent-benchmarks).
+
 # Bootstrapping
 
 ## What is Bootstrapping?
