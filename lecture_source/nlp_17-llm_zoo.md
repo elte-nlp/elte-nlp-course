@@ -222,8 +222,9 @@ The GPT family are the most well-known LLMs. They are being created by
 | GPT-3 [@brown2020language] | 175B| 300B | 2048 |
 | \footnotesize InstructGPT [@instructgpt_neurips] \normalsize | 175B | 77k | 2048 |
 | GPT-4 [@gpt4techreport] | ? | ? | 8192^\*^ |
+| [GPT-5](https://cdn.openai.com/gpt-5-system-card.pdf) | ? | ? | 400k^\*^ |
 
-^\*^GPT-3.5 and GPT-4 details are not available. There are estimates, but
+^\*^Details for the models GPT-3.5 and up are not disclosed. There are estimates, but
 [many of them](https://tooabstractive.com/how-to-tech/difference-between-gpt-1-gpt-2-gpt-3-gpt-4/)
 cannot even get the previous models right.
 
@@ -317,6 +318,19 @@ closed source.
     - Alibaba's [Qwen](https://huggingface.co/Qwen) (at version 3)
     - [Deepseek](https://huggingface.co/deepseek-ai/DeepSeek-V3.1) (at version 3.2)
     - ...
+
+## Model types
+
+To summarize, the following model types can be distinguished:
+
+- _Fundamental (or base) models_: pre-trained only;
+- _Instruct models_: also trained for instruction following in a supervised
+  manner;
+- _Reasoning (thinking) models_: as discussed above.
+
+Most model families release separate fundamental / instruct models. In the last
+generation, a separate reasoning version was added to this list. However,
+some families only make the "most capable" version public.
 
 ## Other models 
 
