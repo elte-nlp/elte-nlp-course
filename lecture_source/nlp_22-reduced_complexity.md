@@ -21,7 +21,7 @@ link-citations: true
 ## Introduction
 
 LLMs have been increasing in parameter count from day 1 even before scaling
-laws[^1] for neural LMs were were established [@kaplan2020scaling]. As
+laws[^1] for neural LMs were established [@kaplan2020scaling]. As
 discussed earlier, large models have various problems:
 
 - adverse environmental effects [@schwartz2020green; @strubell-etal-2019-energy];
@@ -140,7 +140,8 @@ The algorithm is an enhanced version of the _Optimal Brain Quantization_
 algorithm. OBQ quantizes $\mathbf{W}$ row-by-row, one weight at a time, always
 updating the remaining weights to compansate for the quantization error.
 
-It takes OBQ 4 hours to quantize a 100M model. To handle large LLMs, the algorithm
+It takes OBQ 4 hours to quantize a 100M model. To handle large LLMs, the GPTQ
+algorithm
 
 - updates weights only once per column,
 - uses lazy batches for high memory-throughput,
@@ -301,7 +302,7 @@ LoRA is similar to adapters:
 
 However, there are key differences:
 
-- LoRA is only applied to the self-attention matrices ($W_k, W_q, W_v, W_o$);
+- LoRA is primarily applied to the self-attention matrices ($W_k, W_q, W_v, W_o$);
 - LoRA modules can be merged with the frozen matrices at inference time, which
   incurs no _inference latency_ compared to adapters;
 - LoRA generally achieves slightly better results on downstream tasks.
