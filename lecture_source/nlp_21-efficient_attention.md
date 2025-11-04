@@ -94,6 +94,7 @@ Two examples:
 **Fixed attention**
 
 \footnotesize
+- Divide the context window into $l$ blocks, 
 - $A^{(1)}_i = \{j: (\lfloor j/l \rfloor = \lfloor i/l \rfloor)\}$
   (each output vector attends to its block),
 - $A^{(2)}_i = \{j: j\mod l \in \{l-c,l-c+1,...,l\} \}$ (future outputs
