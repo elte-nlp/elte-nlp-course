@@ -1,4 +1,4 @@
-## Practice material for the course (WIP)
+## Practice material for the course
 
 This folder contains the practice material for the course. The material contains example notebooks and extra files for that. Each practice is designed to be a standalone Google Colab notebook. (Exceptions will be clearly marked.) The notebooks tap into topics explained in the lectures but they are not in a 1:1 relationship with the lecture material. Following the order of them is recommended, but not mandatory.
 
