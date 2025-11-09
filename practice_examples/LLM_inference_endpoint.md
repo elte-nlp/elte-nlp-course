@@ -4,16 +4,22 @@ We currently host a single open model endpoint that could be used to student pro
 
 > **Acknowledgement**
 > 
-> The endpoint is hosted by the Digital Heritage National Laboratory, who kindly provide some usage quota for our course as well. We are grateful for their support.
+> The endpoint is jointly provided by the ELTE Faculty of Informatics and the Digital Heritage National Laboratory.
+
+## VPN
+
+In order to access the endpoint you need to connect to an ELTE network, or use the ELTE VPN service as detailed here:
+https://iig.elte.hu/en/content/vpn-settings.t.16226
+
 
 ## Endpoint Information
 
 | **Field**       | **Description**                                      |
 |-----------------|------------------------------------------------------|
-| API Endpoint URL    | `http://mobydick.elte-dh.hu:24642`        |
-| Endpoint API definition   | [http://mobydick.elte-dh.hu:24642/docs](http://mobydick.elte-dh.hu:24642/docs)       |
+| API Endpoint URL    | `http://mobydick.elte-dh.hu:23432`        |
+| Endpoint API definition   | [http://mobydick.elte-dh.hu:23432/docs](http://mobydick.elte-dh.hu:23432/docs)       |
 | Authentication  | API Key (contact the lecturers)              |
-| Model Version (might be out of date)   | [https://huggingface.co/Qwen/Qwen3-32B-AWQ](https://huggingface.co/Qwen/Qwen3-32B-AWQ)                                    |
+| Model Version   | [[https://huggingface.co/Qwen/Qwen3-32B-AWQ](https://huggingface.co/zai-org/GLM-4.5-Air-FP8)]([https://huggingface.co/Qwen/Qwen3-32B-AWQ](https://huggingface.co/zai-org/GLM-4.5-Air-FP8))                                    |
 | vLLM Server documentation   | [https://docs.vllm.ai/en/latest/index.html](https://docs.vllm.ai/en/latest/index.html) |
 | Test GUI    | [http://mobydick.elte-dh.hu:7899](http://mobydick.elte-dh.hu:7899)      |
 | Test GUI login  | Ask the lecturers for the login credentials. |
@@ -32,12 +38,12 @@ from openai import OpenAI
 
 # Set the API key and the base URL (with the /v1 endpoint)
 client = OpenAI(
-    base_url="http://mobydick.elte-dh.hu:24642/v1",
+    base_url="http://mobydick.elte-dh.hu:23432/v1",
     api_key="<API_KEY>"
 )
 
 chat_completion = client.chat.completions.create(
-    model="Qwen/Qwen3-32B-AWQ",
+    model="zai-org/GLM-4.5-Air-FP8",
     messages=[
         {"role": "system", "content": "You are a helpful assistant." },
         {"role": "user", "content": "What is the purpose of life"}
@@ -56,7 +62,7 @@ OpenAI's structured output schema works pretty well. Instruct the model to outpu
 
 ```python
 resp = client.chat.completions.create(
-    model = "Qwen/Qwen3-32B-AWQ",
+    model = "zai-org/GLM-4.5-Air-FP8",
     messages = [
         {
             "role": "system",
@@ -107,6 +113,7 @@ resp = client.chat.completions.create(
 #### Reasoning
 
 This is a reasoning model. You can turn off reasoning mode by setting `extra_body={"chat_template_kwargs": {"enable_thinking": False}}`.
+Reasoning effort can be set by the `reasoning_effort` in the `extra_body`. Accepted values are: `high`, `medium`, `low`.
 
 Warning: This way the structured output will not work and all the content will be put into the `reasoning_content` field.
 
