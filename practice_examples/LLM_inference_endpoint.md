@@ -19,7 +19,7 @@ https://iig.elte.hu/en/content/vpn-settings.t.16226
 | API Endpoint URL    | `http://mobydick.elte-dh.hu:23432`        |
 | Endpoint API definition   | [http://mobydick.elte-dh.hu:23432/docs](http://mobydick.elte-dh.hu:23432/docs)       |
 | Authentication  | API Key (contact the lecturers)              |
-| Model Version   | [[https://huggingface.co/Qwen/Qwen3-32B-AWQ](https://huggingface.co/zai-org/GLM-4.5-Air-FP8)]([https://huggingface.co/Qwen/Qwen3-32B-AWQ](https://huggingface.co/zai-org/GLM-4.5-Air-FP8))                                    |
+| Model Version   | [https://huggingface.co/zai-org/GLM-4.5-Air-FP8](https://huggingface.co/zai-org/GLM-4.5-Air-FP8)             |
 | vLLM Server documentation   | [https://docs.vllm.ai/en/latest/index.html](https://docs.vllm.ai/en/latest/index.html) |
 | Test GUI    | [http://mobydick.elte-dh.hu:7899](http://mobydick.elte-dh.hu:7899)      |
 | Test GUI login  | Ask the lecturers for the login credentials. |
