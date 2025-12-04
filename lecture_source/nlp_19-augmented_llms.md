@@ -783,6 +783,96 @@ Fine-tuning a model for tool selection is hard. Bootstrapping could be a solutio
 
 ![Dataset construction pipeline for tool-finetuned models [@qin2023toolllm]](figures/tool_llm.png){height=30%}
 
+# Agentic Trends
+
+## What is an "Agent"? 
+
+- An entity which has **an LLM** and different **tools** to decide what to do next
+- Based on the input thinking about the actions needed to reach the desired output
+- Usually **multiple agents** grouped in a "**Multi-Agent system**"
+- Each agent could have **different** tools, knowledge, and goals (planner, coder, researcher, etc.)
+- Agents communicate between each other through some protocol (JSON, XML)
+
+## Usual workflow
+
+- **User Input**: An initial prompt is given to the system
+- **Planning**: An agent (controller) decides which other agents to call based on the current state
+- **Delegation**: The other agents perform their actions (could be calling external tools as well)
+- **Aggregation**: The results are sent back to the controller agent
+- **Decision**: The controller decides the next steps based on the results
+- **Iteration**: The process is repeated until the final goal is reached
+
+
+## Common architectures
+
+- **Single Agent**: One agent with multiple tools handling all tasks
+- **Centralized (Supervisor)**: A single controller agent manages all other agents and tools
+- **Hierarchical**: A multi-level structure where higher-level agents oversee lower-level agents
+- **Decentralized (Network)**: Agents operate independently and communicate directly with each other without a central controller
+- **Sequential**: Agents are arranged in a sequence, where the output of one agent becomes the input for the next
+- **Multi-Persona Debate**: Multiple agents with different personas (usually different intuitions) debate to reach a consensus or decision
+
+## Common architectures cont.
+
+![Common agentic architectures image made by [@piyush]](figures/agentic_architectures.png){height=75%}
+
+## Common architectures cont.
+
+- **Multi-Persona Debate**: Multiple agents with different personas debate to reach a consensus or decision
+- Different agents coud have totally opposite personas (ex. optimist vs pessimist)
+- The input goes through all agents, then they generate their own answers
+- The weigthing of different personas can differ and could be learned as well
+- Final answer is aggregated from all agents' answers by the controller agent
+
+## Common architectures cont.
+
+![Example multiple persona generating an answer [@kan]](figures/multi_persona_debate.png){height=80%}
+
+
+## Problems with multi-agent systems
+
+- System topology requires a manually designed architecture
+- Agentic trainining required for better performance
+- Prompt and persona description requires careful design
+- Cannot solve problems which requires other tools or types of agents
+
+## Agentic system optimisation
+
+- @zhang2025metaagentautomaticallyconstructingmultiagent introduced the Meta-Agent
+- Automatically designs multi-agent systems using Finite State Machines (FSMs)
+
+![Construction stage of MetaAgent [@zhang2025metaagentautomaticallyconstructingmultiagent]](figures/MetaAgent.png){height=55%}
+
+## Agentic system optimisation cont.
+
+- Most agentic system are not training the system for tool-use 
+- @li2025intheflowagenticoptimizationeffective invented AgentFlow
+- 4 components:
+  - __Planner__: decides sub-goals and selects tools
+  - __Executor__: runs the selected tools
+  - __Verifier__: checks results and determines progress
+  - __Generator__: produces the final answer
+- Agentflow uses a shared sturcture between agents, allowing multi-step decision making
+- Also introduces Flow-Based Group Refine Policy Optimization (FLOW-GRPO) for better tool-use
+
+## Agentic system optimisation cont.
+
+![Overview of AgentFlow, a trainable agentic system for in-the-flow planning and tool use. [@li2025intheflowagenticoptimizationeffective]](figures/agentflow.png){height=90%}
+
+## Agentic system optimisation cont.
+
+- @zhou2025multiagentdesignoptimizingagents introduced a framework which can optimize the prompt and the topology of multi-agent systems
+- Steps:
+  - __Block level prompt optimization:__ optimize the agent prompt one by one using MIPRO(@opsahlong2024optimizinginstructionsdemonstrationsmultistage)
+  - __Workflow topology optimization:__ search for the best candidate workflows evaluating on a validation set
+  - __Workflow-level prompt optimization:__ optimizing the aget prompts again considering the inter-agent dependencies
+
+## Agentic system optimisation cont.
+
+![ Illustration of the framework with its search space and the multi-stage optimization [@zhou2025multiagentdesignoptimizingagents]](figures/toplogy_opt.png){height=90%}
+
+## 
+
 # Summary 
 
 ## Summary I.
