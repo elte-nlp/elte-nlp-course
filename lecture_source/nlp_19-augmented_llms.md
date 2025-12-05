@@ -783,6 +783,23 @@ Fine-tuning a model for tool selection is hard. Bootstrapping could be a solutio
 
 ![Dataset construction pipeline for tool-finetuned models [@qin2023toolllm]](figures/tool_llm.png){height=30%}
 
+## Model Context Protocol
+
+- "USB-C port of AI" - said by Anthropic
+- standardizing the way of LLMs interact with tools, filesystems or databases
+- Main Parts:
+  - __MCP Host:__ AI Application itself
+  - __MCP CLient:__ component inside the host, which handles the communication
+  - __MCP Server:__ implementing different tools, waits for Clients to connect and provides the tool descriptions and run the tools
+- Clients can connect to multiple servers
+- Commnuication happens with MCP protocol over HTTP
+- Servers has a REST-like API
+
+## Model Context Protocol cont.
+
+![Model Context Protocol architecture [@brad]](figures/mcp_architecture.png){height=80%}
+
+
 # Agentic Trends
 
 ## What is an "Agent"? 
@@ -791,7 +808,7 @@ Fine-tuning a model for tool selection is hard. Bootstrapping could be a solutio
 - Based on the input thinking about the actions needed to reach the desired output
 - Usually **multiple agents** grouped in a "**Multi-Agent system**"
 - Each agent could have **different** tools, knowledge, and goals (planner, coder, researcher, etc.)
-- Agents communicate between each other through some protocol (JSON, XML)
+- Agents communicate between each other through some protocol (JSON, etc.)
 
 ## Usual workflow
 
@@ -810,7 +827,6 @@ Fine-tuning a model for tool selection is hard. Bootstrapping could be a solutio
 - **Hierarchical**: A multi-level structure where higher-level agents oversee lower-level agents
 - **Decentralized (Network)**: Agents operate independently and communicate directly with each other without a central controller
 - **Sequential**: Agents are arranged in a sequence, where the output of one agent becomes the input for the next
-- **Multi-Persona Debate**: Multiple agents with different personas (usually different intuitions) debate to reach a consensus or decision
 
 ## Common architectures cont.
 
@@ -819,10 +835,10 @@ Fine-tuning a model for tool selection is hard. Bootstrapping could be a solutio
 ## Common architectures cont.
 
 - **Multi-Persona Debate**: Multiple agents with different personas debate to reach a consensus or decision
-- Different agents coud have totally opposite personas (ex. optimist vs pessimist)
-- The input goes through all agents, then they generate their own answers
-- The weigthing of different personas can differ and could be learned as well
-- Final answer is aggregated from all agents' answers by the controller agent
+- Different agents coud have totally __opposite personas__ (ex. optimist vs pessimist)
+- The input goes through all agents, then they generate their __own answers__
+- The __weighting__ of different personas can differ and could be learned as well
+- Final answer is __aggregated__ from all agents' answers by the controller agent
 
 ## Common architectures cont.
 
@@ -831,14 +847,14 @@ Fine-tuning a model for tool selection is hard. Bootstrapping could be a solutio
 
 ## Problems with multi-agent systems
 
-- System topology requires a manually designed architecture
-- Agentic trainining required for better performance
-- Prompt and persona description requires careful design
-- Cannot solve problems which requires other tools or types of agents
+- System topology expects a __manually designed__ architecture
+- __Agentic training__ necessary for better performance
+- __Prompt and persona description__ needs careful design
+- Cannot solve problems which requires __other tools or types of agents__
 
 ## Agentic system optimisation
 
-- @zhang2025metaagentautomaticallyconstructingmultiagent introduced the Meta-Agent
+- @zhang2025metaagentautomaticallyconstructingmultiagent introduced the __MetaAgent__
 - Automatically designs multi-agent systems using Finite State Machines (FSMs)
 
 ![Construction stage of MetaAgent [@zhang2025metaagentautomaticallyconstructingmultiagent]](figures/MetaAgent.png){height=55%}
@@ -871,7 +887,16 @@ Fine-tuning a model for tool selection is hard. Bootstrapping could be a solutio
 
 ![ Illustration of the framework with its search space and the multi-stage optimization [@zhou2025multiagentdesignoptimizingagents]](figures/toplogy_opt.png){height=90%}
 
-## 
+## Training-free agentic systems
+
+- Training-free option of GRPO introduced by @cai2025trainingfreegrouprelativepolicy
+- Not training the modelm, instead using __Eperimental Knowledge__ as token Prior and __Self-Consistency__
+- __Experimental Knowledge__: using operations like ADD, DELETE, MODIFY on the stored experiences, using LLM to decide which operation to use
+- __Self-Consistency__: the LLM itself introspect on the scored outputs by the reward model and gives __semantic advantage__
+
+## Training-free agentic systems cont.
+
+![Training-free Group Relative Policy Optimization (TF-GRPO) [@cai2025trainingfreegrouprelativepolicy]](figures/training-free_GRPO.png){height=80%}
 
 # Summary 
 
@@ -880,11 +905,15 @@ Fine-tuning a model for tool selection is hard. Bootstrapping could be a solutio
 Augmented language models use external information sources to enhance their capabilities. One significant group of these sources are vectorized document databases. Embedding models are utilized to retrieve related information via approximate NN search algorithms.
 Other tools include web API-s, or even code interpreters. Models applying a self-monologue process are capable of fulfilling goals by planning and executing successive actions.
 
+MCP (Model Context Protocol) standardizes the way LLMs interact with external tools. Multiple tools and functionalities can be feed to LLM using multiple MCP servers.
+
 ## Summary II.
 
 During retrieval augmented generation the retrieved documents are concatenated or summarized, then fed to the model to generate answers in a second LLM step.
 
 Fine-tuning models to use retrieved information or external tools is possible and increases performance.
+
+Agentic systems consist of multiple LLM-based agents, which can communicate and collaborate to reach goals. These systems can be optimized by training or automatic architecture search.
 
 # References {.allowframebreaks} 
 
