@@ -415,7 +415,7 @@ corresponding cookbook entry $\mathbf e_{z_i}$ in the first decoding step:
 
 ## VQ-VAE distributions and loss
 
-As the VQ-VAE decoder is deterministic and the prior is uniform, the
+As the VQ-VAE encoder is deterministic and the prior is uniform, the
 $\mathbb {KL}(q(\mathbf z| \mathbf x)\Vert p(\mathbf z))$ similarity loss is
 constant and can be ignored. Quantization is non-differentiable, so only the
 so-called __straight-through estimator__ can be used, in which the gradient from
