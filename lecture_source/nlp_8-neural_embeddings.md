@@ -317,9 +317,9 @@ ones between the embeddings.
 
 ## The GloVe algorithm cont.
 
-Instead of trying to minimize the differences
-$E_w(w_i) \cdot E_c(w_j) + \log (C(w_i)) - \log (C(w_i, w_j))$ for
-$w_1,w_2\in V$, GloVe minimizes the closely related
+The requirement on the last slide can be enforced by minimizing 
+$E_w(w_i) \cdot E_c(w_j) - \bigl( \log (C(w_i, w_j)) - \log (C(w_i)) \bigr)$ for
+$w_1,w_2\in V$. Instead, GloVe minimizes the closely related
 $$\sum\limits_{i, j=1}^{|V|} f(C(w_i,w_j)) (E_w(w_i)\cdot E_c({w}_j) + b_w(w_i) +
   {b_c}(w_j) - \text{log} C(w_i, w_j))^2$$
 objective. The differences are
