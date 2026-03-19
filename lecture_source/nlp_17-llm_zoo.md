@@ -310,13 +310,16 @@ GPT is not the only LLM model "family". There are competitors, both open- and
 closed source.
 
 1. Closed
-    - [Claude](https://claude.ai/) (at version 3)
+    - [Claude](https://claude.ai/) (at version 4.6)
     - Google's [Gemini](https://gemini.google.com/)
 1. Open
     - Meta's Llama (at version [4](https://huggingface.co/meta-llama))
     - [Mistral](https://docs.mistral.ai/) (at version 3.2) 
-    - Alibaba's [Qwen](https://huggingface.co/Qwen) (at version 3)
+    - Alibaba's [Qwen](https://huggingface.co/Qwen) (at version 3.5)
     - [Deepseek](https://huggingface.co/deepseek-ai/DeepSeek-V3.1) (at version 3.2)
+    - [Kimi](https://huggingface.co/moonshotai)
+    - [Minimax](https://huggingface.co/MiniMaxAI)
+    - [GLM](https://huggingface.co/zai-org)
     - ...
 
 ## Model types
@@ -330,9 +333,9 @@ To summarize, the following model types can be distinguished:
 
 Most model families release separate fundamental / instruct models. In the last
 generation, a separate reasoning version was added to this list. However,
-some families only make the "most capable" version public.
+some families only make the "most capable" version public. Most families include a wide range of model sizes and reasoning models with adjustable reasoning effort.
 
-## Other models 
+## Other models (Legacy)
 
 Decoder-only autoregressive models have become the de facto LLM standard and
 many other models have been proposed. A few notable examples follow.
@@ -345,7 +348,7 @@ many other models have been proposed. A few notable examples follow.
   - Uses **relative positional encoding**, which allows inference on sequences
     longer than those seen during training.
 
-## Other models cont.
+## Other models (Legacy) cont.
 
 - **GLaM** [@du2022glam]
   - A sparse model with 1.2T parameters, trained on 1.6T tokens.
@@ -358,7 +361,7 @@ many other models have been proposed. A few notable examples follow.
   - Fine-tuned for Quality, Safety and Groundedness (the ``foundation metrics'');
   - End-to-end model inc. calling external IR system for groundedness.
 
-## Other models cont.
+## Other models (Legacy) cont.
 
 - **FLAN** [@wei2022finetuned]
   - Based on LaMDA. Instruction fine-tuning with the **data integration**
@@ -396,7 +399,7 @@ Large models have several problems:
   report it;
 - Most of the models are proprietary and closed source.
 
-## A New Trend
+## Trends
 
 ![](figures/llama_chinchilla.jpg){width=80%}
 
@@ -489,6 +492,25 @@ XLM-RoBERTa proved that Wikipedia is not enough to train a competitive model.
   - The BLOOMZ variant went through multilingual multitask fine-tuning;
   - The most powerful multilingual LLM to date.
 
+## The end of the Transformer Era?
+
+Modern LLMs are almost further away from the original Transformer as the first GPT model was from attention-LSTM networks.
+
+Modern architectures include:
+
+- Windowed attentions, convolutions
+- State-space-model layers (Mamba)
+- Latent attentions (Deepseek)
+- Irregular sparse patterns (LiquidFM, manifold-constrained hyper connections)
+
+## 2026: 3 out of 4 layers are non-attention
+
+![Selective State-Space operator that runs smoothly in GPU memory, linear complexity and is theoretically as powerful as a full attention. It was introduced in @gu2024mambalineartimesequencemodeling](figures/SSSM.png){width=90%}
+
+## Mamba2
+
+![Mamba2 blocks produce the state-space matrices dynamically using convolutions and linear projections. @dao2024transformersssmsgeneralizedmodels](figures/mamba_2_arch.png){width=80%}
+
 ## Current Landscape
 
 Nowadays most models are multilingual, which means good support for the most
@@ -500,6 +522,7 @@ performance.
 
 | Model | Size | Quality |
 | ----- | ---: | ------- |
+| Qwen 3.5 122B A10B | 122B | Virtually no errors |
 | Llama 4 Maverick | 400B | Virtually no errors |
 | GLM-4.5 Air (FP8) | 106B | Few errors |
 | Llama 4 Scout | 109B | Few errors |
@@ -584,6 +607,16 @@ Open:
 
 Nowadays most models are capable of solving codings tasks and separate "coding"
 models are rare.
+
+
+## Long-horizon Agentic Coding
+
+Latest model generations are trained to solve coding problems with high-level defintions/goals only. The model is expected to:
+
+- Decompose the problem into smaller subproblems;
+- Write and test code, or otherwise interact with the computer;
+- Iterate until the problem is solved, explore alternative solutions;
+- Work for multiple iterations with feedback from the computer only and not with human feedback.
 
 # Multimodality
 
