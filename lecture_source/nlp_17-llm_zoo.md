@@ -611,7 +611,7 @@ models are rare.
 
 ## Long-horizon Agentic Coding
 
-Latest model generations are trained to solve coding problems with high-level defintions/goals only. The model is expected to:
+Latest model generations are trained to solve coding problems with high-level definitions/goals only. The model is expected to:
 
 - Decompose the problem into smaller subproblems;
 - Write and test code, or otherwise interact with the computer;
