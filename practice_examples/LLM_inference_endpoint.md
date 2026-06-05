@@ -19,7 +19,7 @@ https://iig.elte.hu/en/content/vpn-settings.t.16226
 | API Endpoint URL    | `http://mobydick.elte-dh.hu:23432`        |
 | Endpoint API definition   | [http://mobydick.elte-dh.hu:23432/docs](http://mobydick.elte-dh.hu:23432/docs)       |
 | Authentication  | API Key (contact the lecturers)              |
-| Model Version   | [https://huggingface.co/zai-org/GLM-4.5-Air-FP8](https://huggingface.co/zai-org/GLM-4.5-Air-FP8)             |
+| Model Version   | [https://huggingface.co/Qwen/Qwen3.6-27B](https://huggingface.co/Qwen/Qwen3.6-27B)             |
 | vLLM Server documentation   | [https://docs.vllm.ai/en/latest/index.html](https://docs.vllm.ai/en/latest/index.html) |
 | Test GUI    | [http://mobydick.elte-dh.hu:7899](http://mobydick.elte-dh.hu:7899)      |
 | Test GUI login  | Ask the lecturers for the login credentials. |
@@ -43,7 +43,7 @@ client = OpenAI(
 )
 
 chat_completion = client.chat.completions.create(
-    model="zai-org/GLM-4.5-Air-FP8",
+    model="Qwen/Qwen3.6-27B",
     messages=[
         {"role": "system", "content": "You are a helpful assistant." },
         {"role": "user", "content": "What is the purpose of life"}
@@ -62,7 +62,7 @@ OpenAI's structured output schema works pretty well. Instruct the model to outpu
 
 ```python
 resp = client.chat.completions.create(
-    model = "zai-org/GLM-4.5-Air-FP8",
+    model = "Qwen/Qwen3.6-27B",
     messages = [
         {
             "role": "system",
@@ -123,11 +123,13 @@ Check the official model documentation for the best generation parameters. Some 
 
 #### Limitations
 
-Visual inputs are not supported, and the context window is limited to ~128k tokens (as a sum of prompt and response). There is no maximal response length. 
+Visual inputs are not supported, and the context window is limited to ~250k tokens (as a sum of prompt and response). There is no maximal response length. 
 
 Please check vLLM OpenAI Server documentation for parameter details (there are known issues with top_p, etc...), also the default for the max generated tokens tends to be a low number (1-200), which you have to override in your requests!
 
 For tokenization or token counting you should use the HTTP endpoints or after getting the model id (by HTTP endpoints again) you can instantiate your own tokenizer from Huggingface objects. Some models might be gated so you need a huggingface access token to download their tokenizer.
+
+Please check the model page for optimal inference parameters recommended by the model creators.
 
 
 ## Test GUI
