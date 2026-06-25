@@ -443,7 +443,7 @@ merge operations.
 
 As the number of merges increases, more and more symbols are full words.
 
-## Greedy BPE subword tokenization 
+## BPE subword tokenization 
 
 Processing a corpus with BPE results in 
 
