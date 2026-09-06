@@ -324,6 +324,50 @@ Other use-cases include:
 - Condition vectors for image generation
 - Multi-modal semantics
 
+## SigLIP
+
+Sigmoid Loss for Language Image Pre-Training [@zhai2023sigmoidlosslanguageimage]
+
+**Question:** Does learning a shared image-text embedding space require a softmax over the other examples in a batch?
+
+**Idea:** Train a binary matching classifier on every image-text pair using a sigmoid loss.
+
+- Retain separate image and text encoders.
+- Replace the batch-normalized contrastive objective with binary contrastive formulation
+- Improve efficiency and performance, especially at smaller batch sizes.
+
+**Data:** (image, text) pairs from web crawls. As a result, off-diagonal negatives are an assumption, not a verified annotation thus a negative label can be semantically wrong since this is imperfect and noisy, which is acknowledged in the paper.
+
+
+## SigLIP Structure
+
+SigLIP objective: $${{L}_{\mathrm{SigLIP}}=-\frac{1}{n}\sum_{i=1}^{n}\sum_{j=1}^{n}log\sigma(y_{ij}x_{ij})}$$
+$x_{ij}$ is the image-text similarity logit, and $y_{ij}=+1$ for the original paired examples and $y_{ij}=-1$ otherwise.
+
+As it is using $\ell_{ij} = -log\sigma(y_{ij}x_{ij})$, where $\sigma(v)=\frac{1}{1+e^{-v}}$, confidently incorrect predictions produce stronger gradients, while confidently correct predictions produce weak gradients.
+
+The architecture uses a dual-encoder setup: a Vision Transformer for images and a Transformer for text. Their outputs are L2-normalized and compared through a dot product with a learned scale and bias.
+
+## Zero-shot classification with SigLIP
+
+For zero-shot classification, encode each candidate class as a text prompt,
+such as “a photo of a cat”. Given the normalized image embedding
+$\mathbf{v}$ and normalized text embeddings $\mathbf{t}_c$, predict:
+
+$$
+\hat{c}=\arg\max_c \mathbf{v}^{\top}\mathbf{t}_c.
+$$
+
+The sigmoid scores need not sum to one across classes, and multiple
+classes can receive high scores.
+
+## Memory efficiency and better results on small batchsize
+
+As the loss is calculated in independent pairs, this allows scores and gradients to be computed in small blocks without storing the whole batches matrix in memory, which results in lower memory consumption
+
+As for the the results, SigLIP outperforms a CLIP-style baseline in smaller batch sized training, getting a 4.1 percentage-point improvement on zero-shot accuracy for a 1k batch size on ImageNet, which is an empirical finding, but could be explained with how to objective is defined, since SigLIPs signal doesn't depend on other competitors signals for gradients other than its pair. As the batch size grows, the gap gets narrower.
+
+// reread the paper for additional ideas, but imo this should be enough then PR
 
 ## ImageBind
 
