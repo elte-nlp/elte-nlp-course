@@ -336,7 +336,7 @@ Sigmoid Loss for Language Image Pre-Training [@zhai2023sigmoidlosslanguageimage]
 - Replace the batch-normalized contrastive objective with binary contrastive formulation
 - Improve efficiency and performance, especially at smaller batch sizes.
 
-**Data:** (image, text) pairs from web crawls. As a result, off-diagonal negatives are an assumption, not a verified annotation thus a negative label can be semantically wrong since this is imperfect and noisy, which is acknowledged in the paper.
+**Data:** (image, text) pairs from web crawls. As a result, off-diagonal negatives are an assumption, not a verified annotation thus a negative label can be semantically wrong since this is imperfect and noisy.
 
 
 ## SigLIP Structure
@@ -358,16 +358,14 @@ $$
 \hat{c}=\arg\max_c \mathbf{v}^{\top}\mathbf{t}_c.
 $$
 
-The sigmoid scores need not sum to one across classes, and multiple
+The sigmoid scores need not sum to 1 across classes, and multiple
 classes can receive high scores.
 
 ## Memory efficiency and better results on small batchsize
 
-As the loss is calculated in independent pairs, this allows scores and gradients to be computed in small blocks without storing the whole batches matrix in memory, which results in lower memory consumption
+As the loss is calculated in independent pairs, this allows scores and gradients to be computed in small blocks without storing the whole batches matrix in memory, which results in lower memory consumption, so allows for scaling to higher batch sizes.
 
 As for the the results, SigLIP outperforms a CLIP-style baseline in smaller batch sized training, getting a 4.1 percentage-point improvement on zero-shot accuracy for a 1k batch size on ImageNet, which is an empirical finding, but could be explained with how to objective is defined, since SigLIPs signal doesn't depend on other competitors signals for gradients other than its pair. As the batch size grows, the gap gets narrower.
-
-// reread the paper for additional ideas, but imo this should be enough then PR
 
 ## ImageBind
 
