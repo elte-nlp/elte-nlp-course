@@ -1,14 +1,15 @@
 ---
 title: "Natural Language Processing"
 subtitle: "Lecture 23: Contrastive Representation Learning"
-author: "Natabara Máté Gyöngyössy"
+author: "Natabara Máté Gyöngyössy, Kristóf Tajti"
 institute: "Eötvös University, Department of Artificial Intelligence"
-date: 2023
+date: 2026
 theme: Marburg
 colortheme: orchid
 fontsize: 14pt
 linkcolor: blue
 aspectratio: 1610
+lang: "en"
 header-includes: |
   \let\emphasized\emph
   \let\strong\textbf
@@ -330,23 +331,23 @@ Sigmoid Loss for Language Image Pre-Training [@zhai2023sigmoidlosslanguageimage]
 
 **Question:** Does learning a shared image-text embedding space require a softmax over the other examples in a batch?
 
-**Idea:** Train a binary matching classifier on every image-text pair using a sigmoid loss.
+**Idea:** Train a binary matching classifier (falling back to NCE-style loss) on every image-text pair using a sigmoid loss.
 
 - Retain separate image and text encoders.
 - Replace the batch-normalized contrastive objective with binary contrastive formulation
 - Improve efficiency and performance, especially at smaller batch sizes.
 
-**Data:** (image, text) pairs from web crawls. As a result, off-diagonal negatives are an assumption, not a verified annotation thus a negative label can be semantically wrong since this is imperfect and noisy.
+Data remains the same type of CLIP.
 
 
 ## SigLIP Structure
 
 SigLIP objective: $${{L}_{\mathrm{SigLIP}}=-\frac{1}{n}\sum_{i=1}^{n}\sum_{j=1}^{n}log\sigma(y_{ij}x_{ij})}$$
-$x_{ij}$ is the image-text similarity logit, and $y_{ij}=+1$ for the original paired examples and $y_{ij}=-1$ otherwise.
+$x_{ij}$ is the image-text similarity logit scaled by a learned exponential factor and shifted by a bias $x_{ij}=e^{\tau}\cdot txt_{i}^{\top} img_{j} + b$, and $y_{ij}=+1$ for the original paired examples and $y_{ij}=-1$ otherwise.
 
 As it is using $\ell_{ij} = -log\sigma(y_{ij}x_{ij})$, where $\sigma(v)=\frac{1}{1+e^{-v}}$, confidently incorrect predictions produce stronger gradients, while confidently correct predictions produce weak gradients.
 
-The architecture uses a dual-encoder setup: a Vision Transformer for images and a Transformer for text. Their outputs are L2-normalized and compared through a dot product with a learned scale and bias.
+The architecture uses a dual-encoder setup and L2 embedding normalization just as with CLIP.
 
 ## Zero-shot classification with SigLIP
 
@@ -358,14 +359,17 @@ $$
 \hat{c}=\arg\max_c \mathbf{v}^{\top}\mathbf{t}_c.
 $$
 
-The sigmoid scores need not sum to 1 across classes, and multiple
-classes can receive high scores.
+The sigmoid scores need not sum to 1 across classes, and multiple classes can receive high scores.
 
 ## Memory efficiency and better results on small batchsize
 
-As the loss is calculated in independent pairs, this allows scores and gradients to be computed in small blocks without storing the whole batches matrix in memory, which results in lower memory consumption, so allows for scaling to higher batch sizes.
+Independent loss computation allows for flexible memory management: calculating the loss in small blocks instead of keeping the whole batch in memory, as well as enabling gradient accumulation across multiple GPUs. Thus higher batch sizes could also be used.
 
-As for the the results, SigLIP outperforms a CLIP-style baseline in smaller batch sized training, getting a 4.1 percentage-point improvement on zero-shot accuracy for a 1k batch size on ImageNet, which is an empirical finding, but could be explained with how to objective is defined, since SigLIPs signal doesn't depend on other competitors signals for gradients other than its pair. As the batch size grows, the gap gets narrower.
+SigLIP outperforms a CLIP-style baseline in smaller batch size of ~1k training (~4.1% on zero-shot ImageNet accuracy). This advantage is attributed to the absence of competing gradients in the softmax scaling. As the batch size grows, the gap gets narrower.
+
+## Decomposed batch loss calculation
+
+![Steps to calculate the loss in smaller units from [@zhai2023sigmoidlosslanguageimage], each GPU holds a portion of the embeddings only. One of the modalities gets iterated (shifted) around the GPUs before aggregating gradients.](figures/siglip_factorized_batch.png){width=100% alt="Three frames of multiple text and image embeddings being paired on a grid each. The first frame has highlighted the diagonals of the loss matrix which corresponds to the first text embedding group being paired with the first image group, 2 with 2 and 3 with 3. The diagonal where the embedding indices match (for all of the sub-batch groups) is denoted as correct pairings, the rest is incorrect. The second frame shows the subsequent pairings as the embeddings are shifted around the GPUs, with pairs 1-2, 2-3, 3-1. The shadow of the previous pairings is visible as a lighter overlay. The last frame shows the last shift 1-3, 2-1, 3-2. Under the image grid is a depiction of loss accumulations for each GPU. Under the last frame cross device summation is written."}
 
 ## ImageBind
 
