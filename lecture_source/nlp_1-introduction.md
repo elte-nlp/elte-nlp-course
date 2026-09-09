@@ -104,7 +104,7 @@ the area.
 
 The processing and generation of acoustic speech signals is traditionally not
 considered part of NLP, which is concerned primarily with __texts__, but is
-obviusly closely related:
+obviously closely related:
 
 -   Speech2text provides input for NLP applications,
 
