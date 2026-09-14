@@ -517,6 +517,40 @@ CoCa-s are not limited to the visual-language modalities.
 
 ![CoCa use cases from [@yu2022coca]](figures/coca_applications.png){height=60% alt="CoCa architecture and downstream uses. At left, image and text enter separate peach blocks labeled Image Encoder and Unimodal Text Decoder. Their representations are linked by a black curved arrow labeled Contrastive Loss, while a second curved cross-attention arrow enters a blue Multimodal Text Decoder above, under Captioning Loss, forming the pretraining objective. A large rightward arrow leads to three vertically separated application panels: an image encoder alone produces classification for visual recognition; parallel image-encoder and text-decoder blocks curve toward one another for alignment, representing dual-encoder crossmodal alignment; and the same two components feed upward into the blue multimodal decoder, which outputs image captioning and multimodal representation. The bottom labels contrast shared CoCa pretraining with zero-shot, frozen-feature, or fine-tuned use for single-encoder recognition, dual-encoder alignment, and encoder–decoder captioning or multimodal understanding."}
 
+# Joint-Embedding Predictive Architectures 
+
+## Image Joint-Embedding Predictive Architectures 
+
+I-JEPA [@assran2023ijepa] is a self-supervised learning method for images, which predicts **latent representations** of masked target regions, encouraging the model to preserve predictable, semantically meaningful information while ignoring unpredictable pixel-level details.
+
+## I-JEPA contexts and targets
+
+![Examples of I-JEPA context and target-masking strategy [@assran2023ijepa]](figures/ijepa_target_visualization.png){height=75%
+alt="Four rows illustrate I-JEPA’s context and target masking strategy. In each row, the first column shows the original image, the second shows the visible context with several regions masked out, and the next four columns show separate rectangular target regions sampled from different locations. The examples include animals and an outdoor scene, demonstrating how I-JEPA predicts representations of multiple local image regions from a larger, partially visible context."}
+
+## I-JEPA architecture
+
+**Context encoder:** A ViT that processes only the visible context patches, producing one representation per visible patch.
+
+**Target Encoder:** EMA of the context enocoder, that processes the full image, creating patch-level targets. Masking blocks happen **after** the full image forward, thus contextualized by the entire image.
+
+**Predictor:** A narrower ViT receiving the context encoder's patch representations and one mask token per target patch. Prediction happens per target block using the target's PE and the ViT's narrowness acts as a bottleneck.
+
+## I-JEPA objective
+
+$$
+\mathcal{L}_{\text{I-JEPA}}
+=\frac{1}{M}\sum_{i=1}^{M}\sum_{j\in B_i}
+\left\|\hat{\mathbf{s}}_{y_j}-\mathbf{s}_{y_j}\right\|_2^2.
+$$
+
+The important point is that the loss is evaluated in the learned representation space and that the encoder is **not** updated via gradient descent as it causes representation collapse.
+
+## Multi-block masking strategy
+
+## Why predict representations instead of pixels?
+
+## From I-JEPA to world models
 
 # Summary
 
