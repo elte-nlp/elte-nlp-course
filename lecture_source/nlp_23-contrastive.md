@@ -519,6 +519,14 @@ CoCa-s are not limited to the visual-language modalities.
 
 # Joint-Embedding Predictive Architectures 
 
+## Three SSL architectures
+
+- **Joint embedding:** align compatible views; avoid collapse using negatives, regularization, or architectural asymmetry.
+- **Generative:** reconstruct the missing input in pixel or token space.
+- **Joint-embedding predictive:** predict the missing input's representation.
+
+![Three common self-supervised learning architectures [@assran2023ijepa]](figures/ijepa_architectures.png){width=100% alt="Comparison of three self-supervised learning architectures. Left: a joint-embedding architecture encodes x and y into representations s_x and s_y and compares them using a compatibility function D. Center: a generative architecture encodes x and combines its representation with latent variable z in a decoder to predict y-hat, which is compared with target y. Right: a joint-embedding predictive architecture encodes x and combines its representation with z in a predictor to estimate s_y-hat, which is compared with target representation s_y produced by a separate y-encoder."}
+
 ## Image Joint-Embedding Predictive Architectures 
 
 I-JEPA [@assran2023ijepa] is a self-supervised learning method for images, which predicts **latent representations** of masked target regions, encouraging the model to preserve predictable, semantically meaningful information while ignoring unpredictable pixel-level details.
@@ -532,7 +540,7 @@ alt="Four rows illustrate I-JEPA’s context and target masking strategy. In eac
 
 **Context encoder:** A ViT that processes only the visible context patches, producing one representation per visible patch.
 
-**Target Encoder:** EMA of the context enocoder, that processes the full image, creating patch-level targets. Masking blocks happen **after** the full image forward, thus contextualized by the entire image.
+**Target Encoder:** EMA of the context encoder, that processes the full image, creating patch-level targets. Masking blocks happen **after** the full image forward, thus contextualized by the entire image.
 
 **Predictor:** A narrower ViT receiving the context encoder's patch representations and one mask token per target patch. Prediction happens per target block using the target's PE and the ViT's narrowness acts as a bottleneck.
 
@@ -544,13 +552,40 @@ $$
 \left\|\hat{\mathbf{s}}_{y_j}-\mathbf{s}_{y_j}\right\|_2^2.
 $$
 
-The important point is that the loss is evaluated in the learned representation space and that the encoder is **not** updated via gradient descent as it causes representation collapse.
+The important point is that the loss is evaluated in the learned representation space and that the target encoder receives **no** gradient, it's updated only via EMA.
 
 ## Multi-block masking strategy
 
+- four possibly overlapping target blocks;
+- target scale sampled from (0.15) to (0.20) of the image;
+- target aspect ratio sampled from (0.75) to (1.5);
+- one context block whose initial scale is sampled from (0.85) to (1.0);
+- a unit aspect ratio for the initial context block;
+- removal of all target-overlapping patches from the context.
+
+The resulting visible context is spatially distributed rather than one compact crop. In the paper's masking comparison, the average visible context contains approximately 25% of the image patches.
+
 ## Why predict representations instead of pixels?
 
+Pixel prediction requires reconstructing exact colors, textures, and other low-level details.
+
+- These details may be unpredictable from the visible context.
+- Several pixel-level completions may be equally valid.
+- An $L_2$ loss can encourage an average of these possible completions.
+
+I-JEPA instead predicts representations instead.
+
+- Target representations can encode: object identity, part, position, pose.
+- Unpredictable pixel details don't need exact reconstruction, encouraging semantic, not low-level, features.
+
 ## From I-JEPA to world models
+
+- **I-JEPA:** predict hidden image regions in representation space. [@assran2023ijepa]
+- **V-JEPA:** extend feature prediction across space and time in video. [@bardes2024revisitingfeaturepredictionlearning]
+- **V-JEPA 2:** combine internet video pretraining with action-conditioned latent dynamics for robotic planning. [@assran2025vjepa2selfsupervisedvideo]
+- **LLM-JEPA / VL-JEPA:** investigate latent prediction for language and vision-language models. [@huang2025llmjepalargelanguagemodels] [@chen2026vljepajointembeddingpredictive]
+
+The shared idea is to model predictable structure in representation space rather than reconstructing every observation.
 
 # Summary
 
