@@ -529,7 +529,7 @@ CoCa-s are not limited to the visual-language modalities.
 
 ## Image Joint-Embedding Predictive Architectures 
 
-I-JEPA [@assran2023ijepa] is a self-supervised learning method for images, which predicts **latent representations** of masked target regions, encouraging the model to preserve predictable, semantically meaningful information while ignoring unpredictable pixel-level details.
+I-JEPA [@assran2023ijepa] is a self-supervised learning method for images that predicts **latent representations** of masked target regions rather than their pixels. This encourages the model to capture predictable, semantically meaningful information without reproducing every low-level detail.
 
 ## I-JEPA contexts and targets
 
@@ -552,7 +552,10 @@ $$
 \left\|\hat{\mathbf{s}}_{y_j}-\mathbf{s}_{y_j}\right\|_2^2.
 $$
 
-The important point is that the loss is evaluated in the learned representation space and that the target encoder receives **no** gradient, it's updated only via EMA.
+- $M$ is the number of target blocks and $B_i$ contains the patch indices of target block $i$.
+- The context encoder and predictor are optimized through this loss. 
+- The target encoder receives **no gradient**; it is updated only via EMA. 
+- This asymmetric design helps prevent representation collapse without requiring negative samples.
 
 ## Multi-block masking strategy
 
@@ -565,24 +568,21 @@ The important point is that the loss is evaluated in the learned representation 
 
 The resulting visible context is spatially distributed rather than one compact crop. In the paper's masking comparison, the average visible context contains approximately 25% of the image patches.
 
-## Why predict representations instead of pixels?
-
-Pixel prediction requires reconstructing exact colors, textures, and other low-level details.
+## Why not predict pixels directly?
 
 - These details may be unpredictable from the visible context.
 - Several pixel-level completions may be equally valid.
-- An $L_2$ loss can encourage an average of these possible completions.
+- As mentioned before, $L_2$ loss can encourage an average of these possible completions.
 
-I-JEPA instead predicts representations instead.
+Moving the loss to a learned target space changes what must be predicted:
 
 - Target representations can encode: object identity, part, position, pose.
 - Unpredictable pixel details don't need exact reconstruction, encouraging semantic, not low-level, features.
 
 ## From I-JEPA to world models
 
-- **I-JEPA:** predict hidden image regions in representation space. [@assran2023ijepa]
 - **V-JEPA:** extend feature prediction across space and time in video. [@bardes2024revisitingfeaturepredictionlearning]
-- **V-JEPA 2:** combine internet video pretraining with action-conditioned latent dynamics for robotic planning. [@assran2025vjepa2selfsupervisedvideo]
+- **V-JEPA 2:** combine internet video pretraining with action-conditioned latent dynamics for understanding, predicting, and planning in the physical world. [@assran2025vjepa2selfsupervisedvideo]
 - **LLM-JEPA / VL-JEPA:** investigate latent prediction for language and vision-language models. [@huang2025llmjepalargelanguagemodels] [@chen2026vljepajointembeddingpredictive]
 
 The shared idea is to model predictable structure in representation space rather than reconstructing every observation.
