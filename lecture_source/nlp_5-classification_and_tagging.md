@@ -581,7 +581,7 @@ defined.
 The $Y_{m-1},O_m$ pair is defined as
 $\mathbf{f}(y_k,\mathbf{x}, m)$, where $f(\cdot)$ is a function that
 produces a feature vector at $m$ based on the value $Y_{m-1}=y_k$ and
-$x$.
+$\mathbf{x}$.
 
 In NLP, we condition only on *local features* within a *context window*
 around the element to be tagged. A few example features for POS tagging,
@@ -601,7 +601,7 @@ designed by linguists:
 
 ## Maximum entropy  Markov models (MEMMs) 
 
-The individual $P(Y_m|Y_{m-1},X_m)$ probabilities are modelled analogously to
+The individual $P(Y_m|Y_{m-1},O_m)$ probabilities are modelled analogously to
 *multinomial logistic regression* with the softmax function:
 
 $$P(Y_m = y_i|Y_{m-1}=y_k,\mathbf{x})=\frac{\exp (\mathbf{w}_i \cdot \mathbf{f}(y_k,
