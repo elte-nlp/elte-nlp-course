@@ -66,7 +66,7 @@ A typical setup concentrates on the user stating __a query and getting back a re
   - **normalization** (spell-checking, spelling-correction)
   - removing **stopwords**
 
-## IMplementation details cont.
+## Implementation details cont.
 
 ![Image from  @stanford](figures/inversed_index_construction.png){width=85%}
 
@@ -82,7 +82,7 @@ A typical setup concentrates on the user stating __a query and getting back a re
 
 ## Inverted Index cont.
 
-- Posting lists are variable-length vectors, typically sorted by __docuemnt ID__, to make __merging posting lists__ easier in case of a query
+- Posting lists are variable-length vectors, typically sorted by __document ID__, to make __merging posting lists__ easier in case of a query
 
 ![Image from @stanford](figures/postings.png){width=85%}
 
@@ -96,7 +96,7 @@ A typical setup concentrates on the user stating __a query and getting back a re
 
 ## Optimization and scaling
 \large
-Term-based Boolean search dominant for decades, efforts went into:
+Term-based Boolean search was dominant for decades. Efforts went into:
 
 - compressing inverted index
 - dealing with frequent index updates
@@ -109,7 +109,7 @@ Dividing documents into 4 categories based on the given information and the resu
 
 - positives:
   - **true positives**: relevant and in the result set
-  - **false positives**: in result set but not relevant
+  - **false positives**: in the result set but not relevant
 - negatives:
   - **true negatives**: irrelevant and not in the result set
   - **false negatives**: relevant but not in the result set
@@ -265,7 +265,7 @@ Requires a __test dataset__ that contains
 
 - a __collection__ of documents
 - __set of queries__ with information need descriptions (manually created or preferably from real-life users)
-- __relvance judgemnets__: can be binary or graded (0-4 scale) measures if a retrieved document matches the information needed 
+- __relevance judgements__: can be binary or graded (0-4 scale); measure if a retrieved document matches the information needed 
 
 Evaluation metrics based on the relevance judgments:
 
@@ -391,13 +391,15 @@ First, the node (or cell) containing the query is selected, and then the closest
 
 ## Quantization
 
-Given a codebook defined by centroids $\mathcal{C} = {c_i | i\in I}$ where $I = {0, 1, ... m-1}$ is finite.
+In **vector quantization** we map each embedding vector to integer IDs. A
+**codebook** defines a set of **centroids** (prototype vectors)
+$\mathcal{C} = {c_i | i\in I}$, where $I = {0, 1, ... m-1}$ is finite, and the
+associated IDs.
 
-We map $q(\cdot)$ each real vector to the closest centroids. The set of real vectors mapped to $c_i$ is the Voronoi cell of it denoted by $V_i$.
+Then, the $q(\cdot)$ function maps each real vector to the closest centroid:
+$$q(x) = \text{arg}\min\limits_{c_i \in C}d(x, c_i)$$, where $d(\cdot)$ is the distance function. The set of real vectors mapped to $c_i$ is the _Voronoi cell_ of $c_i$ denoted by $V_i$.
 
-Meaning that $q(x) = \text{arg}\min\limits_{c_i \in C}d(x, c_i)$, where $d(\cdot)$ is the distance function.
-
-$c_i = E_x[x|i] = \int_{V_i}p(x)\cdot x dx$, then should be defined as the centre of the Voronoi cell.
+<!-- $c_i = E_x[x|i] = \int_{V_i}p(x)\cdot x dx$, then should be defined as the centre of the Voronoi cell. -->
 
 ## Product Quantization
 
@@ -409,11 +411,11 @@ Solution: We should factor the vector into multiple segments (similar to MHA).
 
 ## Product Quantization
 
-In the case of a vector split into $L$ segments, each can be quantized by its specific quantizer. That means $\mathcal{C} = \mathcal{C}_1 \times \mathcal{C}_2 \times ... \times \mathcal{C}_L$ and $I = I_1 \times I_2 \times ... \times I_L$ should be decomposed into the Cartesian-product of the sub-quantizers and sub-indices.
+In **product quantization**, the vector is split into $L$ segments. Each segment can be quantized by its specific quantizer. That means that both the centroids $\mathcal{C} = \mathcal{C}_1 \times \mathcal{C}_2 \times ... \times \mathcal{C}_L$ and the associated indices $I = I_1 \times I_2 \times ... \times I_L$ are decomposed into the Cartesian-product of the sub-quantizers and sub-indices.
 
-In this case the complexity is reduced to $O(dm^{\frac{1}{L}})$ according to @jegou2010product.
+This decomposition reduces the complexity to the complexity to $O(dm^{\frac{1}{L}})$ [@jegou2010product].
 
-Distances between quantized values of each segment can be calculated and stored for the search step.
+For speeding up inference, the distances between the quantized values of each segment can be pre-calculated and stored for the search step.
 
 ## Product Quantization
 
@@ -431,7 +433,7 @@ This results in an average search complexity of $N$ comparisons plus looking up 
 
 ## Graph-based
 
-Graph methods build an index, that takes the form that suits neighbor-relationship representation. Such as Delaunay-graphs, relative nearest neighbor graphs, k-nearest neighbor graphs, minimal spanning trees, etc...
+Graph methods build an index, that takes the form that suits neighbor-relationship representation, such as Delaunay-graphs, relative nearest neighbor graphs, k-nearest neighbor graphs, minimal spanning trees, etc...
 
 
 ![Example graphs to be used as a Graph index for ANN search, from [@wang2021comprehensive]](figures/graph_types.png){height=35%}
