@@ -445,6 +445,88 @@ By reformulating DDIM as an ODE solver (ordinary differential equation) @song202
 6. However, the $f_\theta(x_t)$ prediction is not perfect, so the reverse process should also take multiple steps of refinement for consistent quality.
 7. Modern implementations handle timesteps as continuous variables, thus they use ODE solvers to direct the reverse process.
 
+## From DDIM to learning a continuous flow
+
+- DDPM trains a network to predict noise in an intermediate image.
+- DDIM can use that network for deterministic generation from a random starting point.
+- We can describe generation as continuously moving a sample from noise to data.
+- **Flow matching trains the velocity of this movement directly.**
+
+For this section, time follows the direction of generation:
+
+$$
+X_0\sim\mathcal N(0,I)
+\qquad\longrightarrow\qquad
+X_1\approx\text{a sample from }p_{\mathrm{data}}.
+$$
+
+## What is an ODE?
+
+An ordinary differential equation specifies the instantaneous change of a sample:
+
+$$
+\frac{dX_t}{dt}=v_\theta(X_t,t),
+\qquad X_0\sim\mathcal N(0,I).
+$$
+
+- $X_t$: the current image or latent tensor.
+- $t$: progress through generation ($[0,1]$).
+- $v_\theta(X_t,t)$: predicted direction **and speed** of change.
+- The velocity has the same shape as the sample.
+
+For a small time step $\Delta t$:
+
+$$
+X_{t+\Delta t}\approx X_t+\Delta t\,v_\theta(X_t,t).
+$$
+
+## Sampling with Euler steps
+
+Split the generation interval into $N$ steps:
+
+$$
+\Delta t=\frac1N,\qquad t_k=\frac{k}{N}.
+$$
+
+Starting from Gaussian noise, repeat:
+
+$$
+X_{t_{k+1}}=X_{t_k}+\Delta t\,v_\theta(X_{t_k},t_k).
+$$
+
+- Each Euler step evaluates the network at the current sample.
+- More steps generally reduce numerical approximation error.
+- Other solvers can improve accuracy per unit of computation.
+- The sampling step count is chosen at inference time.
+
+## ODE and SDE sampling I.
+
+An ODE follows a deterministic update:
+
+$$
+dX_t=v_\theta(X_t,t)\,dt.
+$$
+
+Diffusion uses SDE, which injects additional noise during the evolution:
+
+$$
+dX_t=f_\theta(X_t,t)\,dt+g(t)\,dW_t.
+$$
+
+A simple SDE approximation is:
+
+$$
+X_{t+\Delta t}\approx X_t+\Delta t\,f_\theta(X_t,t)
++g(t)\sqrt{\Delta t}\,\xi,
+\quad \xi\sim\mathcal N(0,I).
+$$
+
+**Diversity is achieved in initalization for ODEs.**
+
+## ODE and SDE sampling II.
+
+[![Flow matching animation](figures/flow_matching_ode_vs_sde.png)](figures/flow_matching_ode_vs_sde.mp4.mp4)
+
 ## Guided Diffusion - Classifier
 
 Diffusion guidance is also possible similarly to the case of text dependent GANs and VAEs. In this case our diffusion model's estimator should be perturbed by the guidance signal (e.g. text embedding).
