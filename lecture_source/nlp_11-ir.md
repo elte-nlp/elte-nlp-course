@@ -433,7 +433,7 @@ This results in an average search complexity of $N$ comparisons plus looking up 
 
 ## Graph-based
 
-Graph methods build an index, that takes the form that suits neighbor-relationship representation, such as Delaunay-graphs, relative nearest neighbor graphs, k-nearest neighbor graphs, minimal spanning trees, etc...
+Graph methods build an index that takes the form that suits neighbor-relationship representation, such as Delaunay-graphs, relative nearest neighbor graphs, k-nearest neighbor graphs, minimal spanning trees, etc...
 
 
 ![Example graphs to be used as a Graph index for ANN search, from [@wang2021comprehensive]](figures/graph_types.png){height=35%}
