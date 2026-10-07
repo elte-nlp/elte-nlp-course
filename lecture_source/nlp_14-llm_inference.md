@@ -163,11 +163,15 @@ Shared prefixes are really common in chat models (typically each user interacts 
 
 ## Piggybacking, continuous batching
 
+Piggybacking mixes different tasks into a single pass to optimize GPU utilization.
+
 Small input sequences can be combined together to form a longer sequence with multiple partitions to calculate attention over (using masking for example). This way we can have multiple decoded tokens calculated in a single pass. This is called continuous batching or piggybacking.
 
-Mixed prefill and decoding batches are also possible where one part is used to calculate KV caches, while the other is used for generating tokens. This is useful to eliminate bubble effects during decoding (where a long sequence processing must be finished before we can start working on the next task, thus the GPU is underutilized).
+Mixed prefill and decoding batches are also possible where one part of the GPU is used to calculate KV caches, while the other is used for generating tokens. This is useful to eliminate bubble effects during decoding (where a long sequence processing must be finished before we can start working on the next task, thus the GPU is underutilized).
 
 ## Microbatching
+
+Microbatching splits the batch into smaller parts to optimize memory or GPU use.
 
 Splitting long sequences into smaller parts and processing them in parallel, while stuffing as much decoding tasks into the continuous batch as possible (decode-maximal microbatching) is a good method to tackle bubbles that arise from different sequence lengths. This is what Sarathi [@agrawal2023sarathi] achieves. However, decoding times for different requests and the general difference in prefill and decode processing times could lead to bubbles that microbatching can not solve.
 
