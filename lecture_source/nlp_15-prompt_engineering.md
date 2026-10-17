@@ -72,9 +72,25 @@ The listed biases (and others) make it imperative to **optimize** the prompt use
 for a large language model-based, zero- or few-shot solutions for a task, that is,
 to use suitable **prompt engineering** methods.
 
+In the next sections, we go introduce methods that engineer (optimize) different
+aspects / parts of the prompt.
 
 
 # Task formulation
+
+## Extracting knowledge from encoders
+
+The methods in the next few slides try to probe factual knowledge from a
+pretrained language model. Most of them specifically target **encoders**, but
+they can be adapted to decoders as well.
+
+The [LAMA benchmark](https://github.com/facebookresearch/lama) tests whether
+the models are able to fill in a (single-token) missing word from a statement
+such as _Barack Obama was born in `[MASK]`_.
+
+However, only one phrase per relation is given, which might fail to retrieve the
+information not because it's not there, but because it is a _bad prompt_. The
+following methods attempt to solve this problem.
 
 
 ## Prompt mining
@@ -125,24 +141,41 @@ algorithm [@shin2020autoprompt]:
 ![Figure from @shin2020autoprompt.](./figures/autoprompt.png)
 
 
-
 ## Gradient-based search cont.
 
 The tokens are found by an algorithm related to coordinate-descent:
 
-1.  Initialize a starting list of length $L$ filled with mask tokens.
+1.  Initialize a starting list of length $L$ for the trigger tokens,
+    filled with mask tokens.
 2.  For each $i \in 1 \dots L$ token position:
+    * run the model and measure the loss for the right answer at the answer
+      position (the final `[MASK]`)
     * compute the $\mathbf{g}$ gradient of the log-likelihood of the training
-      data for the token embedding in the position,
+      data for the token embedding in position $i$,
     * for each vocabulary entry, use the gradient to approximate the change in
 	  the log-likelihood using that word in the position would bring, and select
 	  the top $k$ words,
-    * of these, select the one with the largest real log-likelihood and replace
-      the current token in position $i$ with it.
+    * of these, select the one with the largest real log-likelihood (i.e. re-run
+      the model $k$ times with the updated prompts) and replace the current
+      token in position $i$ with it.
 
-###  
-This obviously assumes that the gradients are accessible, although
+## Gradient-based search cont.
+
+Note that the gradient only selects the **candidates**; the final token is
+selected by re-running the model and choosing the **actual** best trigger token.
+
+Advantages:
+
+* Performs better than prompt mining
+* Can be used for other tasks, such as sentiment analysis, NLI.
+
+Disadvantages:
+
+* The generated prompt is gibberish
+* Assumes that the gradients are accessible, although
 doesn't require __changing__ the parameters.
+
+
 
 ## Prompt generation
 
@@ -195,18 +228,19 @@ for few-shot prediction:
 
 ## Contrastive learning
 
-@rubin2022learning rely on contrastive learning to find the most useful examples.
-The proposed method is to
+@rubin2022learning train a dense retriever, made up of an input and an example
+embedding, so that good examples end up close to the input.
 
--   Use a (typically smaller) scoring $LM$ to find positive and negative $( e
-      , x)$ pairs in the training data, where the score is simply $P_{LM}(y | e,
-      x)$.
--   Using contrastive learning train a metric embedding model that can be used to
-    assign a score to *any* (example, $x$) pair.
--   For any $x$, retrieve positive and negative examples that contain the top and
-    bottom $k$ scoring examples according to the model and use those in the
-    few-shot prompt.
+For each training example $(x, y)$:
 
+1. Retrieve a pool of candidate examples (e.g. with BM25)
+2. For each example $e$, compute the probability the model gives to the correct
+   output given the prompt with the example: $P_{LM}(y | e, x)$.
+3. Examples that make the good answer likely are labelled as good examples,
+   those least likely as bad ones.
+
+The retriever is then trained with contrastive learning. During inference,
+the examples closest to the input are added to the prompt.
 
 
 # Continuous ("soft") strategies
@@ -501,7 +535,7 @@ various types of __adversarial prompting__:
   details of their prompts that may contain sensitive information.
 
 # Epilogue: Metaprompted LLMs as prompt optimizers
-## LLMs as optimizers
+## Optimization by PROmpting (OPRO)
 
 @yang2023large  use (meta)prompted LLMs as general optimizers:
 
@@ -511,17 +545,17 @@ meta-prompt for the next optimization step. [@yang2023large]
 
 ![From @yang2023large.](figures/llm_metaopt.png){width=65%}
 
-## LLMs as optimizers: application to prompting 
+## OPRO: application to prompting 
 
 ![First half of an optimizer metaprompt instantiation for solving grade school math problems
 [@yang2023large].](figures/metaprompt_1.png){width=100%}
 
-## LLMs as optimizers: application to prompting I
+## OPRO: application to prompting I
 
 ![Second half of an optimizer metaprompt instantiation for solving grade school
 math problems [@yang2023large].](figures/metaprompt_2.png){width=100%}
 
-## LLMs as optimizers: application to prompting II
+## OPRO: application to prompting II
 
 @battle2024unreasonable found that the metaprompting optimizer approach
 overperforms well-known manual prompt engineering methods, such as "positive
