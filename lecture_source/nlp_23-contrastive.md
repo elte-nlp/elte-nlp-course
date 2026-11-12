@@ -517,6 +517,75 @@ CoCa-s are not limited to the visual-language modalities.
 
 ![CoCa use cases from [@yu2022coca]](figures/coca_applications.png){height=60% alt="CoCa architecture and downstream uses. At left, image and text enter separate peach blocks labeled Image Encoder and Unimodal Text Decoder. Their representations are linked by a black curved arrow labeled Contrastive Loss, while a second curved cross-attention arrow enters a blue Multimodal Text Decoder above, under Captioning Loss, forming the pretraining objective. A large rightward arrow leads to three vertically separated application panels: an image encoder alone produces classification for visual recognition; parallel image-encoder and text-decoder blocks curve toward one another for alignment, representing dual-encoder crossmodal alignment; and the same two components feed upward into the blue multimodal decoder, which outputs image captioning and multimodal representation. The bottom labels contrast shared CoCa pretraining with zero-shot, frozen-feature, or fine-tuned use for single-encoder recognition, dual-encoder alignment, and encoder–decoder captioning or multimodal understanding."}
 
+# Joint-Embedding Predictive Architectures 
+
+## Three SSL architectures
+
+- **Joint embedding:** align compatible views; avoid collapse using negatives, regularization, or architectural asymmetry.
+- **Generative:** reconstruct the missing input in pixel or token space.
+- **Joint-embedding predictive:** predict the missing input's representation.
+
+![Three common self-supervised learning architectures [@assran2023ijepa]](figures/ijepa_architectures.png){width=100% alt="Comparison of three self-supervised learning architectures. Left: a joint-embedding architecture encodes x and y into representations s_x and s_y and compares them using a compatibility function D. Center: a generative architecture encodes x and combines its representation with latent variable z in a decoder to predict y-hat, which is compared with target y. Right: a joint-embedding predictive architecture encodes x and combines its representation with z in a predictor to estimate s_y-hat, which is compared with target representation s_y produced by a separate y-encoder."}
+
+## Image Joint-Embedding Predictive Architectures 
+
+I-JEPA [@assran2023ijepa] is a self-supervised learning method for images that predicts **latent representations** of masked target regions rather than their pixels. This encourages the model to capture predictable, semantically meaningful information without reproducing every low-level detail.
+
+## I-JEPA contexts and targets
+
+![Examples of I-JEPA context and target-masking strategy [@assran2023ijepa]](figures/ijepa_target_visualization.png){height=75%
+alt="Four rows illustrate I-JEPA’s context and target masking strategy. In each row, the first column shows the original image, the second shows the visible context with several regions masked out, and the next four columns show separate rectangular target regions sampled from different locations. The examples include animals and an outdoor scene, demonstrating how I-JEPA predicts representations of multiple local image regions from a larger, partially visible context."}
+
+## I-JEPA architecture
+
+**Context encoder:** A ViT that processes only the visible context patches, producing one representation per visible patch.
+
+**Target Encoder:** EMA of the context encoder, that processes the full image, creating patch-level targets. Masking blocks happen **after** the full image forward, thus contextualized by the entire image.
+
+**Predictor:** A narrower ViT receiving the context encoder's patch representations and one mask token per target patch. Prediction happens per target block using the target's PE and the ViT's narrowness acts as a bottleneck.
+
+## I-JEPA objective
+
+$$
+\mathcal{L}_{\text{I-JEPA}}
+=\frac{1}{M}\sum_{i=1}^{M}\sum_{j\in B_i}
+\left\|\hat{\mathbf{s}}_{y_j}-\mathbf{s}_{y_j}\right\|_2^2.
+$$
+
+- $M$ is the number of target blocks and $B_i$ contains the patch indices of target block $i$.
+- The context encoder and predictor are optimized through this loss. 
+- The target encoder receives **no gradient**; it is updated only via EMA. 
+- This asymmetric design helps prevent representation collapse without requiring negative samples.
+
+## Multi-block masking strategy
+
+- four possibly overlapping target blocks;
+- target scale sampled from (0.15) to (0.20) of the image;
+- target aspect ratio sampled from (0.75) to (1.5);
+- one context block whose initial scale is sampled from (0.85) to (1.0);
+- a unit aspect ratio for the initial context block;
+- removal of all target-overlapping patches from the context.
+
+The resulting visible context is spatially distributed rather than one compact crop. In the paper's masking comparison, the average visible context contains approximately 25% of the image patches.
+
+## Why not predict pixels directly?
+
+- These details may be unpredictable from the visible context.
+- Several pixel-level completions may be equally valid.
+- As mentioned before, $L_2$ loss can encourage an average of these possible completions.
+
+Moving the loss to a learned target space changes what must be predicted:
+
+- Target representations can encode: object identity, part, position, pose.
+- Unpredictable pixel details don't need exact reconstruction, encouraging semantic, not low-level, features.
+
+## From I-JEPA to world models
+
+- **V-JEPA:** extend feature prediction across space and time in video. [@bardes2024revisitingfeaturepredictionlearning]
+- **V-JEPA 2:** combine internet video pretraining with action-conditioned latent dynamics for understanding, predicting, and planning in the physical world. [@assran2025vjepa2selfsupervisedvideo]
+- **LLM-JEPA / VL-JEPA:** investigate latent prediction for language and vision-language models. [@huang2025llmjepalargelanguagemodels] [@chen2026vljepajointembeddingpredictive]
+
+The shared idea is to model predictable structure in representation space rather than reconstructing every observation.
 
 # Summary
 
