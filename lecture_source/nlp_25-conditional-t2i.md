@@ -1,9 +1,9 @@
 ---
 title: "Natural Language Processing"
 subtitle: "Lecture 25: Conditional Text-to-Image Models"
-author: "Natabara Máté Gyöngyössy"
+author: "Natabara Máté Gyöngyössy, Tajti Kristóf"
 institute: "Eötvös University, Department of Artificial Intelligence"
-date: 2024
+date: 2026
 theme: Marburg
 colortheme: orchid
 fontsize: 14pt
@@ -447,22 +447,17 @@ By reformulating DDIM as an ODE solver (ordinary differential equation) @song202
 
 ## From DDIM to learning a continuous flow
 
-- DDPM trains a network to predict noise in an intermediate image.
-- DDIM can use that network for deterministic generation from a random starting point.
-- We can describe generation as continuously moving a sample from noise to data.
+- DDPM trains a network to predict the noise in a noisy image.
+- DDIM uses it for deterministic generation from random noise.
+- Generation = continuously moving a sample from noise to data.
 - **Flow matching trains the velocity of this movement directly.**
 
-For this section, time follows the direction of generation:
-
-$$
-X_0\sim\mathcal N(0,I)
-\qquad\longrightarrow\qquad
-X_1\approx\text{a sample from }p_{\mathrm{data}}.
-$$
+Here, time follows the direction of generation:
+$X_0\sim\mathcal N(0,I)\;\longrightarrow\;X_1\approx$ a sample from $p_{\mathrm{data}}$.
 
 ## What is an ODE?
 
-An ordinary differential equation specifies the instantaneous change of a sample:
+An ODE specifies the instantaneous change of a sample:
 
 $$
 \frac{dX_t}{dt}=v_\theta(X_t,t),
@@ -470,24 +465,13 @@ $$
 $$
 
 - $X_t$: the current image or latent tensor.
-- $t$: progress through generation ($[0,1]$).
+- $t\in[0,1]$: progress through generation.
 - $v_\theta(X_t,t)$: predicted direction **and speed** of change.
-- The velocity has the same shape as the sample.
-
-For a small time step $\Delta t$:
-
-$$
-X_{t+\Delta t}\approx X_t+\Delta t\,v_\theta(X_t,t).
-$$
+- Small step $\Delta t$: $X_{t+\Delta t}\approx X_t+\Delta t\,v_\theta(X_t,t)$.
 
 ## Sampling with Euler steps
 
-Split the generation interval into $N$ steps:
-
-$$
-\Delta t=\frac1N,\qquad t_k=\frac{k}{N}.
-$$
-
+Split $[0,1]$ into $N$ steps, $\Delta t=1/N$, $t_k=k/N$.
 Starting from Gaussian noise, repeat:
 
 $$
@@ -496,7 +480,6 @@ $$
 
 - Each Euler step evaluates the network at the current sample.
 - More steps generally reduce numerical approximation error.
-- Other solvers can improve accuracy per unit of computation.
 - The sampling step count is chosen at inference time.
 
 ## ODE and SDE sampling I.
@@ -513,19 +496,82 @@ $$
 dX_t=f_\theta(X_t,t)\,dt+g(t)\,dW_t.
 $$
 
-A simple SDE approximation is:
-
-$$
-X_{t+\Delta t}\approx X_t+\Delta t\,f_\theta(X_t,t)
-+g(t)\sqrt{\Delta t}\,\xi,
-\quad \xi\sim\mathcal N(0,I).
-$$
-
 **Diversity is achieved in initalization for ODEs.**
 
 ## ODE and SDE sampling II.
 
-[![Flow matching animation](figures/flow_matching_ode_vs_sde.png)](figures/flow_matching_ode_vs_sde.mp4.mp4)
+[![Flow matching animation](figures/flow_matching_ode_vs_sde.png){height=75%}](https://github.com/elte-nlp/elte-nlp-course/blob/main/lecture_source/figures/flow_matching_ode_vs_sde.mp4)
+
+Click the image to play the animation.
+
+## Choose a path from noise to data
+
+Recall the DDPM training sample:
+
+$$
+x_k=\sqrt{\bar\alpha_k}\,x_0+
+\sqrt{1-\bar\alpha_k}\,\epsilon.
+$$
+
+For a simple flow-matching construction, sample independently
+$z\sim p_{\mathrm{data}}$ and $\epsilon\sim\mathcal N(0,I)$, then set
+
+$$
+x_t=(1-t)\epsilon+tz.
+$$
+
+- At $t=0$: $x_t=\epsilon$.
+- At $t=1$: $x_t=z$.
+
+## Training target
+
+Differentiate $x_t=(1-t)\epsilon+tz$ w.r.t. $t$, keeping the pair fixed:
+
+$$
+\frac{dx_t}{dt}=z-\epsilon.
+$$
+
+Train the network to predict this velocity:
+
+$$
+\mathcal L_{\mathrm{CFM}}(\theta)=
+\mathbb E_{t,z,\epsilon}
+\left[\left\|v_\theta(x_t,t)-(z-\epsilon)\right\|_2^2\right],
+\qquad t\sim\mathcal U(0,1).
+$$
+
+## Why do conditional targets learn the marginal flow?
+
+Different pairs can imply different velocities at the same $(x,t)$.
+Squared-error regression learns their conditional average:
+
+$$
+v^*(x,t)=\mathbb E\!\left[z-\epsilon\mid x_t=x\right].
+$$
+
+- Averaged over pairs compatible with the current state.
+- This field transports the marginal distribution $p_t$.
+- Learned from easy pairwise targets, no explicit averaging.
+- $\mathcal L_{\mathrm{CFM}}(\theta)=\mathcal L_{\mathrm{FM}}(\theta)+C$, with $C$ independent of $\theta$.
+
+## Straight training paths do not guarantee straight generation
+
+- Each sampled pair defines a straight interpolation.
+- The network learns an average of compatible pairwise velocities.
+- That average changes with position and time.
+- Generated trajectories can therefore curve and require multiple steps.
+
+**Straight-line flow matching does not automatically give exact one-step generation.**
+
+## Flow matching vs. DDPM and DDIM
+
+| Aspect | DDPM / DDIM | Straight-path FM |
+| --- | --- | --- |
+| Training input | Noisy data | Noisy data |
+| Target | Noise $\epsilon$ | Velocity $z-\epsilon$ |
+| Objective | Squared error | Squared error |
+| Path | DDPM schedule | Linear interpolation |
+| Sampling | DDPM or DDIM steps | Integrate the ODE |
 
 ## Guided Diffusion - Classifier
 
@@ -536,6 +582,7 @@ Given a noise estimator $\epsilon_\theta$ in a reverse process we add conditiona
 $\hat\epsilon_\theta(x_t,y) = \epsilon_\theta(x_t,y) + s\sigma_t \nabla_{x_t}logp_\phi(y|x_t)$
 
 Where $s$ is the guidance scale, $p_\phi(y|x_t)$ is a classifier that guides the diffusion process using the derivative of the log-likelihood with respect to the class we want to generate.
+
 
 
 ## Guided Diffusion - Classifier-free
