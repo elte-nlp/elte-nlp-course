@@ -16,5 +16,7 @@
 !.github/**
 !practice_examples
 !practice_examples/**
+!helper_code/
+!helper_code/**
 _region_.tex
 !pkglist

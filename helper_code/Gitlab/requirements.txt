@@ -1,0 +1,2 @@
+python-gitlab>=4.0
+pydantic>=2.0
