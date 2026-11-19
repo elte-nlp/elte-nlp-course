@@ -60,7 +60,7 @@ Here $Q(Z|x,y)$ is the approximate posterior distribution. $P(x|y,Z)$ is the lik
 
 ## AlignDRAW Neural Distribution Modeling
 
-$Q(Z_t|x,y,Z_{1:t-1})$ and $P(Z_t|Z_{1:t-1})$ are modeled by a Gaussian distribution that is parametrized based on the inference and generative networks respectively. The latents depend on eachother in a sequential manner.
+$Q(Z_t|x,y,Z_{1:t-1})$ and $P(Z_t|Z_{1:t-1})$ are modeled by a Gaussian distribution that is parametrized based on the inference and generative networks respectively. The latents depend on each other in a sequential manner.
 
 $P(Z_t|Z_{1:t-1}) = \mathcal{N}\left(\mu(h_{t-1}^{gen}),\sigma(h_{t-1}^{gen})\right)$
 
@@ -124,7 +124,7 @@ $\mathcal{L}_{CLS} = log(D(I_{real}, T_{real})) + 0.5 log(1-D(I_{real}, T_{fake}
 
 ## Text embedding interpolation
 
-As back then text-image datasets were sparse, the authors used a text embedding interpolation method to generate more training examples for unseen text descriptions. This way the input text embedding is a linear combination of two text embeddings. One which is the correct text embedding and the other is a random text embedding from the dataset. This is then passed to the generator. This way even if the discriminator does not have real examples for a given pair it can still learn when to reject a generated image. This augments the generator.
+As back then text-image datasets were sparse, the authors used a text embedding interpolation method to generate more training examples for unseen text descriptions. This way the input text embedding is a linear combination of two random text embeddings from the dataset. This is then passed to the generator. This way even if the discriminator does not have real examples for a given pair it can still learn when to reject a generated image. This augments the generator.
 The authors propose $\beta=0.5$ for $t_1$ and $t_2$ text embeddings:
 
 $D(G(z, t_1)) \rightarrow D(G(z, \beta t_1 + (1-\beta)t_2))$
@@ -187,7 +187,7 @@ Where $\phi_i$ is the feature extractor, $C_i$, $H_i$ and $W_i$ are the number o
 
 ## Autoregressive approach
 
-Variational Autoencoders (VAE) could also be used to create images from text description if the latent prior includes text conditioning. On way of including text conditioning is to use an autoregressive prior model. 
+Variational Autoencoders (VAE) could also be used to create images from text description if the latent prior includes text conditioning. One way of including text conditioning is to use an autoregressive prior model. 
 
 This autoregressive prior is similar to the autoregressive models used in language modeling. The difference is that the vocabulary is not only the text tokens but also the latent image features which use the same representation as the VAE.
 
@@ -266,7 +266,7 @@ $q(x_{1:T}|x_0)=\prod\limits_{t=1}^Tq(x_t|x_{t-1})$
 
 $p_\theta(x_{0:T})=p(x_T)\prod\limits_{t=1}^Tp_\theta(x_{t-1}|x_t)$
 
-Given $\alpha_t = 1-\beta_t$ and $\bar\alpha_t=\prod\limits_{s=1}^t\alpha_s$ direct computation is possible for $q(x_t|x_0)=\mathcal{N}(x_t;\sqrt{\bar\alpha_t}x_0,(1-\bar\alpha_t)I)$. This speeds up training as recurrence is not needed.
+Given $\alpha_t = 1-\beta_t$ and $\bar\alpha_t=\prod\limits_{s=1}^t\alpha_s$ direct computation is possible for $q(x_t|x_0)=\mathcal{N}(x_t;\sqrt{\bar\alpha_t}x_0,(1-\bar\alpha_t)I)$. This speeds up training as we can "jump" to any step.
 
 ## DDPM: Learning the reverse
 
@@ -304,7 +304,7 @@ Substituting $x_0$ we get: $\tilde\mu(x_t,\epsilon)=\frac{1}{\sqrt{\alpha_t}}\le
 
 ## DDPM: Noise prediction
 
-Finally we arrive to the conclusion that in order to minimize the KL-divergence (which is minimized by approximating $\tilde\mu(x_t,x_0)$ with $\mu_\theta(x_t,t)$) We have to predict the unknown part of $\tilde\mu(x_t,x_0)$ which is $\epsilon$, since $x_t$, the $\alpha$-s and $\beta$-s are known. In order to do this we create an approximator for $\epsilon$, which is $\epsilon_\theta(x_t, t)$, thus $\mu_\theta(x_t, \epsilon_\theta(x_t, t))=\frac{1}{\sqrt{\alpha_t}}\left(x_t - \frac{\beta_t}{\sqrt{1-\bar\alpha_t}}\epsilon_\theta\right)$. This could be used during inference.
+Finally we arrive to the conclusion that in order to minimize the KL-divergence (which is minimized by approximating $\tilde\mu(x_t,x_0)$ with $\mu_\theta(x_t,t)$), we have to predict the unknown part of $\tilde\mu(x_t,x_0)$ which is $\epsilon$, since $x_t$, the $\alpha$-s and $\beta$-s are known. In order to do this we create an approximator for $\epsilon$, which is $\epsilon_\theta(x_t, t)$, thus $\mu_\theta(x_t, \epsilon_\theta(x_t, t))=\frac{1}{\sqrt{\alpha_t}}\left(x_t - \frac{\beta_t}{\sqrt{1-\bar\alpha_t}}\epsilon_\theta\right)$. This could be used during inference.
 
 If we neglect $C$, $L_0$ and $L_T$ we get the following function to optimize:
 $L_{simp}(\theta) = \mathbb{E}_{t, x_0, \epsilon} ||\epsilon - \epsilon_\theta(x_t, t) ||^2 = \mathbb{E}_{t, x_0, \epsilon} ||\epsilon - \epsilon_\theta\left(\sqrt{\bar\alpha_t}x_0 + \sqrt{1-\bar\alpha_t}\epsilon, t\right) ||^2$, during training we use the second form as $x_0$ and $t$ are inputs.
@@ -361,7 +361,7 @@ By fixing $\gamma = 1$ for all steps we get the original DDPM loss.
 
 ## DDIM: Redefine as non-Markovian
 
-If we select a set of $Q$ forward distributions in such a way that they can be marginalized to the same $q(x_t|x_0)$ distribution DDPM uses we get the same traning goal thus the same DDPM trained models could be used for forward and reverse processes, even if these processes are non-Markovian due to the selection of our $Q$ distributions.
+If we select a set of $Q$ forward distributions in such a way that they can be marginalized to the same $q(x_t|x_0)$ distribution DDPM uses we get the same training goal thus the same DDPM trained models could be used for forward and reverse processes, even if these processes are non-Markovian due to the selection of our $Q$ distributions.
 
 Such a non-Markovian process exists for a given vector of positive $\sigma$ stds. It can be defined by the generative process first.
 
@@ -458,7 +458,7 @@ Where $s$ is the guidance scale, $p_\phi(y|x_t)$ is a classifier that guides the
 
 ## Guided Diffusion - Classifier-free
 
-This needs the diffusion model to be trained with a classifier as well, and the classifier gradients are also needed during generation. In order to avoid this classifier-free networks operate on an unconditional estimator $\epsilon_\theta(x_t)$ and a conditional estimator $\epsilon_\theta(x_t,y)$ by differing from the unconditioned prediction $\hat\epsilon_\theta(x_t,y) = \epsilon_\theta(x_t,y) + s(\epsilon_\theta(x_t,y)-\epsilon_\theta(x_t))$
+This needs the diffusion model to be trained with a classifier as well, and the classifier gradients are also needed during generation. In order to avoid this, classifier-free networks operate on an unconditional estimator $\epsilon_\theta(x_t)$ and a conditional estimator $\epsilon_\theta(x_t,y)$ by differing from the unconditioned prediction $\hat\epsilon_\theta(x_t,y) = \epsilon_\theta(x_t,y) + s(\epsilon_\theta(x_t,y)-\epsilon_\theta(x_t))$
 
 This is essentially done by adding $0$ labels to the classifier during training, thus the classifier-free estimator is just $\epsilon_\theta(x_t,0)$.
 
@@ -466,7 +466,7 @@ Read @ho2022classifierfree for more details!
 
 ## CLIP-guided Diffusion: GLIDE
 
-@nichol2022glide introduces a method where they replace the classifier with a CLIP [@radford2021learning] dot-product similarity measure.
+@nichol2022glide introduces a method, where they replace the classifier with a CLIP [@radford2021learning] dot-product similarity measure.
 
 $\hat\epsilon_\theta(x_t,y) = \epsilon_\theta(x_t,y) + s\sigma_t \nabla_{x_t}(f(x_t)\cdot g(y))$
 
@@ -480,7 +480,7 @@ Here $f$ is the image encoder and $g$ is the text encoder. Importantly this CLIP
 
 ## Latent Diffusion
 
-Latent diffusion refers to the method, where diffusion is performed in the latent space of a VAE or GAN. DALL-E 2 [@ramesh2022hierarchical] and Stable Diffusion [@rombach2022highresolution] offer two popular examples to this method.
+Latent diffusion refers to the method where diffusion is performed in the latent space of a VAE or GAN. DALL-E 2 [@ramesh2022hierarchical] and Stable Diffusion [@rombach2022highresolution] offer two popular examples to this method.
 
 While DALL-E 2 uses a CLIP-like model as the VAE with a Transformer-based diffusion prior, Stable Diffusion utilizes a VQ-GAN generator and a U-Net style prior. 
 
